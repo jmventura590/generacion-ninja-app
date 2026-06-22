@@ -1,50 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  Lock, Check, X,
-  Hand, Bug, MoveDiagonal, Mountain,
-  RotateCw, ArrowDownUp, StepForward, Grid3x3, Circle, CircleDot,
-} from "lucide-react";
+import { Lock, Check, X } from "lucide-react";
+import pasamanos from "@/assets/obstacles/pasamanos.png";
+import arana from "@/assets/obstacles/arana.png";
+import muro from "@/assets/obstacles/muro.png";
+import palestra from "@/assets/obstacles/palestra.png";
+import tronco from "@/assets/obstacles/tronco.png";
+import escalera from "@/assets/obstacles/escalera.png";
+import escalones from "@/assets/obstacles/escalones.png";
+import pegboard from "@/assets/obstacles/pegboard.png";
+import anillas from "@/assets/obstacles/anillas.png";
+import pelotas from "@/assets/obstacles/pelotas.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "My Ninja Path — ADN Ninja Warrior" },
-      { name: "description", content: "Ninja Benjamín's attendance progress, unlocked obstacles, and next milestones." },
-      { property: "og:title", content: "My Ninja Path — ADN Ninja Warrior" },
-      { property: "og:description", content: "Track attendance, unlock obstacles, claim pins." },
+      { title: "Mi Camino Ninja — ADN Ninja Warrior" },
+      { name: "description", content: "Progreso de asistencia del Ninja Benjamín, obstáculos desbloqueados y próximas metas." },
+      { property: "og:title", content: "Mi Camino Ninja — ADN Ninja Warrior" },
+      { property: "og:description", content: "Seguí la asistencia, desbloqueá obstáculos y reclamá tus pines." },
     ],
   }),
-  component: NinjaPath,
+  component: CaminoNinja,
 });
 
 type Obstacle = {
   name: string;
-  Icon: React.ComponentType<{ className?: string }>;
+  image: string;
   unlocked: boolean;
   times?: number;
 };
 
 const OBSTACLES: Obstacle[] = [
-  { name: "Pasamanos", Icon: Hand, unlocked: true, times: 10 },
-  { name: "Salto de la Araña", Icon: Bug, unlocked: true, times: 10 },
-  { name: "Muro Curvado", Icon: MoveDiagonal, unlocked: true, times: 10 },
-  { name: "Palestra", Icon: Mountain, unlocked: true, times: 10 },
-  { name: "Tronco Giratorio", Icon: RotateCw, unlocked: false },
-  { name: "Escalera Invertida", Icon: ArrowDownUp, unlocked: false },
-  { name: "5 Escalones", Icon: StepForward, unlocked: false },
-  { name: "Pegboard", Icon: Grid3x3, unlocked: false },
-  { name: "Escalar con Anillas", Icon: Circle, unlocked: false },
-  { name: "Pelotas Colgantes", Icon: CircleDot, unlocked: false },
+  { name: "Pasamanos", image: pasamanos, unlocked: true, times: 10 },
+  { name: "Salto de la Araña", image: arana, unlocked: true, times: 10 },
+  { name: "Muro Curvado", image: muro, unlocked: true, times: 10 },
+  { name: "Palestra", image: palestra, unlocked: true, times: 10 },
+  { name: "Tronco Giratorio", image: tronco, unlocked: false },
+  { name: "Escalera Invertida", image: escalera, unlocked: false },
+  { name: "5 Escalones", image: escalones, unlocked: false },
+  { name: "Pegboard", image: pegboard, unlocked: false },
+  { name: "Escalar con Anillas", image: anillas, unlocked: false },
+  { name: "Pelotas Colgantes", image: pelotas, unlocked: false },
 ];
 
-function NinjaPath() {
+function CaminoNinja() {
   const [selected, setSelected] = useState<Obstacle | null>(null);
   const progress = 65;
 
   return (
     <div className="px-5 pt-5">
-      {/* Profile */}
+      {/* Perfil */}
       <section className="flex items-center gap-4">
         <div className="relative">
           <div className="grid h-20 w-20 place-items-center rounded-full bg-gradient-neon p-[3px] shadow-neon">
@@ -58,16 +64,16 @@ function NinjaPath() {
           <h2 className="truncate text-2xl font-black text-foreground">Ninja Benjamín</h2>
           <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.7_0.2_145/40%)] bg-[oklch(0.7_0.2_145/12%)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-neon">
             <span className="h-1.5 w-1.5 rounded-full bg-neon" />
-            Green Wristband 🟢
+            Muñequera Verde 🟢
           </div>
         </div>
       </section>
 
-      {/* Progress */}
+      {/* Progreso */}
       <section className="mt-7 rounded-2xl border border-border/70 bg-surface p-5 shadow-card">
         <div className="flex items-baseline justify-between">
           <p className="text-sm font-semibold text-foreground">
-            Progress towards <span className="text-electric">Blue Wristband</span>
+            Progreso hacia <span className="text-electric">Muñequera Azul</span>
           </p>
           <p className="font-display text-lg font-black text-neon">{progress}%</p>
         </div>
@@ -78,15 +84,15 @@ function NinjaPath() {
           />
         </div>
         <p className="mt-3 text-xs italic text-muted-foreground">
-          (7 more attendances required for the next milestone)
+          (Faltan 7 asistencias para la próxima meta)
         </p>
       </section>
 
-      {/* Medals */}
+      {/* Medallas */}
       <section className="mt-7">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-display text-base font-bold uppercase tracking-wider text-foreground">
-            Obstacle Medals
+            Medallas de Obstáculos
           </h3>
           <span className="text-xs text-muted-foreground">
             {OBSTACLES.filter(o => o.unlocked).length} / {OBSTACLES.length}
@@ -106,7 +112,7 @@ function NinjaPath() {
 }
 
 function ObstacleTile({ obstacle, onSelect }: { obstacle: Obstacle; onSelect: () => void }) {
-  const { Icon, name, unlocked } = obstacle;
+  const { image, name, unlocked } = obstacle;
   return (
     <button
       onClick={onSelect}
@@ -117,10 +123,17 @@ function ObstacleTile({ obstacle, onSelect }: { obstacle: Obstacle; onSelect: ()
           : "border-border/60 bg-[oklch(0.19_0.01_260)] opacity-70 hover:opacity-90",
       ].join(" ")}
     >
-      <Icon
+      <img
+        src={image}
+        alt={name}
+        loading="lazy"
+        width={512}
+        height={512}
         className={[
-          "h-8 w-8 transition-transform group-hover:scale-110",
-          unlocked ? "text-neon drop-shadow-[0_0_8px_oklch(0.88_0.27_145/60%)]" : "text-muted-foreground/60 grayscale",
+          "h-14 w-14 object-contain transition-transform group-hover:scale-110",
+          unlocked
+            ? "drop-shadow-[0_0_8px_oklch(0.88_0.27_145/55%)]"
+            : "grayscale opacity-60",
         ].join(" ")}
       />
       <span
@@ -145,7 +158,7 @@ function ObstacleTile({ obstacle, onSelect }: { obstacle: Obstacle; onSelect: ()
 
 function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClose: () => void }) {
   if (!obstacle) return null;
-  const { Icon, name, unlocked, times } = obstacle;
+  const { image, name, unlocked, times } = obstacle;
 
   return (
     <div
@@ -158,7 +171,7 @@ function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClo
       >
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label="Cerrar"
           className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-white/5 hover:text-foreground"
         >
           <X className="h-4 w-4" />
@@ -167,11 +180,17 @@ function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClo
         <div className="flex flex-col items-center text-center">
           <div
             className={[
-              "grid h-24 w-24 place-items-center rounded-3xl",
+              "grid h-28 w-28 place-items-center rounded-3xl p-3",
               unlocked ? "bg-gradient-neon shadow-neon" : "bg-[oklch(0.25_0.012_260)]",
             ].join(" ")}
           >
-            <Icon className={unlocked ? "h-12 w-12 text-primary-foreground" : "h-12 w-12 text-muted-foreground"} />
+            <img
+              src={image}
+              alt={name}
+              width={512}
+              height={512}
+              className={unlocked ? "h-full w-full object-contain" : "h-full w-full object-contain grayscale opacity-60"}
+            />
           </div>
 
           <h3 className="mt-4 font-display text-xl font-black uppercase tracking-wide">
@@ -181,26 +200,26 @@ function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClo
           {unlocked ? (
             <>
               <p className="mt-4 text-sm leading-relaxed text-foreground/90">
-                Practiced <span className="font-bold text-neon">{times} times!</span> You can now claim your
-                physical Pin at the front desk!
+                ¡Practicado <span className="font-bold text-neon">{times} veces!</span> Ya podés
+                reclamar tu Pin físico en la recepción.
               </p>
               <button
                 onClick={onClose}
                 className="mt-6 w-full rounded-xl bg-gradient-neon py-3 font-display text-sm font-bold uppercase tracking-widest text-primary-foreground shadow-neon transition active:scale-[0.98]"
               >
-                Claim Pin
+                Reclamar Pin
               </button>
             </>
           ) : (
             <>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Keep coming to classes to unlock this obstacle!
+                ¡Seguí viniendo a las clases para desbloquear este obstáculo!
               </p>
               <button
                 onClick={onClose}
                 className="mt-6 w-full rounded-xl border border-border bg-[oklch(0.25_0.012_260)] py-3 font-display text-sm font-bold uppercase tracking-widest text-foreground transition hover:bg-[oklch(0.28_0.012_260)] active:scale-[0.98]"
               >
-                Got it
+                Entendido
               </button>
             </>
           )}
