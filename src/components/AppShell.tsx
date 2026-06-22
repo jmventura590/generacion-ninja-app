@@ -20,8 +20,8 @@ export function AppShell() {
 
         <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md px-4 pb-4">
           <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border/70 bg-surface/95 p-2 shadow-card backdrop-blur-xl">
-            <NavItem to="/" label="My Ninja Path" Icon={Footprints} />
-            <NavItem to="/report" label="Monthly Report" Icon={BarChart3} />
+            <NavItem to="/" label="Mi Camino Ninja" Icon={Footprints} />
+            <NavItem to="/report" label="Reporte Mensual" Icon={BarChart3} />
           </div>
         </nav>
       </div>
