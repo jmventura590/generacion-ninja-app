@@ -27,7 +27,7 @@ type Obstacle = {
 
 const OBSTACLES: Obstacle[] = [
   { name: "Pasamanos", Icon: Hand, unlocked: true, times: 10 },
-  { name: "Salto de la Araña", Icon: Spider, unlocked: true, times: 10 },
+  { name: "Salto de la Araña", Icon: Bug, unlocked: true, times: 10 },
   { name: "Muro Curvado", Icon: MoveDiagonal, unlocked: true, times: 10 },
   { name: "Palestra", Icon: Mountain, unlocked: true, times: 10 },
   { name: "Tronco Giratorio", Icon: RotateCw, unlocked: false },
