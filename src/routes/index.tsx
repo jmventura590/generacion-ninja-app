@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Lock, Check, X,
-  Hand, Spider, MoveDiagonal, Mountain,
+  Hand, Bug, MoveDiagonal, Mountain,
   RotateCw, ArrowDownUp, StepForward, Grid3x3, Circle, CircleDot,
 } from "lucide-react";
 
