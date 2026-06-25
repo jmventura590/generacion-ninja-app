@@ -10,11 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as AdnRouteRouteImport } from './routes/adn/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdnIndexRouteImport } from './routes/adn/index'
 
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdnRouteRoute = AdnRouteRouteImport.update({
+  id: '/adn',
+  path: '/adn',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,30 +29,41 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdnIndexRoute = AdnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdnRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adn': typeof AdnRouteRouteWithChildren
   '/report': typeof ReportRoute
+  '/adn/': typeof AdnIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/adn': typeof AdnIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adn': typeof AdnRouteRouteWithChildren
   '/report': typeof ReportRoute
+  '/adn/': typeof AdnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/report'
+  fullPaths: '/' | '/adn' | '/report' | '/adn/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/report'
-  id: '__root__' | '/' | '/report'
+  to: '/' | '/report' | '/adn'
+  id: '__root__' | '/' | '/adn' | '/report' | '/adn/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdnRouteRoute: typeof AdnRouteRouteWithChildren
   ReportRoute: typeof ReportRoute
 }
 
@@ -58,6 +76,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adn': {
+      id: '/adn'
+      path: '/adn'
+      fullPath: '/adn'
+      preLoaderRoute: typeof AdnRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -65,11 +90,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adn/': {
+      id: '/adn/'
+      path: '/'
+      fullPath: '/adn/'
+      preLoaderRoute: typeof AdnIndexRouteImport
+      parentRoute: typeof AdnRouteRoute
+    }
   }
 }
 
+interface AdnRouteRouteChildren {
+  AdnIndexRoute: typeof AdnIndexRoute
+}
+
+const AdnRouteRouteChildren: AdnRouteRouteChildren = {
+  AdnIndexRoute: AdnIndexRoute,
+}
+
+const AdnRouteRouteWithChildren = AdnRouteRoute._addFileChildren(
+  AdnRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdnRouteRoute: AdnRouteRouteWithChildren,
   ReportRoute: ReportRoute,
 }
 export const routeTree = rootRouteImport
