@@ -14,16 +14,256 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance_logs: {
+        Row: {
+          class_type_id: string
+          coach_id: string | null
+          created_at: string
+          date: string
+          id: string
+          student_id: string
+          xp_awarded: number
+        }
+        Insert: {
+          class_type_id: string
+          coach_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          student_id: string
+          xp_awarded?: number
+        }
+        Update: {
+          class_type_id?: string
+          coach_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          student_id?: string
+          xp_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_logs_class_type_id_fkey"
+            columns: ["class_type_id"]
+            isOneToOne: false
+            referencedRelation: "class_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      avatars: {
+        Row: {
+          gender: string
+          hair: string
+          hair_color: string
+          skin: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          gender?: string
+          hair?: string
+          hair_color?: string
+          skin?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          gender?: string
+          hair?: string
+          hair_color?: string
+          skin?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatars_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_types: {
+        Row: {
+          id: string
+          name: string
+          xp_matrix: Json
+        }
+        Insert: {
+          id?: string
+          name: string
+          xp_matrix: Json
+        }
+        Update: {
+          id?: string
+          name?: string
+          xp_matrix?: Json
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      skill_bars: {
+        Row: {
+          agility_xp: number
+          coordination_xp: number
+          grip_xp: number
+          jump_xp: number
+          strength_xp: number
+          student_id: string
+        }
+        Insert: {
+          agility_xp?: number
+          coordination_xp?: number
+          grip_xp?: number
+          jump_xp?: number
+          strength_xp?: number
+          student_id: string
+        }
+        Update: {
+          agility_xp?: number
+          coordination_xp?: number
+          grip_xp?: number
+          jump_xp?: number
+          strength_xp?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_bars_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_profiles: {
+        Row: {
+          age: number
+          created_at: string
+          current_belt_color: string
+          id: string
+          student_name: string
+          total_xp: number
+          user_id: string | null
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          current_belt_color?: string
+          id?: string
+          student_name: string
+          total_xp?: number
+          user_id?: string | null
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          current_belt_color?: string
+          id?: string
+          student_name?: string
+          total_xp?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      unlocked_items: {
+        Row: {
+          id: string
+          item_name: string
+          item_type: string
+          purchased_status: boolean
+          student_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          id?: string
+          item_name: string
+          item_type: string
+          purchased_status?: boolean
+          student_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          id?: string
+          item_name?: string
+          item_type?: string
+          purchased_status?: boolean
+          student_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unlocked_items_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      belt_for_xp: { Args: { _xp: number }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "coach" | "student_parent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +390,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["coach", "student_parent"],
+    },
   },
 } as const
