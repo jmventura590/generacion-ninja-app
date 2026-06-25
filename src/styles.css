@@ -128,3 +128,99 @@
   background-size: 200% 100%;
   animation: shimmer 2.5s linear infinite;
 }
+
+/* ===========================================
+   GENERACIÓN ADN — Theme scope (#adn-root)
+   Vibrant fluor green + electric violet on charcoal/black
+   =========================================== */
+.adn-root {
+  --adn-bg: #1e1e24;
+  --adn-bg-deep: #000000;
+  --adn-fluor: #39ff14;
+  --adn-violet: #df00ff;
+  --adn-text: #ffffff;
+  --adn-muted: #9ca3af;
+  --adn-surface: #15151a;
+  --adn-border: rgba(255,255,255,0.08);
+
+  background: radial-gradient(ellipse at top, #2a2a33 0%, #1e1e24 45%, #000 100%);
+  color: var(--adn-text);
+  min-height: 100vh;
+  font-family: var(--font-sans);
+}
+.adn-root h1, .adn-root h2, .adn-root h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+.adn-fluor { color: var(--adn-fluor); text-shadow: 0 0 14px rgba(57,255,20,0.55); }
+.adn-violet { color: var(--adn-violet); text-shadow: 0 0 14px rgba(223,0,255,0.55); }
+.adn-card {
+  background: linear-gradient(160deg, #1c1c22, #0a0a0d);
+  border: 1px solid var(--adn-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px -8px rgba(0,0,0,0.8);
+}
+.adn-card-glow {
+  border-color: var(--adn-fluor);
+  box-shadow:
+    0 0 0 1px var(--adn-fluor),
+    0 0 24px -4px rgba(57,255,20,0.6),
+    0 0 40px -8px rgba(223,0,255,0.45);
+}
+.adn-btn-primary {
+  background: linear-gradient(90deg, var(--adn-fluor), #00ffae);
+  color: #001a00;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 24px -4px rgba(57,255,20,0.65);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.adn-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 32px -4px rgba(57,255,20,0.9); }
+.adn-btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.adn-btn-secondary {
+  background: linear-gradient(90deg, var(--adn-violet), #8a00ff);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 24px -6px rgba(223,0,255,0.65);
+}
+.adn-input {
+  background: #0a0a0d;
+  border: 1px solid var(--adn-border);
+  color: #fff;
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  width: 100%;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.adn-input:focus { border-color: var(--adn-fluor); box-shadow: 0 0 0 3px rgba(57,255,20,0.18); }
+
+@keyframes skill-fill {
+  from { width: 0%; }
+}
+.adn-bar-fill {
+  background: linear-gradient(90deg, var(--adn-fluor), var(--adn-violet));
+  box-shadow: 0 0 12px rgba(57,255,20,0.6);
+  height: 100%;
+  border-radius: 999px;
+  animation: skill-fill 1s cubic-bezier(.2,.7,.2,1);
+}
+
+@keyframes locked-pulse {
+  0%,100% { opacity: .55; }
+  50% { opacity: .85; }
+}
+.adn-locked { filter: grayscale(1) brightness(0.55); animation: locked-pulse 3s ease-in-out infinite; }
+
+@keyframes unlock-glow {
+  0%,100% { box-shadow: 0 0 0 1px var(--adn-fluor), 0 0 20px rgba(57,255,20,0.5), 0 0 40px rgba(223,0,255,0.35); }
+  50% { box-shadow: 0 0 0 1px var(--adn-violet), 0 0 28px rgba(223,0,255,0.6), 0 0 48px rgba(57,255,20,0.45); }
+}
+.adn-unlocked { animation: unlock-glow 2.4s ease-in-out infinite; }
+
