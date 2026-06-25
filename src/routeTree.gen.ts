@@ -13,6 +13,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as AdnRouteRouteImport } from './routes/adn/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdnIndexRouteImport } from './routes/adn/index'
+import { Route as AdnAuthRouteImport } from './routes/adn/auth'
 
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
@@ -34,16 +35,23 @@ const AdnIndexRoute = AdnIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdnRouteRoute,
 } as any)
+const AdnAuthRoute = AdnAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => AdnRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/adn': typeof AdnRouteRouteWithChildren
   '/report': typeof ReportRoute
+  '/adn/auth': typeof AdnAuthRoute
   '/adn/': typeof AdnIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
+  '/adn/auth': typeof AdnAuthRoute
   '/adn': typeof AdnIndexRoute
 }
 export interface FileRoutesById {
@@ -51,14 +59,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/adn': typeof AdnRouteRouteWithChildren
   '/report': typeof ReportRoute
+  '/adn/auth': typeof AdnAuthRoute
   '/adn/': typeof AdnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/adn' | '/report' | '/adn/'
+  fullPaths: '/' | '/adn' | '/report' | '/adn/auth' | '/adn/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/report' | '/adn'
-  id: '__root__' | '/' | '/adn' | '/report' | '/adn/'
+  to: '/' | '/report' | '/adn/auth' | '/adn'
+  id: '__root__' | '/' | '/adn' | '/report' | '/adn/auth' | '/adn/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,14 +106,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdnIndexRouteImport
       parentRoute: typeof AdnRouteRoute
     }
+    '/adn/auth': {
+      id: '/adn/auth'
+      path: '/auth'
+      fullPath: '/adn/auth'
+      preLoaderRoute: typeof AdnAuthRouteImport
+      parentRoute: typeof AdnRouteRoute
+    }
   }
 }
 
 interface AdnRouteRouteChildren {
+  AdnAuthRoute: typeof AdnAuthRoute
   AdnIndexRoute: typeof AdnIndexRoute
 }
 
 const AdnRouteRouteChildren: AdnRouteRouteChildren = {
+  AdnAuthRoute: AdnAuthRoute,
   AdnIndexRoute: AdnIndexRoute,
 }
 
