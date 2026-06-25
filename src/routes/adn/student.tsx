@@ -37,16 +37,24 @@ function StudentDashboard() {
       setStudent(s as Student);
       const { data: sk } = await supabase.from("skill_bars").select("*").eq("student_id", s.id).maybeSingle();
       if (sk) setSkills(sk as any);
-      const { data: av } = await supabase.from("avatars").select("config").eq("student_id", s.id).maybeSingle();
-      if (av?.config) setAvatar(av.config as AvatarCfg);
+      const { data: av } = await supabase.from("avatars").select("skin, hair_color").eq("student_id", s.id).maybeSingle();
+      if (av) {
+        const skinIdx = Math.max(0, SKINS.indexOf(av.skin));
+        const hairIdx = Math.max(0, HAIRS.indexOf(av.hair_color));
+        setAvatar({ skin: skinIdx, hair: hairIdx, accessory: 0 });
+      }
     })();
   }, [navigate]);
 
   async function saveAvatar(cfg: AvatarCfg) {
     setAvatar(cfg);
     if (!student) return;
-    await supabase.from("avatars").upsert({ student_id: student.id, config: cfg }, { onConflict: "student_id" });
+    await supabase.from("avatars").upsert(
+      { student_id: student.id, skin: SKINS[cfg.skin], hair_color: HAIRS[cfg.hair], hair: "default", gender: "neutral" },
+      { onConflict: "student_id" },
+    );
   }
+
 
   async function logout() { await supabase.auth.signOut(); navigate({ to: "/adn/auth" }); }
 
