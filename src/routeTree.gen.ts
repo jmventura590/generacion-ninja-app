@@ -13,6 +13,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as AdnRouteRouteImport } from './routes/adn/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdnIndexRouteImport } from './routes/adn/index'
+import { Route as AdnCoachRouteImport } from './routes/adn/coach'
 import { Route as AdnAuthRouteImport } from './routes/adn/auth'
 
 const ReportRoute = ReportRouteImport.update({
@@ -35,6 +36,11 @@ const AdnIndexRoute = AdnIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdnRouteRoute,
 } as any)
+const AdnCoachRoute = AdnCoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => AdnRouteRoute,
+} as any)
 const AdnAuthRoute = AdnAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -46,12 +52,14 @@ export interface FileRoutesByFullPath {
   '/adn': typeof AdnRouteRouteWithChildren
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
+  '/adn/coach': typeof AdnCoachRoute
   '/adn/': typeof AdnIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
+  '/adn/coach': typeof AdnCoachRoute
   '/adn': typeof AdnIndexRoute
 }
 export interface FileRoutesById {
@@ -60,14 +68,22 @@ export interface FileRoutesById {
   '/adn': typeof AdnRouteRouteWithChildren
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
+  '/adn/coach': typeof AdnCoachRoute
   '/adn/': typeof AdnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/adn' | '/report' | '/adn/auth' | '/adn/'
+  fullPaths: '/' | '/adn' | '/report' | '/adn/auth' | '/adn/coach' | '/adn/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/report' | '/adn/auth' | '/adn'
-  id: '__root__' | '/' | '/adn' | '/report' | '/adn/auth' | '/adn/'
+  to: '/' | '/report' | '/adn/auth' | '/adn/coach' | '/adn'
+  id:
+    | '__root__'
+    | '/'
+    | '/adn'
+    | '/report'
+    | '/adn/auth'
+    | '/adn/coach'
+    | '/adn/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +122,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdnIndexRouteImport
       parentRoute: typeof AdnRouteRoute
     }
+    '/adn/coach': {
+      id: '/adn/coach'
+      path: '/coach'
+      fullPath: '/adn/coach'
+      preLoaderRoute: typeof AdnCoachRouteImport
+      parentRoute: typeof AdnRouteRoute
+    }
     '/adn/auth': {
       id: '/adn/auth'
       path: '/auth'
@@ -118,11 +141,13 @@ declare module '@tanstack/react-router' {
 
 interface AdnRouteRouteChildren {
   AdnAuthRoute: typeof AdnAuthRoute
+  AdnCoachRoute: typeof AdnCoachRoute
   AdnIndexRoute: typeof AdnIndexRoute
 }
 
 const AdnRouteRouteChildren: AdnRouteRouteChildren = {
   AdnAuthRoute: AdnAuthRoute,
+  AdnCoachRoute: AdnCoachRoute,
   AdnIndexRoute: AdnIndexRoute,
 }
 
