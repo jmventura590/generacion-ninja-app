@@ -9,7 +9,7 @@ export function AppShell() {
           <div className="flex items-center gap-2">
             <div className="h-2.5 w-2.5 rounded-full bg-neon shadow-neon animate-pulse-neon" />
             <h1 className="text-sm font-bold tracking-[0.28em] text-foreground/90">
-              ADN <span className="text-neon">NINJA</span> WARRIOR
+              ADN <span className="text-neon">GENERACIÓN</span> NINJA
             </h1>
           </div>
         </header>
