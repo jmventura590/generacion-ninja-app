@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Map, Store } from "lucide-react";
+import { LogOut, User, BarChart3, Map, Store, Check } from "lucide-react";
 import { BELTS, beltFromXp, OBSTACLES, SKILLS, type SkillKey } from "@/lib/adn-game";
 
 export const Route = createFileRoute("/adn/student")({
@@ -11,7 +12,6 @@ export const Route = createFileRoute("/adn/student")({
 
 type Student = { id: string; student_name: string; age: number | null; total_xp: number; current_belt_color: string };
 type Skills = Record<SkillKey, number>;
-type AvatarCfg = { hair: number; skin: number; accessory: number };
 
 const TABS = [
   { key: "avatar", label: "Avatar",   Icon: User },
@@ -21,12 +21,42 @@ const TABS = [
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
+/* ─── Avatar Presets ───────────────────────────
+ * 10 avatares (5 nenes + 5 nenas), 6-14 años.
+ * Variación de piel, color de pelo y peinado (lacio, rulos, trenzas, gorra).
+ * Todos visten remera negra con logo ADN blanco en el pecho.
+ */
+type Gender = "boy" | "girl";
+type HairStyle = "short" | "curly" | "long" | "braids" | "cap" | "ponytail" | "buzz" | "bun";
+type AvatarPreset = {
+  id: string;
+  gender: Gender;
+  skin: string;
+  hairColor: string;
+  style: HairStyle;
+};
+
+const AVATAR_PRESETS: AvatarPreset[] = [
+  { id: "b1", gender: "boy",  skin: "#f7d4b3", hairColor: "#3a1f0e", style: "short"    },
+  { id: "b2", gender: "boy",  skin: "#e2b08a", hairColor: "#1b1b1b", style: "curly"    },
+  { id: "b3", gender: "boy",  skin: "#b88357", hairColor: "#0a0a0a", style: "buzz"     },
+  { id: "b4", gender: "boy",  skin: "#7e4f2a", hairColor: "#1b1b1b", style: "cap"      },
+  { id: "b5", gender: "boy",  skin: "#f0c8a0", hairColor: "#caa15a", style: "short"    },
+  { id: "g1", gender: "girl", skin: "#f7d4b3", hairColor: "#caa15a", style: "long"     },
+  { id: "g2", gender: "girl", skin: "#e2b08a", hairColor: "#6b3a1d", style: "braids"   },
+  { id: "g3", gender: "girl", skin: "#b88357", hairColor: "#1b1b1b", style: "ponytail" },
+  { id: "g4", gender: "girl", skin: "#7e4f2a", hairColor: "#0a0a0a", style: "bun"      },
+  { id: "g5", gender: "girl", skin: "#f0c8a0", hairColor: "#df00ff", style: "curly"    },
+];
+
 function StudentDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("evo");
   const [student, setStudent] = useState<Student | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
-  const [avatar, setAvatar] = useState<AvatarCfg>({ hair: 0, skin: 1, accessory: 0 });
+  const [avatarId, setAvatarId] = useState<string>("b1");
+  const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
+  const prevBeltRef = useRef<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -34,33 +64,43 @@ function StudentDashboard() {
       if (!session) { navigate({ to: "/adn/auth" }); return; }
       const { data: s } = await supabase.from("student_profiles").select("*").eq("user_id", session.user.id).maybeSingle();
       if (!s) { toast.error("No hay alumno asociado a tu cuenta."); return; }
-      setStudent(s as Student);
-      const { data: sk } = await supabase.from("skill_bars").select("*").eq("student_id", s.id).maybeSingle();
+      const stu = s as Student;
+      setStudent(stu);
+      const { data: sk } = await supabase.from("skill_bars").select("*").eq("student_id", stu.id).maybeSingle();
       if (sk) setSkills(sk as any);
-      const { data: av } = await supabase.from("avatars").select("skin, hair_color").eq("student_id", s.id).maybeSingle();
-      if (av) {
-        const skinIdx = Math.max(0, SKINS.indexOf(av.skin));
-        const hairIdx = Math.max(0, HAIRS.indexOf(av.hair_color));
-        setAvatar({ skin: skinIdx, hair: hairIdx, accessory: 0 });
+      const { data: av } = await supabase.from("avatars").select("hair, gender, skin, hair_color").eq("student_id", stu.id).maybeSingle();
+      if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair)) setAvatarId(av.hair);
+
+      // Detect belt-up vs locally-stored previous belt
+      const storageKey = `adn:lastBelt:${stu.id}`;
+      const lastSeen = localStorage.getItem(storageKey);
+      prevBeltRef.current = lastSeen;
+      if (lastSeen && lastSeen !== stu.current_belt_color) {
+        const belt = BELTS.find((b) => b.key === stu.current_belt_color);
+        if (belt && BELTS.findIndex((b) => b.key === stu.current_belt_color) > BELTS.findIndex((b) => b.key === (lastSeen as any))) {
+          setCelebrate({ beltKey: belt.key, beltLabel: belt.label });
+        }
       }
+      localStorage.setItem(storageKey, stu.current_belt_color);
     })();
   }, [navigate]);
 
-  async function saveAvatar(cfg: AvatarCfg) {
-    setAvatar(cfg);
+  async function selectAvatar(id: string) {
+    setAvatarId(id);
     if (!student) return;
+    const preset = AVATAR_PRESETS.find((p) => p.id === id)!;
     await supabase.from("avatars").upsert(
-      { student_id: student.id, skin: SKINS[cfg.skin], hair_color: HAIRS[cfg.hair], hair: "default", gender: "neutral" },
+      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: preset.skin, hair_color: preset.hairColor },
       { onConflict: "student_id" },
     );
   }
-
 
   async function logout() { await supabase.auth.signOut(); navigate({ to: "/adn/auth" }); }
 
   if (!student || !skills) return <div className="p-10 text-center text-white/60">Cargando...</div>;
 
   const belt = beltFromXp(student.total_xp);
+  const preset = AVATAR_PRESETS.find((p) => p.id === avatarId) ?? AVATAR_PRESETS[0];
 
   return (
     <div className="min-h-screen pb-24">
@@ -73,7 +113,7 @@ function StudentDashboard() {
       </header>
 
       <main className="px-5 mt-4">
-        {tab === "avatar" && <AvatarStudio cfg={avatar} onSave={saveAvatar} />}
+        {tab === "avatar" && <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} />}
         {tab === "evo"    && <Evolution student={student} skills={skills} belt={belt} />}
         {tab === "map"    && <ObstacleMap skills={skills} />}
         {tab === "shop"   && <Shop />}
@@ -88,83 +128,201 @@ function StudentDashboard() {
           </button>
         ))}
       </nav>
+
+      {celebrate && (
+        <LevelUpCelebration
+          preset={preset}
+          beltLabel={celebrate.beltLabel}
+          onClose={() => setCelebrate(null)}
+        />
+      )}
     </div>
   );
 }
 
 /* ─── Avatar Studio ─────────────────────────── */
-const SKINS  = ["#f7d4b3", "#e2b08a", "#b88357", "#7e4f2a"];
-const HAIRS  = ["#1b1b1b", "#6b3a1d", "#caa15a", "#df00ff"];
-const ACCS   = ["none", "cap", "headband"];
-
-function AvatarStudio({ cfg, onSave }: { cfg: AvatarCfg; onSave: (c: AvatarCfg) => void }) {
+function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: (id: string) => void }) {
+  const selected = AVATAR_PRESETS.find((p) => p.id === selectedId) ?? AVATAR_PRESETS[0];
   return (
     <div className="space-y-5">
       <div className="adn-card p-5 flex flex-col items-center">
-        <AvatarSVG cfg={cfg} size={180} />
-        <p className="mt-3 text-xs text-white/50">Camiseta oficial ADN — verde fluor con detalles violetas.</p>
+        <AvatarSVG preset={selected} size={180} cheering={false} />
+        <p className="mt-3 text-xs text-white/50 text-center">Remera negra oficial ADN — elegí tu personaje favorito.</p>
       </div>
-      <div className="adn-card p-5 space-y-4">
-        <Selector label="Piel" value={cfg.skin} onChange={(i) => onSave({ ...cfg, skin: i })}
-          options={SKINS.map((c) => ({ swatch: c }))} />
-        <Selector label="Pelo" value={cfg.hair} onChange={(i) => onSave({ ...cfg, hair: i })}
-          options={HAIRS.map((c) => ({ swatch: c }))} />
-        <Selector label="Accesorio" value={cfg.accessory} onChange={(i) => onSave({ ...cfg, accessory: i })}
-          options={ACCS.map((c) => ({ label: c }))} />
-      </div>
-    </div>
-  );
-}
-
-function Selector({ label, value, onChange, options }: {
-  label: string; value: number; onChange: (i: number) => void;
-  options: { swatch?: string; label?: string }[];
-}) {
-  return (
-    <div>
-      <div className="text-[10px] tracking-[0.3em] text-white/50 mb-2">{label.toUpperCase()}</div>
-      <div className="flex gap-2 flex-wrap">
-        {options.map((o, i) => (
-          <button key={i} onClick={() => onChange(i)}
-            className={`h-10 min-w-10 rounded-lg border-2 px-2 text-xs font-bold ${i === value ? "border-[var(--adn-fluor)]" : "border-white/15"}`}
-            style={o.swatch ? { background: o.swatch } : {}}>
-            {o.label}
-          </button>
-        ))}
+      <div className="adn-card p-5">
+        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · 10 PERSONAJES</div>
+        <div className="grid grid-cols-5 gap-2.5">
+          {AVATAR_PRESETS.map((p) => {
+            const active = p.id === selectedId;
+            return (
+              <button key={p.id} onClick={() => onSelect(p.id)}
+                className={`relative aspect-square rounded-xl border-2 p-1 transition ${active ? "border-[var(--adn-fluor)] bg-[#39ff14]/10" : "border-white/10 bg-black/40 hover:border-white/30"}`}>
+                <AvatarSVG preset={p} size={64} cheering={false} />
+                {active && (
+                  <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[var(--adn-fluor)] text-black grid place-items-center shadow-[0_0_12px_#39ff14]">
+                    <Check size={12} strokeWidth={3}/>
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
 
-function AvatarSVG({ cfg, size = 120 }: { cfg: AvatarCfg; size?: number }) {
-  const skin = SKINS[cfg.skin] ?? SKINS[0];
-  const hair = HAIRS[cfg.hair] ?? HAIRS[0];
-  const acc  = ACCS[cfg.accessory];
+/* ─── Avatar SVG ─────────────────────────── */
+function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPreset; size?: number; cheering?: boolean }) {
+  const { skin, hairColor, style, gender } = preset;
+  const armPose = cheering ? (
+    <>
+      {/* arms up */}
+      <path d="M62 135 L40 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
+      <path d="M138 135 L160 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
+      <circle cx="40" cy="65" r="8" fill={skin}/>
+      <circle cx="160" cy="65" r="8" fill={skin}/>
+    </>
+  ) : (
+    <>
+      {/* arms down */}
+      <path d="M62 135 L48 178" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
+      <path d="M138 135 L152 178" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
+    </>
+  );
+
   return (
-    <svg width={size} height={size} viewBox="0 0 200 200" aria-label="avatar">
+    <svg width={size} height={size} viewBox="0 0 200 200" aria-label={`avatar ${preset.id}`}>
       <defs>
-        <radialGradient id="bgG"><stop offset="0%" stopColor="#39ff14" stopOpacity=".35"/><stop offset="100%" stopColor="#000" stopOpacity="0"/></radialGradient>
+        <radialGradient id={`bgG-${preset.id}`}>
+          <stop offset="0%"   stopColor="#39ff14" stopOpacity=".28"/>
+          <stop offset="100%" stopColor="#000"    stopOpacity="0"/>
+        </radialGradient>
       </defs>
-      <circle cx="100" cy="100" r="98" fill="url(#bgG)" />
-      {/* shirt */}
-      <path d="M40 195 L60 130 Q100 120 140 130 L160 195 Z" fill="#39ff14" stroke="#df00ff" strokeWidth="3"/>
+      <circle cx="100" cy="100" r="98" fill={`url(#bgG-${preset.id})`} />
+
+      {/* arms (behind shirt) */}
+      {armPose}
+
+      {/* shirt — BLACK with ADN logo */}
+      <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#0a0a0a" stroke="#222" strokeWidth="2"/>
+      {/* ADN logo on chest (white) */}
+      <g transform="translate(100 158)">
+        <text textAnchor="middle" fontFamily="Orbitron, sans-serif" fontWeight="900" fontSize="18" fill="#ffffff" letterSpacing="1">ADN</text>
+        <rect x="-18" y="6" width="36" height="2" fill="#ffffff" opacity=".85"/>
+      </g>
+
       {/* neck */}
-      <rect x="88" y="105" width="24" height="20" fill={skin}/>
+      <rect x="90" y="108" width="20" height="18" fill={skin}/>
+
       {/* head */}
-      <circle cx="100" cy="80" r="35" fill={skin} stroke="#000" strokeWidth="2"/>
-      {/* hair */}
-      <path d="M65 75 Q100 30 135 75 Q130 55 100 50 Q70 55 65 75 Z" fill={hair}/>
-      {acc === "cap" && <path d="M62 70 Q100 38 138 70 L138 78 L62 78 Z" fill="#df00ff"/>}
-      {acc === "headband" && <rect x="62" y="70" width="76" height="8" fill="#df00ff"/>}
+      <circle cx="100" cy="80" r="33" fill={skin} stroke="#000" strokeWidth="1.5"/>
+
+      {/* hair by style */}
+      {style === "short"    && <path d="M68 76 Q100 32 132 76 Q126 56 100 52 Q74 56 68 76 Z" fill={hairColor}/>}
+      {style === "curly"    && (
+        <g fill={hairColor}>
+          <circle cx="75"  cy="60" r="11"/><circle cx="90"  cy="50" r="12"/>
+          <circle cx="105" cy="48" r="12"/><circle cx="120" cy="52" r="11"/>
+          <circle cx="128" cy="65" r="10"/><circle cx="70"  cy="72" r="9"/>
+        </g>
+      )}
+      {style === "buzz"     && <path d="M70 78 Q100 56 130 78 Q128 66 100 62 Q72 66 70 78 Z" fill={hairColor} opacity=".85"/>}
+      {style === "cap"      && (
+        <>
+          <path d="M68 76 Q100 60 132 76 L132 78 L68 78 Z" fill={hairColor}/>
+          <path d="M58 76 Q100 42 142 76 L142 84 L58 84 Z" fill="#df00ff"/>
+          <rect x="58" y="82" width="84" height="6" fill="#0a0a0a"/>
+          <text x="100" y="74" textAnchor="middle" fontSize="9" fontWeight="900" fill="#fff">ADN</text>
+        </>
+      )}
+      {style === "long"     && (
+        <>
+          <path d="M62 78 Q70 130 78 150 L70 152 Q56 120 60 80 Z" fill={hairColor}/>
+          <path d="M138 78 Q130 130 122 150 L130 152 Q144 120 140 80 Z" fill={hairColor}/>
+          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
+        </>
+      )}
+      {style === "braids"   && (
+        <>
+          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
+          <g fill={hairColor}>
+            <ellipse cx="62" cy="100" rx="8" ry="14"/>
+            <ellipse cx="62" cy="125" rx="7" ry="12"/>
+            <ellipse cx="138" cy="100" rx="8" ry="14"/>
+            <ellipse cx="138" cy="125" rx="7" ry="12"/>
+          </g>
+          <circle cx="62" cy="140" r="4" fill="#df00ff"/>
+          <circle cx="138" cy="140" r="4" fill="#df00ff"/>
+        </>
+      )}
+      {style === "ponytail" && (
+        <>
+          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
+          <path d="M135 80 Q170 100 162 140 Q155 120 145 110 Z" fill={hairColor}/>
+        </>
+      )}
+      {style === "bun"      && (
+        <>
+          <path d="M68 78 Q100 38 132 78 Q126 58 100 54 Q74 58 68 78 Z" fill={hairColor}/>
+          <circle cx="100" cy="42" r="14" fill={hairColor}/>
+          <circle cx="100" cy="42" r="14" fill="none" stroke="#000" strokeOpacity=".2" strokeWidth="1"/>
+        </>
+      )}
+
       {/* eyes */}
-      <circle cx="88" cy="85" r="3" fill="#0a0a0d"/>
-      <circle cx="112" cy="85" r="3" fill="#0a0a0d"/>
+      <circle cx="88"  cy="86" r="3" fill="#0a0a0d"/>
+      <circle cx="112" cy="86" r="3" fill="#0a0a0d"/>
       {/* smile */}
-      <path d="M88 98 Q100 108 112 98" stroke="#0a0a0d" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-      {/* ADN badge */}
-      <rect x="92" y="150" width="16" height="10" rx="2" fill="#000"/>
-      <text x="100" y="158" textAnchor="middle" fontSize="7" fill="#39ff14" fontWeight="900">ADN</text>
+      <path d={cheering ? "M86 96 Q100 112 114 96" : "M88 98 Q100 106 112 98"} stroke="#0a0a0d" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+
+      {/* girl earrings hint */}
+      {gender === "girl" && (
+        <>
+          <circle cx="67" cy="92" r="2" fill="#df00ff"/>
+          <circle cx="133" cy="92" r="2" fill="#df00ff"/>
+        </>
+      )}
     </svg>
+  );
+}
+
+/* ─── Level Up Celebration ─────────────────── */
+function LevelUpCelebration({ preset, beltLabel, onClose }: { preset: AvatarPreset; beltLabel: string; onClose: () => void }) {
+  useEffect(() => {
+    const colors = ["#39ff14", "#df00ff", "#ffffff", "#00ffae"];
+    const end = Date.now() + 2500;
+    const tick = () => {
+      confetti({ particleCount: 5, angle: 60,  spread: 70, startVelocity: 55, origin: { x: 0,   y: 0.8 }, colors });
+      confetti({ particleCount: 5, angle: 120, spread: 70, startVelocity: 55, origin: { x: 1,   y: 0.8 }, colors });
+      confetti({ particleCount: 3, spread: 360, startVelocity: 25, origin: { x: 0.5, y: 0.4 }, colors, scalar: 0.9 });
+      if (Date.now() < end) requestAnimationFrame(tick);
+    };
+    tick();
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 animate-fade-in">
+      <div className="text-[11px] tracking-[0.5em] text-white/60">SUBISTE DE NIVEL</div>
+      <h2 className="mt-2 text-3xl font-black text-center adn-fluor" style={{ fontFamily: "Orbitron, sans-serif" }}>¡{beltLabel}!</h2>
+
+      <div className="relative mt-6">
+        {/* Neon aura */}
+        <div className="absolute inset-0 rounded-full blur-3xl opacity-80 animate-pulse"
+             style={{ background: "radial-gradient(circle, #39ff14 0%, #df00ff 60%, transparent 75%)" }} />
+        {/* Bouncing avatar */}
+        <div className="relative animate-bounce">
+          <AvatarSVG preset={preset} size={240} cheering />
+        </div>
+      </div>
+
+      <p className="mt-6 text-sm text-white/70 text-center max-w-xs">
+        Tu constancia rinde frutos. ¡Seguí entrenando, ninja!
+      </p>
+      <button onClick={onClose} className="adn-btn-primary mt-6 px-8 py-3 text-sm">
+        SEGUIR
+      </button>
+    </div>
   );
 }
 
@@ -285,7 +443,7 @@ function Shop() {
         </div>
       </div>
       <p className="text-[11px] text-white/50 text-center px-4">
-        Optional badges to celebrate your real-world effort and consistency.
+        Insignias opcionales para celebrar tu esfuerzo y constancia en el mundo real.
       </p>
     </div>
   );

@@ -1,4 +1,4 @@
-# Project Memory — ADN Ninja Warrior
+# Project Memory — ADN Generación Ninja
 
 ## Core
 Mobile-first app for kids at obstacle course gym. Dark theme #121212 + neon green + electric blue accents. All UI copy in castellano (es-AR).

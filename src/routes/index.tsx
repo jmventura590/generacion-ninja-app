@@ -15,9 +15,9 @@ import pelotas from "@/assets/obstacles/pelotas.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Mi Camino Ninja — ADN Ninja Warrior" },
+      { title: "Mi Camino Ninja — ADN Generación Ninja" },
       { name: "description", content: "Progreso de asistencia del Ninja Benjamín, obstáculos desbloqueados y próximas metas." },
-      { property: "og:title", content: "Mi Camino Ninja — ADN Ninja Warrior" },
+      { property: "og:title", content: "Mi Camino Ninja — ADN Generación Ninja" },
       { property: "og:description", content: "Seguí la asistencia, desbloqueá obstáculos y reclamá tus pines." },
     ],
   }),

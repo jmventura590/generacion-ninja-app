@@ -46,10 +46,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "ADN Ninja Warrior — Mi Camino Ninja" },
-      { name: "description", content: "Seguimiento de asistencia gamificado para el gimnasio de obstáculos ADN Ninja Warrior." },
+      { title: "ADN Generación Ninja — Mi Camino Ninja" },
+      { name: "description", content: "Seguimiento de asistencia gamificado para el gimnasio de obstáculos ADN Generación Ninja." },
       { name: "theme-color", content: "#121212" },
-      { property: "og:title", content: "ADN Ninja Warrior" },
+      { property: "og:title", content: "ADN Generación Ninja" },
       { property: "og:description", content: "Seguí tu progreso ninja, desbloqueá obstáculos y ganá pines." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
