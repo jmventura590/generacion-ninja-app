@@ -254,13 +254,6 @@ export type Database = {
     }
     Functions: {
       belt_for_xp: { Args: { _xp: number }; Returns: string }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
     }
     Enums: {
       app_role: "coach" | "student_parent"
