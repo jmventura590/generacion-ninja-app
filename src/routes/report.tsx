@@ -19,9 +19,9 @@ import {
 export const Route = createFileRoute("/report")({
   head: () => ({
     meta: [
-      { title: "Reporte Mensual — ADN Ninja Warrior" },
+      { title: "Reporte Mensual — ADN Generación Ninja" },
       { name: "description", content: "Reporte de asistencia y desarrollo físico estimulado." },
-      { property: "og:title", content: "Reporte Mensual — ADN Ninja Warrior" },
+      { property: "og:title", content: "Reporte Mensual — ADN Generación Ninja" },
       { property: "og:description", content: "Resumen mensual del compromiso y capacidades físicas de tu hijo." },
     ],
   }),
