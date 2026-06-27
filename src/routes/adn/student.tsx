@@ -58,8 +58,8 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "b5", gender: "boy",  img: avB5, label: "Confiado",     chest: { top: "38%", left: "50%", width: "20%" } },
   { id: "g1", gender: "girl", img: avG1, label: "Peace",        chest: { top: "42%", left: "52%", width: "20%" } },
   { id: "g2", gender: "girl", img: avG2, label: "OK",           chest: { top: "42%", left: "52%", width: "20%" } },
-  { id: "g3", gender: "girl", img: avG3, label: "Salto",        chest: { top: "44%", left: "50%", width: "22%" } },
-  { id: "g4", gender: "girl", img: avG4, label: "Lista",        chest: { top: "40%", left: "50%", width: "20%" } },
+  { id: "g3", gender: "girl", img: avG3, label: "Salto en V",   chest: { top: "44%", left: "50%", width: "22%" } },
+  { id: "g4", gender: "girl", img: avG4, label: "Trenzas",      chest: { top: "40%", left: "50%", width: "20%" } },
   { id: "g5", gender: "girl", img: avG5, label: "Festejo",      chest: { top: "40%", left: "50%", width: "20%" } },
 ];
 
