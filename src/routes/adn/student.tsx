@@ -22,34 +22,47 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 /* ─── Avatar Presets ───────────────────────────
- * 10 avatares (5 nenes + 5 nenas), 6-14 años.
- * Variación de piel, color de pelo y peinado (lacio, rulos, trenzas, gorra).
- * Todos visten remera negra con logo ADN blanco en el pecho.
+ * 10 ilustraciones (5 nenes + 5 nenas), estilo marcador a mano igual al Mapa.
+ * Cada PNG tiene remera negra LISA; el logo ADN real se superpone vía <img>
+ * con mix-blend-mode: screen para que la silueta blanca aparezca impresa.
  */
+import avB1 from "@/assets/avatars/b1.png";
+import avB2 from "@/assets/avatars/b2.png";
+import avB3 from "@/assets/avatars/b3.png";
+import avB4 from "@/assets/avatars/b4.png";
+import avB5 from "@/assets/avatars/b5.png";
+import avG1 from "@/assets/avatars/g1.png";
+import avG2 from "@/assets/avatars/g2.png";
+import avG3 from "@/assets/avatars/g3.png";
+import avG4 from "@/assets/avatars/g4.png";
+import avG5 from "@/assets/avatars/g5.png";
+
+const ADN_LOGO_URL = "/assets/adn-logo.jpg";
+
 type Gender = "boy" | "girl";
-type HairStyle = "short" | "curly" | "long" | "braids" | "spiky" | "ponytail" | "buzz" | "bun" | "wavy" | "sideswept";
 type AvatarPreset = {
   id: string;
   gender: Gender;
-  skin: string;
-  hairColor: string;
-  style: HairStyle;
+  img: string;
+  label: string;
+  // chest position (% of avatar box) for the printed ADN logo overlay
+  chest: { top: string; left: string; width: string };
 };
 
-// 10 nenes/nenas (6-14 años), looks variados y realistas.
-// Solo 1 rapado (b3). Sin gorra. Pelos en tonos naturales.
+// 10 personajes únicos: piel/pelo/ojos naturales, pose distinta cada uno.
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  skin: "#f7d4b3", hairColor: "#3a1f0e", style: "short"     }, // castaño corto, piel clara
-  { id: "b2", gender: "boy",  skin: "#e2b08a", hairColor: "#1b1b1b", style: "curly"     }, // rulos negros
-  { id: "b3", gender: "boy",  skin: "#b88357", hairColor: "#0a0a0a", style: "buzz"      }, // único rapado
-  { id: "b4", gender: "boy",  skin: "#d9a274", hairColor: "#5a2d10", style: "spiky"     }, // pelo parado castaño
-  { id: "b5", gender: "boy",  skin: "#f0c8a0", hairColor: "#caa15a", style: "sideswept" }, // rubio peinado al costado
-  { id: "g1", gender: "girl", skin: "#f7d4b3", hairColor: "#a86b3a", style: "long"      }, // pelo largo castaño claro
-  { id: "g2", gender: "girl", skin: "#c89373", hairColor: "#2a1608", style: "braids"    }, // trenzas oscuras
-  { id: "g3", gender: "girl", skin: "#b88357", hairColor: "#1b1b1b", style: "ponytail"  }, // colita negra
-  { id: "g4", gender: "girl", skin: "#7e4f2a", hairColor: "#0a0a0a", style: "bun"       }, // rodete negro
-  { id: "g5", gender: "girl", skin: "#f0c8a0", hairColor: "#b8341f", style: "wavy"      }, // pelirroja ondulada
+  { id: "b1", gender: "boy",  img: avB1, label: "Saludo",       chest: { top: "44%", left: "50%", width: "20%" } },
+  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba",chest: { top: "44%", left: "53%", width: "20%" } },
+  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados",chest: { top: "40%", left: "50%", width: "18%" } },
+  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump",    chest: { top: "44%", left: "52%", width: "20%" } },
+  { id: "b5", gender: "boy",  img: avB5, label: "Confiado",     chest: { top: "38%", left: "50%", width: "20%" } },
+  { id: "g1", gender: "girl", img: avG1, label: "Peace",        chest: { top: "42%", left: "52%", width: "20%" } },
+  { id: "g2", gender: "girl", img: avG2, label: "OK",           chest: { top: "42%", left: "52%", width: "20%" } },
+  { id: "g3", gender: "girl", img: avG3, label: "Salto",        chest: { top: "44%", left: "50%", width: "22%" } },
+  { id: "g4", gender: "girl", img: avG4, label: "Lista",        chest: { top: "40%", left: "50%", width: "20%" } },
+  { id: "g5", gender: "girl", img: avG5, label: "Festejo",      chest: { top: "40%", left: "50%", width: "20%" } },
 ];
+
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -92,7 +105,7 @@ function StudentDashboard() {
     if (!student) return;
     const preset = AVATAR_PRESETS.find((p) => p.id === id)!;
     await supabase.from("avatars").upsert(
-      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: preset.skin, hair_color: preset.hairColor },
+      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: "#000", hair_color: "#000" },
       { onConflict: "student_id" },
     );
   }
@@ -147,7 +160,7 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
   return (
     <div className="space-y-5">
       <div className="adn-card p-5 flex flex-col items-center">
-        <AvatarSVG preset={selected} size={180} cheering={false} />
+        <AvatarImage preset={selected} size={220} />
         <p className="mt-3 text-xs text-white/50 text-center">Remera negra oficial ADN — elegí tu personaje favorito.</p>
       </div>
       <div className="adn-card p-5">
@@ -158,7 +171,7 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
             return (
               <button key={p.id} onClick={() => onSelect(p.id)}
                 className={`relative aspect-square rounded-xl border-2 p-1 transition ${active ? "border-[var(--adn-fluor)] bg-[#39ff14]/10" : "border-white/10 bg-black/40 hover:border-white/30"}`}>
-                <AvatarSVG preset={p} size={64} cheering={false} />
+                <AvatarImage preset={p} size={72} />
                 {active && (
                   <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[var(--adn-fluor)] text-black grid place-items-center shadow-[0_0_12px_#39ff14]">
                     <Check size={12} strokeWidth={3}/>
@@ -173,132 +186,44 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
   );
 }
 
-/* ─── Avatar SVG ─────────────────────────── */
-function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPreset; size?: number; cheering?: boolean }) {
-  const { skin, hairColor, style, gender } = preset;
-  const armPose = cheering ? (
-    <>
-      {/* both arms up — victory */}
-      <path d="M62 135 L40 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
-      <path d="M138 135 L160 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
-      <circle cx="40" cy="65" r="8" fill={skin}/>
-      <circle cx="160" cy="65" r="8" fill={skin}/>
-    </>
-  ) : (
-    <>
-      {/* action pose — one arm grabbing up (climbing), other pulling back */}
-      <path d="M138 132 Q160 100 150 60" stroke={skin} strokeWidth="12" strokeLinecap="round" fill="none"/>
-      <circle cx="150" cy="56" r="9" fill={skin}/>
-      <path d="M62 132 Q40 150 46 178" stroke={skin} strokeWidth="12" strokeLinecap="round" fill="none"/>
-      <circle cx="46" cy="180" r="8" fill={skin}/>
-    </>
-  );
-
+/* ─── Avatar Image (PNG ilustración + logo ADN real superpuesto) ─── */
+function AvatarImage({ preset, size = 120 }: { preset: AvatarPreset; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 200 200" aria-label={`avatar ${preset.id}`}>
-      <defs>
-        <radialGradient id={`bgG-${preset.id}`}>
-          <stop offset="0%"   stopColor="#39ff14" stopOpacity=".28"/>
-          <stop offset="100%" stopColor="#000"    stopOpacity="0"/>
-        </radialGradient>
-      </defs>
-      <circle cx="100" cy="100" r="98" fill={`url(#bgG-${preset.id})`} />
-
-      {/* arms (behind shirt) */}
-      {armPose}
-
-      {/* shirt — negro liso con "ADN" blanco inline */}
-      <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#000" stroke="#000" strokeWidth="2"/>
-      <text x="100" y="168" textAnchor="middle" fontSize="22" fontWeight="900" fill="#ffffff" letterSpacing="1.5" fontFamily="system-ui, -apple-system, sans-serif">ADN</text>
-
-
-      {/* neck */}
-      <rect x="90" y="108" width="20" height="18" fill={skin}/>
-
-      {/* head */}
-      <circle cx="100" cy="80" r="33" fill={skin} stroke="#000" strokeWidth="1.5"/>
-
-
-      {/* hair by style */}
-      {style === "short"    && <path d="M68 76 Q100 32 132 76 Q126 56 100 52 Q74 56 68 76 Z" fill={hairColor}/>}
-      {style === "curly"    && (
-        <g fill={hairColor}>
-          <circle cx="75"  cy="60" r="11"/><circle cx="90"  cy="50" r="12"/>
-          <circle cx="105" cy="48" r="12"/><circle cx="120" cy="52" r="11"/>
-          <circle cx="128" cy="65" r="10"/><circle cx="70"  cy="72" r="9"/>
-        </g>
-      )}
-      {style === "buzz"     && <path d="M70 78 Q100 56 130 78 Q128 66 100 62 Q72 66 70 78 Z" fill={hairColor} opacity=".85"/>}
-      {style === "spiky"    && (
-        <g fill={hairColor}>
-          <path d="M68 78 Q100 60 132 78 Q126 62 100 58 Q74 62 68 78 Z"/>
-          <path d="M72 60 L80 78 L86 58 L94 78 L100 54 L106 78 L114 58 L120 78 L128 60 L124 78 L76 78 Z"/>
-        </g>
-      )}
-      {style === "sideswept" && (
-        <>
-          <path d="M68 78 Q100 38 132 78 Q126 58 100 54 Q74 58 68 78 Z" fill={hairColor}/>
-          <path d="M70 70 Q90 48 132 60 Q120 72 96 74 Q80 76 70 78 Z" fill={hairColor}/>
-        </>
-      )}
-      {style === "wavy"     && (
-        <>
-          <path d="M62 80 Q66 110 74 130 L66 132 Q56 110 58 82 Z" fill={hairColor}/>
-          <path d="M138 80 Q134 110 126 130 L134 132 Q144 110 142 82 Z" fill={hairColor}/>
-          <path d="M65 76 Q100 34 135 76 Q130 54 100 50 Q70 54 65 76 Z" fill={hairColor}/>
-          <path d="M70 80 Q85 92 75 105 Q92 96 88 84 Z" fill={hairColor} opacity=".7"/>
-        </>
-      )}
-      {style === "long"     && (
-        <>
-          <path d="M62 78 Q70 130 78 150 L70 152 Q56 120 60 80 Z" fill={hairColor}/>
-          <path d="M138 78 Q130 130 122 150 L130 152 Q144 120 140 80 Z" fill={hairColor}/>
-          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
-        </>
-      )}
-      {style === "braids"   && (
-        <>
-          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
-          <g fill={hairColor}>
-            <ellipse cx="62" cy="100" rx="8" ry="14"/>
-            <ellipse cx="62" cy="125" rx="7" ry="12"/>
-            <ellipse cx="138" cy="100" rx="8" ry="14"/>
-            <ellipse cx="138" cy="125" rx="7" ry="12"/>
-          </g>
-          <circle cx="62" cy="140" r="4" fill="#df00ff"/>
-          <circle cx="138" cy="140" r="4" fill="#df00ff"/>
-        </>
-      )}
-      {style === "ponytail" && (
-        <>
-          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
-          <path d="M135 80 Q170 100 162 140 Q155 120 145 110 Z" fill={hairColor}/>
-        </>
-      )}
-      {style === "bun"      && (
-        <>
-          <path d="M68 78 Q100 38 132 78 Q126 58 100 54 Q74 58 68 78 Z" fill={hairColor}/>
-          <circle cx="100" cy="42" r="14" fill={hairColor}/>
-          <circle cx="100" cy="42" r="14" fill="none" stroke="#000" strokeOpacity=".2" strokeWidth="1"/>
-        </>
-      )}
-
-      {/* eyes */}
-      <circle cx="88"  cy="86" r="3" fill="#0a0a0d"/>
-      <circle cx="112" cy="86" r="3" fill="#0a0a0d"/>
-      {/* smile */}
-      <path d={cheering ? "M86 96 Q100 112 114 96" : "M88 98 Q100 106 112 98"} stroke="#0a0a0d" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-
-      {/* girl earrings hint */}
-      {gender === "girl" && (
-        <>
-          <circle cx="67" cy="92" r="2" fill="#df00ff"/>
-          <circle cx="133" cy="92" r="2" fill="#df00ff"/>
-        </>
-      )}
-    </svg>
+    <div
+      className="relative mx-auto select-none"
+      style={{ width: size, height: size }}
+      aria-label={`avatar ${preset.id}`}
+    >
+      <img
+        src={preset.img}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        draggable={false}
+        className="absolute inset-0 w-full h-full object-contain"
+      />
+      {/* Logo ADN real (silueta blanca sobre fondo negro) — screen blend
+          deja sólo la silueta blanca visible sobre la remera negra. */}
+      <img
+        src={ADN_LOGO_URL}
+        alt=""
+        draggable={false}
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: preset.chest.top,
+          left: preset.chest.left,
+          width: preset.chest.width,
+          transform: "translate(-50%, -50%)",
+          mixBlendMode: "screen",
+          pointerEvents: "none",
+        }}
+      />
+    </div>
   );
 }
+
 
 /* ─── Level Up Celebration ─────────────────── */
 function LevelUpCelebration({ preset, beltLabel, onClose }: { preset: AvatarPreset; beltLabel: string; onClose: () => void }) {
@@ -325,7 +250,7 @@ function LevelUpCelebration({ preset, beltLabel, onClose }: { preset: AvatarPres
              style={{ background: "radial-gradient(circle, #39ff14 0%, #df00ff 60%, transparent 75%)" }} />
         {/* Bouncing avatar */}
         <div className="relative animate-bounce">
-          <AvatarSVG preset={preset} size={240} cheering />
+          <AvatarImage preset={preset} size={240} />
         </div>
       </div>
 
