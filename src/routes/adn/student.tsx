@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Map, Store, Check } from "lucide-react";
+import { LogOut, User, BarChart3, Map, Check } from "lucide-react";
 import { BELTS, beltFromXp, OBSTACLES, SKILLS, type SkillKey } from "@/lib/adn-game";
+import adnLogo from "@/assets/adn-logo.jpg";
 
 export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
@@ -17,7 +18,6 @@ const TABS = [
   { key: "avatar", label: "Avatar",   Icon: User },
   { key: "evo",    label: "Evolución",Icon: BarChart3 },
   { key: "map",    label: "Mapa",     Icon: Map },
-  { key: "shop",   label: "Shop",     Icon: Store },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
