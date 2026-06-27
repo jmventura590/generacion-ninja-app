@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          obstacles_in_class: number
           student_id: string
           xp_awarded: number
         }
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          obstacles_in_class?: number
           student_id: string
           xp_awarded?: number
         }
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          obstacles_in_class?: number
           student_id?: string
           xp_awarded?: number
         }
@@ -93,6 +96,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      class_groups: {
+        Row: {
+          code: string
+          days_label: string
+          ends_at: string
+          id: string
+          sort_order: number
+          starts_at: string
+        }
+        Insert: {
+          code: string
+          days_label: string
+          ends_at: string
+          id?: string
+          sort_order: number
+          starts_at: string
+        }
+        Update: {
+          code?: string
+          days_label?: string
+          ends_at?: string
+          id?: string
+          sort_order?: number
+          starts_at?: string
+        }
+        Relationships: []
       }
       class_types: {
         Row: {
@@ -176,6 +206,7 @@ export type Database = {
           age: number
           created_at: string
           current_belt_color: string
+          group_id: string | null
           id: string
           student_name: string
           total_xp: number
@@ -185,6 +216,7 @@ export type Database = {
           age: number
           created_at?: string
           current_belt_color?: string
+          group_id?: string | null
           id?: string
           student_name: string
           total_xp?: number
@@ -194,12 +226,21 @@ export type Database = {
           age?: number
           created_at?: string
           current_belt_color?: string
+          group_id?: string | null
           id?: string
           student_name?: string
           total_xp?: number
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "student_profiles_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "class_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_heartbeat: {
         Row: {
