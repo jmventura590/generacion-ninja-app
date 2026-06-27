@@ -299,39 +299,4 @@ function Evolution({ student, skills, belt }: { student: Student; skills: Skills
   );
 }
 
-/* ─── Obstacle Map ─────────────────────────── */
-function ObstacleMap({ skills }: { skills: Skills }) {
-  return (
-    <div className="space-y-4">
-      <div className="text-[10px] tracking-[0.3em] text-white/50 px-1">MAPA DE OBSTÁCULOS</div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {OBSTACLES.map((o) => {
-          const xp = skills[o.unlockSkill] ?? 0;
-          const unlocked = xp >= o.unlockAt;
-          const pct = Math.min(100, (xp / o.unlockAt) * 100);
-          return (
-            <div key={o.name} className={`adn-card p-4 ${unlocked ? "adn-unlocked" : ""}`}>
-              <div className="aspect-square w-full overflow-hidden rounded-xl bg-black/60">
-                <img src={o.img} alt={o.name} loading="lazy" width={768} height={768}
-                  className={`w-full h-full object-contain ${unlocked ? "" : "adn-locked"}`} />
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="font-black">{o.name}</div>
-                <div className={`text-[10px] font-bold ${unlocked ? "adn-fluor" : "text-white/40"}`}>{unlocked ? "DESTRABADO" : "BLOQUEADO"}</div>
-              </div>
-              <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className="adn-bar-fill" style={{ width: `${pct}%` }} />
-              </div>
-              {unlocked ? (
-                <button className="adn-btn-primary w-full mt-3 py-2.5 text-[11px]">¡Obstáculo Destrabado! Pedí tu Pin real en el mostrador</button>
-              ) : (
-                <p className="mt-3 text-[11px] text-white/50">Faltan {o.unlockAt - xp} XP de {o.unlockSkill.replace("_xp","")} para desbloquear.</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
