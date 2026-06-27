@@ -27,7 +27,7 @@ type TabKey = (typeof TABS)[number]["key"];
  * Todos visten remera negra con logo ADN blanco en el pecho.
  */
 type Gender = "boy" | "girl";
-type HairStyle = "short" | "curly" | "long" | "braids" | "cap" | "ponytail" | "buzz" | "bun";
+type HairStyle = "short" | "curly" | "long" | "braids" | "spiky" | "ponytail" | "buzz" | "bun" | "wavy" | "sideswept";
 type AvatarPreset = {
   id: string;
   gender: Gender;
@@ -36,17 +36,19 @@ type AvatarPreset = {
   style: HairStyle;
 };
 
+// 10 nenes/nenas (6-14 años), looks variados y realistas.
+// Solo 1 rapado (b3). Sin gorra. Pelos en tonos naturales.
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  skin: "#f7d4b3", hairColor: "#3a1f0e", style: "short"    },
-  { id: "b2", gender: "boy",  skin: "#e2b08a", hairColor: "#1b1b1b", style: "curly"    },
-  { id: "b3", gender: "boy",  skin: "#b88357", hairColor: "#0a0a0a", style: "buzz"     },
-  { id: "b4", gender: "boy",  skin: "#7e4f2a", hairColor: "#1b1b1b", style: "cap"      },
-  { id: "b5", gender: "boy",  skin: "#f0c8a0", hairColor: "#caa15a", style: "short"    },
-  { id: "g1", gender: "girl", skin: "#f7d4b3", hairColor: "#caa15a", style: "long"     },
-  { id: "g2", gender: "girl", skin: "#e2b08a", hairColor: "#6b3a1d", style: "braids"   },
-  { id: "g3", gender: "girl", skin: "#b88357", hairColor: "#1b1b1b", style: "ponytail" },
-  { id: "g4", gender: "girl", skin: "#7e4f2a", hairColor: "#0a0a0a", style: "bun"      },
-  { id: "g5", gender: "girl", skin: "#f0c8a0", hairColor: "#df00ff", style: "curly"    },
+  { id: "b1", gender: "boy",  skin: "#f7d4b3", hairColor: "#3a1f0e", style: "short"     }, // castaño corto, piel clara
+  { id: "b2", gender: "boy",  skin: "#e2b08a", hairColor: "#1b1b1b", style: "curly"     }, // rulos negros
+  { id: "b3", gender: "boy",  skin: "#b88357", hairColor: "#0a0a0a", style: "buzz"      }, // único rapado
+  { id: "b4", gender: "boy",  skin: "#d9a274", hairColor: "#5a2d10", style: "spiky"     }, // pelo parado castaño
+  { id: "b5", gender: "boy",  skin: "#f0c8a0", hairColor: "#caa15a", style: "sideswept" }, // rubio peinado al costado
+  { id: "g1", gender: "girl", skin: "#f7d4b3", hairColor: "#a86b3a", style: "long"      }, // pelo largo castaño claro
+  { id: "g2", gender: "girl", skin: "#c89373", hairColor: "#2a1608", style: "braids"    }, // trenzas oscuras
+  { id: "g3", gender: "girl", skin: "#b88357", hairColor: "#1b1b1b", style: "ponytail"  }, // colita negra
+  { id: "g4", gender: "girl", skin: "#7e4f2a", hairColor: "#0a0a0a", style: "bun"       }, // rodete negro
+  { id: "g5", gender: "girl", skin: "#f0c8a0", hairColor: "#b8341f", style: "wavy"      }, // pelirroja ondulada
 ];
 
 function StudentDashboard() {
