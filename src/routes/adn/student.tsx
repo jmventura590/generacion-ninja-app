@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Map, Check } from "lucide-react";
-import { BELTS, beltFromXp, OBSTACLES, SKILLS, type SkillKey } from "@/lib/adn-game";
+import { LogOut, User, BarChart3, Album, Check } from "lucide-react";
+import { BELTS, beltFromXp, SKILLS, type SkillKey } from "@/lib/adn-game";
+import AlbumTab from "@/components/AlbumTab";
 
 
 export const Route = createFileRoute("/adn/student")({
