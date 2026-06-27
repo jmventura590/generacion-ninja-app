@@ -204,13 +204,9 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
       {/* arms (behind shirt) */}
       {armPose}
 
-      {/* shirt — BLACK with ADN logo */}
+      {/* shirt — BLACK with ADN logo image stamped on chest */}
       <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#0a0a0a" stroke="#222" strokeWidth="2"/>
-      {/* ADN logo on chest (white) */}
-      <g transform="translate(100 158)">
-        <text textAnchor="middle" fontFamily="Orbitron, sans-serif" fontWeight="900" fontSize="18" fill="#ffffff" letterSpacing="1">ADN</text>
-        <rect x="-18" y="6" width="36" height="2" fill="#ffffff" opacity=".85"/>
-      </g>
+      <image href="/assets/adn-logo.jpg" x="74" y="142" width="52" height="36" preserveAspectRatio="xMidYMid meet" />
 
       {/* neck */}
       <rect x="90" y="108" width="20" height="18" fill={skin}/>
