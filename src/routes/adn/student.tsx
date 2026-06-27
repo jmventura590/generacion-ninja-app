@@ -177,7 +177,7 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
   const { skin, hairColor, style, gender } = preset;
   const armPose = cheering ? (
     <>
-      {/* arms up */}
+      {/* both arms up — victory */}
       <path d="M62 135 L40 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
       <path d="M138 135 L160 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
       <circle cx="40" cy="65" r="8" fill={skin}/>
@@ -185,9 +185,11 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
     </>
   ) : (
     <>
-      {/* arms down */}
-      <path d="M62 135 L48 178" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
-      <path d="M138 135 L152 178" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
+      {/* action pose — one arm grabbing up (climbing), other pulling back */}
+      <path d="M138 132 Q160 100 150 60" stroke={skin} strokeWidth="12" strokeLinecap="round" fill="none"/>
+      <circle cx="150" cy="56" r="9" fill={skin}/>
+      <path d="M62 132 Q40 150 46 178" stroke={skin} strokeWidth="12" strokeLinecap="round" fill="none"/>
+      <circle cx="46" cy="180" r="8" fill={skin}/>
     </>
   );
 
@@ -204,15 +206,24 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
       {/* arms (behind shirt) */}
       {armPose}
 
-      {/* shirt — BLACK with ADN logo image stamped on chest */}
+      {/* shirt — BLACK with white ADN logo */}
       <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#0a0a0a" stroke="#222" strokeWidth="2"/>
-      <image href="/assets/adn-logo.jpg" x="74" y="142" width="52" height="36" preserveAspectRatio="xMidYMid meet" />
+      {/* ADN logo: white ninja silhouette climbing between the letters A · D · N */}
+      <g transform="translate(76 148) scale(0.9)" fill="#ffffff">
+        <text x="0" y="18" fontSize="14" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="1">A</text>
+        <text x="18" y="18" fontSize="14" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="1">D</text>
+        <text x="38" y="18" fontSize="14" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="1">N</text>
+        {/* tiny ninja silhouette over D */}
+        <circle cx="27" cy="6" r="2.3"/>
+        <path d="M25 8 L25 13 L23 16 M29 8 L29 13 L31 16 M27 9 L27 14" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+      </g>
 
       {/* neck */}
       <rect x="90" y="108" width="20" height="18" fill={skin}/>
 
       {/* head */}
       <circle cx="100" cy="80" r="33" fill={skin} stroke="#000" strokeWidth="1.5"/>
+
 
       {/* hair by style */}
       {style === "short"    && <path d="M68 76 Q100 32 132 76 Q126 56 100 52 Q74 56 68 76 Z" fill={hairColor}/>}
