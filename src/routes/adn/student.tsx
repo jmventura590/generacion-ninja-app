@@ -207,9 +207,9 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
       {/* arms (behind shirt) */}
       {armPose}
 
-      {/* shirt — BLACK with real ADN logo image on the chest */}
-      <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#0a0a0a" stroke="#222" strokeWidth="2"/>
-      <image href={adnLogo} x="64" y="138" width="72" height="48" preserveAspectRatio="xMidYMid meet" />
+      {/* shirt — negro liso con "ADN" blanco inline */}
+      <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#000" stroke="#000" strokeWidth="2"/>
+      <text x="100" y="168" textAnchor="middle" fontSize="22" fontWeight="900" fill="#ffffff" letterSpacing="1.5" fontFamily="system-ui, -apple-system, sans-serif">ADN</text>
 
 
       {/* neck */}
@@ -229,12 +229,24 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
         </g>
       )}
       {style === "buzz"     && <path d="M70 78 Q100 56 130 78 Q128 66 100 62 Q72 66 70 78 Z" fill={hairColor} opacity=".85"/>}
-      {style === "cap"      && (
+      {style === "spiky"    && (
+        <g fill={hairColor}>
+          <path d="M68 78 Q100 60 132 78 Q126 62 100 58 Q74 62 68 78 Z"/>
+          <path d="M72 60 L80 78 L86 58 L94 78 L100 54 L106 78 L114 58 L120 78 L128 60 L124 78 L76 78 Z"/>
+        </g>
+      )}
+      {style === "sideswept" && (
         <>
-          <path d="M68 76 Q100 60 132 76 L132 78 L68 78 Z" fill={hairColor}/>
-          <path d="M58 76 Q100 42 142 76 L142 84 L58 84 Z" fill="#df00ff"/>
-          <rect x="58" y="82" width="84" height="6" fill="#0a0a0a"/>
-          <text x="100" y="74" textAnchor="middle" fontSize="9" fontWeight="900" fill="#fff">ADN</text>
+          <path d="M68 78 Q100 38 132 78 Q126 58 100 54 Q74 58 68 78 Z" fill={hairColor}/>
+          <path d="M70 70 Q90 48 132 60 Q120 72 96 74 Q80 76 70 78 Z" fill={hairColor}/>
+        </>
+      )}
+      {style === "wavy"     && (
+        <>
+          <path d="M62 80 Q66 110 74 130 L66 132 Q56 110 58 82 Z" fill={hairColor}/>
+          <path d="M138 80 Q134 110 126 130 L134 132 Q144 110 142 82 Z" fill={hairColor}/>
+          <path d="M65 76 Q100 34 135 76 Q130 54 100 50 Q70 54 65 76 Z" fill={hairColor}/>
+          <path d="M70 80 Q85 92 75 105 Q92 96 88 84 Z" fill={hairColor} opacity=".7"/>
         </>
       )}
       {style === "long"     && (
