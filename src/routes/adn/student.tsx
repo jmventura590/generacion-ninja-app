@@ -116,10 +116,9 @@ function StudentDashboard() {
         {tab === "avatar" && <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} />}
         {tab === "evo"    && <Evolution student={student} skills={skills} belt={belt} />}
         {tab === "map"    && <ObstacleMap skills={skills} />}
-        {tab === "shop"   && <Shop />}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-4 bg-black/95 border-t border-white/10 backdrop-blur">
+      <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-3 bg-black/95 border-t border-white/10 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ key, label, Icon }) => (
           <button key={key} onClick={() => setTab(key)}
             className={`flex flex-col items-center gap-1 py-3 text-[10px] tracking-widest ${tab === key ? "adn-fluor" : "text-white/50"}`}>
