@@ -63,5 +63,5 @@ export const OBSTACLES: {
 }[] = [
   { name: "Muro Curvado",   img: muroImg,      unlockSkill: "jump_xp",    unlockAt: 150, caption: "Corré pared arriba" },
   { name: "Pasamanos",      img: pasamanosImg, unlockSkill: "grip_xp",    unlockAt: 150, caption: "Colgate y avanzá"   },
-  { name: "Puente Colgante",img: puenteImg,    unlockSkill: "agility_xp", unlockAt: 150, caption: "Mantené el equilibrio" },
+  { name: "Puente Colgante",img: puenteImg,    unlockSkill: "balance_xp", unlockAt: 150, caption: "Mantené el equilibrio" },
 ];
