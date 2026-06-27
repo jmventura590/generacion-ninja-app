@@ -224,3 +224,9 @@
 }
 .adn-unlocked { animation: unlock-glow 2.4s ease-in-out infinite; }
 
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(0, 110vh, 0) rotate(720deg); opacity: 0.9; }
+}
+
+
