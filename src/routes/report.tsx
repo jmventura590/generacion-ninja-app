@@ -197,8 +197,8 @@ function ReportPage() {
       {/* Disclaimer */}
       <div className="rounded-xl border border-border/60 bg-background/40 p-4">
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Este reporte traduce la asistencia de tu hijo en capacidades físicas
-          estimuladas. En <span className="font-semibold text-neon">ADN</span> promovemos
+          Este reporte traduce la asistencia de tu hijo en habilidades físicas
+          entrenadas. En <span className="font-semibold text-neon">ADN</span> promovemos
           la salud integral a través del juego y el desafío adaptado.
         </p>
       </div>
