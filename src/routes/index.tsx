@@ -133,7 +133,7 @@ function ObstacleTile({ obstacle, onSelect }: { obstacle: Obstacle; onSelect: ()
           "h-14 w-14 object-contain transition-transform group-hover:scale-110",
           unlocked
             ? "drop-shadow-[0_0_8px_oklch(0.88_0.27_145/55%)]"
-            : "grayscale opacity-60",
+            : "blur-[3px] opacity-50",
         ].join(" ")}
       />
       <span
@@ -189,7 +189,7 @@ function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClo
               alt={name}
               width={512}
               height={512}
-              className={unlocked ? "h-full w-full object-contain" : "h-full w-full object-contain grayscale opacity-60"}
+              className={unlocked ? "h-full w-full object-contain" : "h-full w-full object-contain blur-[4px] opacity-60"}
             />
           </div>
 
