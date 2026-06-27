@@ -347,7 +347,7 @@ function Evolution({ student, skills, belt }: { student: Student; skills: Skills
             <div className="h-3 bg-white/5 rounded-full overflow-hidden">
               <div className="adn-bar-fill" style={{ width: `${belt.pct}%` }} />
             </div>
-            <div className="mt-1 text-[10px] text-white/40">Faltan {belt.next.min - student.total_xp} XP</div>
+            <div className="mt-1 text-[10px] text-white/40">Nivel {belt.level} → {belt.next.label}</div>
           </div>
         )}
       </div>
