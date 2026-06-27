@@ -111,46 +111,47 @@ function ReportPage() {
       {/* Commitment cards */}
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-border/70 bg-surface p-4 shadow-card">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            <Sparkles className="h-3 w-3 text-neon" />
+          <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
+            <Sparkles className="h-4 w-4 text-neon" />
             Asistencia
           </div>
           <div className="mt-2 font-display text-2xl font-black text-foreground">
             {data.attended}<span className="text-muted-foreground/70">/{data.total}</span>
           </div>
-          <div className="text-[11px] text-muted-foreground">Clases asistidas</div>
+          <div className="text-sm text-muted-foreground">Clases asistidas</div>
           {perfect && (
-            <div className="mt-2 inline-flex rounded-full bg-gradient-neon px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-neon">
+            <div className="mt-2 inline-flex rounded-full bg-gradient-neon px-2.5 py-1 text-xs font-bold text-primary-foreground shadow-neon">
               ¡Perfecta! 🌟
             </div>
           )}
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-surface p-4 shadow-card">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            <Clock className="h-3 w-3 text-electric" />
+          <div className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground">
+            <Clock className="h-4 w-4 text-electric" />
             Movimiento
           </div>
           <div className="mt-2 font-display text-2xl font-black text-electric">
-            {data.minutes}<span className="ml-1 text-xs text-muted-foreground/70">min</span>
+            {data.minutes}<span className="ml-1 text-sm text-muted-foreground/70">min</span>
           </div>
-          <div className="text-[11px] text-muted-foreground">de desarrollo motor</div>
+          <div className="text-sm text-muted-foreground">de desarrollo motor</div>
         </div>
       </div>
 
       {/* Radar chart card */}
       <div className="rounded-2xl border border-border/70 bg-surface p-4 shadow-card">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-sm font-bold uppercase tracking-widest text-foreground">
-            Capacidades <span className="text-neon">Estimuladas</span>
+          <h2 className="font-display text-base font-bold text-foreground">
+            Capacidades <span className="text-neon">estimuladas</span>
           </h2>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="text-sm font-semibold text-muted-foreground">
             7 ejes
           </span>
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Basado en obstáculos practicados este mes.
         </p>
+
 
         <div className="mt-2 h-[320px] w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -187,7 +188,7 @@ function ReportPage() {
         <div className="mt-2 grid grid-cols-7 gap-1">
           {SKILLS.map((s, i) => (
             <div key={s} className="text-center">
-              <div className="text-[10px] font-bold text-neon">{data.radar[i].value}</div>
+              <div className="text-sm font-bold text-neon">{data.radar[i].value}</div>
             </div>
           ))}
         </div>
@@ -195,7 +196,7 @@ function ReportPage() {
 
       {/* Disclaimer */}
       <div className="rounded-xl border border-border/60 bg-background/40 p-4">
-        <p className="text-[11px] leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Este reporte traduce la asistencia de tu hijo en capacidades físicas
           estimuladas. En <span className="font-semibold text-neon">ADN</span> promovemos
           la salud integral a través del juego y el desafío adaptado.

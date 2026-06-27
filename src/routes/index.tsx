@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Lock, Check, X } from "lucide-react";
+import { Lock, Check, X, Sparkles } from "lucide-react";
 import pasamanos from "@/assets/obstacles/pasamanos.png";
 import arana from "@/assets/obstacles/arana.png";
 import muro from "@/assets/obstacles/muro.png";
@@ -9,15 +9,15 @@ import tronco from "@/assets/obstacles/tronco.png";
 import escalera from "@/assets/obstacles/escalera.png";
 import escalones from "@/assets/obstacles/escalones.png";
 import pegboard from "@/assets/obstacles/pegboard.png";
-
 import pelotas from "@/assets/obstacles/pelotas.png";
+import { UnlockCelebration } from "@/components/UnlockCelebration";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Mi Camino Ninja — ADN Generación Ninja" },
+      { title: "Mi camino ninja — ADN Generación Ninja" },
       { name: "description", content: "Progreso de asistencia del Ninja Benjamín, obstáculos desbloqueados y próximas metas." },
-      { property: "og:title", content: "Mi Camino Ninja — ADN Generación Ninja" },
+      { property: "og:title", content: "Mi camino ninja — ADN Generación Ninja" },
       { property: "og:description", content: "Seguí la asistencia, desbloqueá obstáculos y reclamá tus pines." },
     ],
   }),
@@ -31,22 +31,31 @@ type Obstacle = {
   times?: number;
 };
 
-const OBSTACLES: Obstacle[] = [
+const INITIAL_OBSTACLES: Obstacle[] = [
   { name: "Pasamanos", image: pasamanos, unlocked: true, times: 10 },
-  { name: "Salto de la Araña", image: arana, unlocked: true, times: 10 },
-  { name: "Muro Curvado", image: muro, unlocked: true, times: 10 },
+  { name: "Salto de la araña", image: arana, unlocked: true, times: 10 },
+  { name: "Muro curvado", image: muro, unlocked: true, times: 10 },
   { name: "Palestra", image: palestra, unlocked: true, times: 10 },
-  { name: "Tronco Giratorio", image: tronco, unlocked: false },
-  { name: "Escalera Invertida", image: escalera, unlocked: false },
-  { name: "5 Escalones", image: escalones, unlocked: false },
+  { name: "Tronco giratorio", image: tronco, unlocked: false },
+  { name: "Escalera invertida", image: escalera, unlocked: false },
+  { name: "5 escalones", image: escalones, unlocked: false },
   { name: "Pegboard", image: pegboard, unlocked: false },
-  
-  { name: "Pelotas Colgantes", image: pelotas, unlocked: false },
+  { name: "Pelotas colgantes", image: pelotas, unlocked: false },
 ];
 
 function CaminoNinja() {
+  const [obstacles, setObstacles] = useState<Obstacle[]>(INITIAL_OBSTACLES);
   const [selected, setSelected] = useState<Obstacle | null>(null);
+  const [celebrating, setCelebrating] = useState<string | null>(null);
   const progress = 65;
+
+  function unlockNow(name: string) {
+    setObstacles((list) =>
+      list.map((o) => (o.name === name ? { ...o, unlocked: true, times: 10 } : o)),
+    );
+    setSelected(null);
+    setCelebrating(name);
+  }
 
   return (
     <div className="px-5 pt-5">
@@ -60,11 +69,11 @@ function CaminoNinja() {
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Ninja</p>
+          <p className="text-sm font-semibold tracking-wide text-muted-foreground">Ninja</p>
           <h2 className="truncate text-2xl font-black text-foreground">Ninja Benjamín</h2>
-          <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.7_0.2_145/40%)] bg-[oklch(0.7_0.2_145/12%)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-neon">
+          <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[oklch(0.7_0.2_145/40%)] bg-[oklch(0.7_0.2_145/12%)] px-3 py-1 text-sm font-semibold text-neon">
             <span className="h-1.5 w-1.5 rounded-full bg-neon" />
-            Muñequera Verde 🟢
+            Muñequera verde 🟢
           </div>
         </div>
       </section>
@@ -72,8 +81,8 @@ function CaminoNinja() {
       {/* Progreso */}
       <section className="mt-7 rounded-2xl border border-border/70 bg-surface p-5 shadow-card">
         <div className="flex items-baseline justify-between">
-          <p className="text-sm font-semibold text-foreground">
-            Progreso hacia <span className="text-electric">Muñequera Azul</span>
+          <p className="text-base font-semibold text-foreground">
+            Progreso hacia <span className="text-electric">muñequera azul</span>
           </p>
           <p className="font-display text-lg font-black text-neon">{progress}%</p>
         </div>
@@ -83,30 +92,39 @@ function CaminoNinja() {
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-3 text-xs italic text-muted-foreground">
-          (Faltan 7 asistencias para la próxima meta)
+        <p className="mt-3 text-sm italic text-muted-foreground">
+          Faltan 7 asistencias para la próxima meta
         </p>
       </section>
 
       {/* Medallas */}
       <section className="mt-7">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-base font-bold uppercase tracking-wider text-foreground">
-            Medallas de Obstáculos
+          <h3 className="font-display text-lg font-bold text-foreground">
+            Medallas de obstáculos
           </h3>
-          <span className="text-xs text-muted-foreground">
-            {OBSTACLES.filter(o => o.unlocked).length} / {OBSTACLES.length}
+          <span className="text-sm font-semibold text-muted-foreground">
+            {obstacles.filter((o) => o.unlocked).length} / {obstacles.length}
           </span>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
-          {OBSTACLES.map((o) => (
+          {obstacles.map((o) => (
             <ObstacleTile key={o.name} obstacle={o} onSelect={() => setSelected(o)} />
           ))}
         </div>
       </section>
 
-      <ObstacleModal obstacle={selected} onClose={() => setSelected(null)} />
+      <ObstacleModal
+        obstacle={selected}
+        onClose={() => setSelected(null)}
+        onUnlock={unlockNow}
+      />
+
+      <UnlockCelebration
+        obstacleName={celebrating}
+        onClose={() => setCelebrating(null)}
+      />
     </div>
   );
 }
@@ -138,7 +156,7 @@ function ObstacleTile({ obstacle, onSelect }: { obstacle: Obstacle; onSelect: ()
       />
       <span
         className={[
-          "line-clamp-2 text-[10.5px] font-semibold uppercase tracking-wide leading-tight",
+          "line-clamp-2 text-xs font-semibold leading-tight",
           unlocked ? "text-foreground" : "text-muted-foreground",
         ].join(" ")}
       >
@@ -156,7 +174,15 @@ function ObstacleTile({ obstacle, onSelect }: { obstacle: Obstacle; onSelect: ()
   );
 }
 
-function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClose: () => void }) {
+function ObstacleModal({
+  obstacle,
+  onClose,
+  onUnlock,
+}: {
+  obstacle: Obstacle | null;
+  onClose: () => void;
+  onUnlock: (name: string) => void;
+}) {
   if (!obstacle) return null;
   const { image, name, unlocked, times } = obstacle;
 
@@ -193,31 +219,38 @@ function ObstacleModal({ obstacle, onClose }: { obstacle: Obstacle | null; onClo
             />
           </div>
 
-          <h3 className="mt-4 font-display text-xl font-black uppercase tracking-wide">
+          <h3 className="mt-4 font-display text-xl font-black tracking-wide">
             {name}
           </h3>
 
           {unlocked ? (
             <>
-              <p className="mt-4 text-sm leading-relaxed text-foreground/90">
+              <p className="mt-4 text-base leading-relaxed text-foreground/90">
                 ¡Practicado <span className="font-bold text-neon">{times} veces!</span> Ya podés
                 reclamar tu Pin físico en la recepción.
               </p>
               <button
                 onClick={onClose}
-                className="mt-6 w-full rounded-xl bg-gradient-neon py-3 font-display text-sm font-bold uppercase tracking-widest text-primary-foreground shadow-neon transition active:scale-[0.98]"
+                className="mt-6 w-full rounded-xl bg-gradient-neon py-3 font-display text-base font-bold text-primary-foreground shadow-neon transition active:scale-[0.98]"
               >
                 Reclamar Pin
               </button>
             </>
           ) : (
             <>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
                 ¡Seguí viniendo a las clases para desbloquear este obstáculo!
               </p>
               <button
+                onClick={() => onUnlock(name)}
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-neon py-3 font-display text-base font-bold text-primary-foreground shadow-neon transition active:scale-[0.98]"
+              >
+                <Sparkles className="h-4 w-4" />
+                Marcar como ganado
+              </button>
+              <button
                 onClick={onClose}
-                className="mt-6 w-full rounded-xl border border-border bg-[oklch(0.25_0.012_260)] py-3 font-display text-sm font-bold uppercase tracking-widest text-foreground transition hover:bg-[oklch(0.28_0.012_260)] active:scale-[0.98]"
+                className="mt-2 w-full rounded-xl border border-border bg-[oklch(0.25_0.012_260)] py-3 font-display text-base font-bold text-foreground transition hover:bg-[oklch(0.28_0.012_260)] active:scale-[0.98]"
               >
                 Entendido
               </button>
