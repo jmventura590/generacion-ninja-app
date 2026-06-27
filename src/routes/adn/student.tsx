@@ -160,7 +160,7 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
   return (
     <div className="space-y-5">
       <div className="adn-card p-5 flex flex-col items-center">
-        <AvatarSVG preset={selected} size={180} cheering={false} />
+        <AvatarImage preset={selected} size={220} />
         <p className="mt-3 text-xs text-white/50 text-center">Remera negra oficial ADN — elegí tu personaje favorito.</p>
       </div>
       <div className="adn-card p-5">
