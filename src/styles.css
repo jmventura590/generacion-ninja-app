@@ -229,4 +229,14 @@
   100% { transform: translate3d(0, 110vh, 0) rotate(720deg); opacity: 0.9; }
 }
 
+/* Álbum Ninja — gold rarity treatment */
+.card-gold {
+  filter: sepia(0.55) saturate(2.2) hue-rotate(-12deg) brightness(1.08) contrast(1.05);
+  box-shadow: inset 0 0 24px rgba(250, 204, 21, 0.45);
+  animation: gold-shimmer 2.6s ease-in-out infinite;
+}
+@keyframes gold-shimmer {
+  0%, 100% { filter: sepia(0.55) saturate(2.2) hue-rotate(-12deg) brightness(1.05) contrast(1.05); }
+  50%      { filter: sepia(0.65) saturate(2.6) hue-rotate(-12deg) brightness(1.18) contrast(1.08); }
+}
 
