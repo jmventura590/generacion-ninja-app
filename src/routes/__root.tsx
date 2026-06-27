@@ -86,10 +86,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdn = pathname.startsWith("/adn");
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell />
-      {/* Outlet is rendered inside AppShell */}
+      {isAdn ? <Outlet /> : <AppShell />}
       <noscript><Outlet /></noscript>
     </QueryClientProvider>
   );
