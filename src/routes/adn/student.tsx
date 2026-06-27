@@ -353,7 +353,7 @@ function Evolution({ student, skills, belt }: { student: Student; skills: Skills
       </div>
 
       <div className="adn-card p-5">
-        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">CAPACIDADES</div>
+        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">HABILIDADES</div>
         <div className="space-y-3">
           {SKILLS.map(({ key, label }) => {
             const v = skills[key] ?? 0;
