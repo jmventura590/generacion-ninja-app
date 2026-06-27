@@ -195,6 +195,24 @@ export type Database = {
         }
         Relationships: []
       }
+      system_heartbeat: {
+        Row: {
+          beat_at: string
+          id: number
+          note: string | null
+        }
+        Insert: {
+          beat_at?: string
+          id?: number
+          note?: string | null
+        }
+        Update: {
+          beat_at?: string
+          id?: number
+          note?: string | null
+        }
+        Relationships: []
+      }
       unlocked_items: {
         Row: {
           id: string
@@ -254,6 +272,7 @@ export type Database = {
     }
     Functions: {
       belt_for_xp: { Args: { _xp: number }; Returns: string }
+      record_system_heartbeat: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "coach" | "student_parent"

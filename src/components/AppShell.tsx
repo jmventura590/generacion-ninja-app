@@ -8,8 +8,8 @@ export function AppShell() {
         <header className="sticky top-0 z-20 border-b border-border/60 bg-background/85 px-5 py-4 backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <div className="h-2.5 w-2.5 rounded-full bg-neon shadow-neon animate-pulse-neon" />
-            <h1 className="text-sm font-bold tracking-[0.28em] text-foreground/90">
-              ADN <span className="text-neon">GENERACIÓN</span> NINJA
+            <h1 className="font-display text-base font-bold tracking-wide text-foreground/90">
+              ADN <span className="text-neon">Generación</span> Ninja
             </h1>
           </div>
         </header>
@@ -42,7 +42,7 @@ function NavItem({
     <Link
       to={to}
       activeOptions={{ exact: true }}
-      className="group flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition-all hover:text-foreground data-[status=active]:bg-gradient-neon data-[status=active]:text-primary-foreground data-[status=active]:shadow-neon"
+      className="group flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted-foreground transition-all hover:text-foreground data-[status=active]:bg-gradient-neon data-[status=active]:text-primary-foreground data-[status=active]:shadow-neon"
     >
       <Icon className="h-5 w-5" />
       <span>{label}</span>
