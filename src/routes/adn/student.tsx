@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Map, Check } from "lucide-react";
-import { BELTS, beltFromXp, OBSTACLES, SKILLS, type SkillKey } from "@/lib/adn-game";
+import { LogOut, User, BarChart3, Album, Check } from "lucide-react";
+import { BELTS, beltFromXp, SKILLS, type SkillKey } from "@/lib/adn-game";
+import AlbumTab from "@/components/AlbumTab";
 
 
 export const Route = createFileRoute("/adn/student")({
@@ -15,9 +16,9 @@ type Student = { id: string; student_name: string; age: number | null; total_xp:
 type Skills = Record<SkillKey, number>;
 
 const TABS = [
-  { key: "avatar", label: "Avatar",   Icon: User },
-  { key: "evo",    label: "Evolución",Icon: BarChart3 },
-  { key: "map",    label: "Mapa",     Icon: Map },
+  { key: "avatar", label: "Avatar",    Icon: User },
+  { key: "evo",    label: "Evolución", Icon: BarChart3 },
+  { key: "album",  label: "Álbum",     Icon: Album },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
@@ -129,7 +130,7 @@ function StudentDashboard() {
       <main className="px-5 mt-4">
         {tab === "avatar" && <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} />}
         {tab === "evo"    && <Evolution student={student} skills={skills} belt={belt} />}
-        {tab === "map"    && <ObstacleMap skills={skills} />}
+        {tab === "album"  && <AlbumTab studentId={student.id} />}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-3 bg-black/95 border-t border-white/10 backdrop-blur pb-[env(safe-area-inset-bottom)]">
@@ -298,39 +299,4 @@ function Evolution({ student, skills, belt }: { student: Student; skills: Skills
   );
 }
 
-/* ─── Obstacle Map ─────────────────────────── */
-function ObstacleMap({ skills }: { skills: Skills }) {
-  return (
-    <div className="space-y-4">
-      <div className="text-[10px] tracking-[0.3em] text-white/50 px-1">MAPA DE OBSTÁCULOS</div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {OBSTACLES.map((o) => {
-          const xp = skills[o.unlockSkill] ?? 0;
-          const unlocked = xp >= o.unlockAt;
-          const pct = Math.min(100, (xp / o.unlockAt) * 100);
-          return (
-            <div key={o.name} className={`adn-card p-4 ${unlocked ? "adn-unlocked" : ""}`}>
-              <div className="aspect-square w-full overflow-hidden rounded-xl bg-black/60">
-                <img src={o.img} alt={o.name} loading="lazy" width={768} height={768}
-                  className={`w-full h-full object-contain ${unlocked ? "" : "adn-locked"}`} />
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="font-black">{o.name}</div>
-                <div className={`text-[10px] font-bold ${unlocked ? "adn-fluor" : "text-white/40"}`}>{unlocked ? "DESTRABADO" : "BLOQUEADO"}</div>
-              </div>
-              <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className="adn-bar-fill" style={{ width: `${pct}%` }} />
-              </div>
-              {unlocked ? (
-                <button className="adn-btn-primary w-full mt-3 py-2.5 text-[11px]">¡Obstáculo Destrabado! Pedí tu Pin real en el mostrador</button>
-              ) : (
-                <p className="mt-3 text-[11px] text-white/50">Faltan {o.unlockAt - xp} XP de {o.unlockSkill.replace("_xp","")} para desbloquear.</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
