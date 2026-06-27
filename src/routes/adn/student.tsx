@@ -130,7 +130,7 @@ function StudentDashboard() {
       <main className="px-5 mt-4">
         {tab === "avatar" && <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} />}
         {tab === "evo"    && <Evolution student={student} skills={skills} belt={belt} />}
-        {tab === "map"    && <ObstacleMap skills={skills} />}
+        {tab === "album"  && <AlbumTab studentId={student.id} />}
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-3 bg-black/95 border-t border-white/10 backdrop-blur pb-[env(safe-area-inset-bottom)]">
