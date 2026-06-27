@@ -186,132 +186,44 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
   );
 }
 
-/* ─── Avatar SVG ─────────────────────────── */
-function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPreset; size?: number; cheering?: boolean }) {
-  const { skin, hairColor, style, gender } = preset;
-  const armPose = cheering ? (
-    <>
-      {/* both arms up — victory */}
-      <path d="M62 135 L40 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
-      <path d="M138 135 L160 70" stroke={skin} strokeWidth="12" strokeLinecap="round"/>
-      <circle cx="40" cy="65" r="8" fill={skin}/>
-      <circle cx="160" cy="65" r="8" fill={skin}/>
-    </>
-  ) : (
-    <>
-      {/* action pose — one arm grabbing up (climbing), other pulling back */}
-      <path d="M138 132 Q160 100 150 60" stroke={skin} strokeWidth="12" strokeLinecap="round" fill="none"/>
-      <circle cx="150" cy="56" r="9" fill={skin}/>
-      <path d="M62 132 Q40 150 46 178" stroke={skin} strokeWidth="12" strokeLinecap="round" fill="none"/>
-      <circle cx="46" cy="180" r="8" fill={skin}/>
-    </>
-  );
-
+/* ─── Avatar Image (PNG ilustración + logo ADN real superpuesto) ─── */
+function AvatarImage({ preset, size = 120 }: { preset: AvatarPreset; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 200 200" aria-label={`avatar ${preset.id}`}>
-      <defs>
-        <radialGradient id={`bgG-${preset.id}`}>
-          <stop offset="0%"   stopColor="#39ff14" stopOpacity=".28"/>
-          <stop offset="100%" stopColor="#000"    stopOpacity="0"/>
-        </radialGradient>
-      </defs>
-      <circle cx="100" cy="100" r="98" fill={`url(#bgG-${preset.id})`} />
-
-      {/* arms (behind shirt) */}
-      {armPose}
-
-      {/* shirt — negro liso con "ADN" blanco inline */}
-      <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#000" stroke="#000" strokeWidth="2"/>
-      <text x="100" y="168" textAnchor="middle" fontSize="22" fontWeight="900" fill="#ffffff" letterSpacing="1.5" fontFamily="system-ui, -apple-system, sans-serif">ADN</text>
-
-
-      {/* neck */}
-      <rect x="90" y="108" width="20" height="18" fill={skin}/>
-
-      {/* head */}
-      <circle cx="100" cy="80" r="33" fill={skin} stroke="#000" strokeWidth="1.5"/>
-
-
-      {/* hair by style */}
-      {style === "short"    && <path d="M68 76 Q100 32 132 76 Q126 56 100 52 Q74 56 68 76 Z" fill={hairColor}/>}
-      {style === "curly"    && (
-        <g fill={hairColor}>
-          <circle cx="75"  cy="60" r="11"/><circle cx="90"  cy="50" r="12"/>
-          <circle cx="105" cy="48" r="12"/><circle cx="120" cy="52" r="11"/>
-          <circle cx="128" cy="65" r="10"/><circle cx="70"  cy="72" r="9"/>
-        </g>
-      )}
-      {style === "buzz"     && <path d="M70 78 Q100 56 130 78 Q128 66 100 62 Q72 66 70 78 Z" fill={hairColor} opacity=".85"/>}
-      {style === "spiky"    && (
-        <g fill={hairColor}>
-          <path d="M68 78 Q100 60 132 78 Q126 62 100 58 Q74 62 68 78 Z"/>
-          <path d="M72 60 L80 78 L86 58 L94 78 L100 54 L106 78 L114 58 L120 78 L128 60 L124 78 L76 78 Z"/>
-        </g>
-      )}
-      {style === "sideswept" && (
-        <>
-          <path d="M68 78 Q100 38 132 78 Q126 58 100 54 Q74 58 68 78 Z" fill={hairColor}/>
-          <path d="M70 70 Q90 48 132 60 Q120 72 96 74 Q80 76 70 78 Z" fill={hairColor}/>
-        </>
-      )}
-      {style === "wavy"     && (
-        <>
-          <path d="M62 80 Q66 110 74 130 L66 132 Q56 110 58 82 Z" fill={hairColor}/>
-          <path d="M138 80 Q134 110 126 130 L134 132 Q144 110 142 82 Z" fill={hairColor}/>
-          <path d="M65 76 Q100 34 135 76 Q130 54 100 50 Q70 54 65 76 Z" fill={hairColor}/>
-          <path d="M70 80 Q85 92 75 105 Q92 96 88 84 Z" fill={hairColor} opacity=".7"/>
-        </>
-      )}
-      {style === "long"     && (
-        <>
-          <path d="M62 78 Q70 130 78 150 L70 152 Q56 120 60 80 Z" fill={hairColor}/>
-          <path d="M138 78 Q130 130 122 150 L130 152 Q144 120 140 80 Z" fill={hairColor}/>
-          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
-        </>
-      )}
-      {style === "braids"   && (
-        <>
-          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
-          <g fill={hairColor}>
-            <ellipse cx="62" cy="100" rx="8" ry="14"/>
-            <ellipse cx="62" cy="125" rx="7" ry="12"/>
-            <ellipse cx="138" cy="100" rx="8" ry="14"/>
-            <ellipse cx="138" cy="125" rx="7" ry="12"/>
-          </g>
-          <circle cx="62" cy="140" r="4" fill="#df00ff"/>
-          <circle cx="138" cy="140" r="4" fill="#df00ff"/>
-        </>
-      )}
-      {style === "ponytail" && (
-        <>
-          <path d="M65 72 Q100 30 135 72 Q130 50 100 48 Q70 50 65 72 Z" fill={hairColor}/>
-          <path d="M135 80 Q170 100 162 140 Q155 120 145 110 Z" fill={hairColor}/>
-        </>
-      )}
-      {style === "bun"      && (
-        <>
-          <path d="M68 78 Q100 38 132 78 Q126 58 100 54 Q74 58 68 78 Z" fill={hairColor}/>
-          <circle cx="100" cy="42" r="14" fill={hairColor}/>
-          <circle cx="100" cy="42" r="14" fill="none" stroke="#000" strokeOpacity=".2" strokeWidth="1"/>
-        </>
-      )}
-
-      {/* eyes */}
-      <circle cx="88"  cy="86" r="3" fill="#0a0a0d"/>
-      <circle cx="112" cy="86" r="3" fill="#0a0a0d"/>
-      {/* smile */}
-      <path d={cheering ? "M86 96 Q100 112 114 96" : "M88 98 Q100 106 112 98"} stroke="#0a0a0d" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-
-      {/* girl earrings hint */}
-      {gender === "girl" && (
-        <>
-          <circle cx="67" cy="92" r="2" fill="#df00ff"/>
-          <circle cx="133" cy="92" r="2" fill="#df00ff"/>
-        </>
-      )}
-    </svg>
+    <div
+      className="relative mx-auto select-none"
+      style={{ width: size, height: size }}
+      aria-label={`avatar ${preset.id}`}
+    >
+      <img
+        src={preset.img}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        draggable={false}
+        className="absolute inset-0 w-full h-full object-contain"
+      />
+      {/* Logo ADN real (silueta blanca sobre fondo negro) — screen blend
+          deja sólo la silueta blanca visible sobre la remera negra. */}
+      <img
+        src={ADN_LOGO_URL}
+        alt=""
+        draggable={false}
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: preset.chest.top,
+          left: preset.chest.left,
+          width: preset.chest.width,
+          transform: "translate(-50%, -50%)",
+          mixBlendMode: "screen",
+          pointerEvents: "none",
+        }}
+      />
+    </div>
   );
 }
+
 
 /* ─── Level Up Celebration ─────────────────── */
 function LevelUpCelebration({ preset, beltLabel, onClose }: { preset: AvatarPreset; beltLabel: string; onClose: () => void }) {
