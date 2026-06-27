@@ -9,7 +9,7 @@ import tronco from "@/assets/obstacles/tronco.png";
 import escalera from "@/assets/obstacles/escalera.png";
 import escalones from "@/assets/obstacles/escalones.png";
 import pegboard from "@/assets/obstacles/pegboard.png";
-import anillas from "@/assets/obstacles/anillas.png";
+
 import pelotas from "@/assets/obstacles/pelotas.png";
 
 export const Route = createFileRoute("/")({
@@ -40,7 +40,7 @@ const OBSTACLES: Obstacle[] = [
   { name: "Escalera Invertida", image: escalera, unlocked: false },
   { name: "5 Escalones", image: escalones, unlocked: false },
   { name: "Pegboard", image: pegboard, unlocked: false },
-  { name: "Escalar con Anillas", image: anillas, unlocked: false },
+  
   { name: "Pelotas Colgantes", image: pelotas, unlocked: false },
 ];
 
