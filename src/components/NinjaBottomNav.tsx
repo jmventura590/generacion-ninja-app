@@ -1,6 +1,6 @@
 import React from "react";
 
-export type NinjaNavTab = "avatar" | "evolucion" | "mapa" | "shop" | "reporte";
+export type NinjaNavTab = "avatar" | "evolucion" | "mapa" | "reporte";
 
 interface NinjaBottomNavProps {
   activeTab: NinjaNavTab;
@@ -33,13 +33,6 @@ const MapaIcon: React.FC<{ active: boolean }> = ({ active }) => (
   </svg>
 );
 
-const ShopIcon: React.FC<{ active: boolean }> = ({ active }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-    <path d="M4 8h16l-1.2 11.2a1 1 0 0 1-1 .8H6.2a1 1 0 0 1-1-.8L4 8z" stroke={active ? "#39FF14" : "#6B7280"} strokeWidth="1.8" strokeLinejoin="round" />
-    <path d="M8 8V6a4 4 0 1 1 8 0v2" stroke={active ? "#39FF14" : "#6B7280"} strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
 const ReporteIcon: React.FC<{ active: boolean }> = ({ active }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="8" stroke={active ? "#39FF14" : "#6B7280"} strokeWidth="1.8" />
@@ -51,7 +44,6 @@ const NAV_ITEMS: NavItem[] = [
   { key: "avatar", label: "Avatar", icon: AvatarIcon },
   { key: "evolucion", label: "Evolución", icon: EvolucionIcon },
   { key: "mapa", label: "Mapa", icon: MapaIcon },
-  { key: "shop", label: "Shop", icon: ShopIcon },
   { key: "reporte", label: "Reporte", icon: ReporteIcon },
 ];
 
