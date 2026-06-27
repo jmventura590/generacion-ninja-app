@@ -16,9 +16,9 @@ type Student = { id: string; student_name: string; age: number | null; total_xp:
 type Skills = Record<SkillKey, number>;
 
 const TABS = [
-  { key: "avatar", label: "Avatar",   Icon: User },
-  { key: "evo",    label: "Evolución",Icon: BarChart3 },
-  { key: "map",    label: "Mapa",     Icon: Map },
+  { key: "avatar", label: "Avatar",    Icon: User },
+  { key: "evo",    label: "Evolución", Icon: BarChart3 },
+  { key: "album",  label: "Álbum",     Icon: Album },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
