@@ -142,7 +142,7 @@ function ReportPage() {
       <div className="rounded-2xl border border-border/70 bg-surface p-4 shadow-card">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-base font-bold text-foreground">
-            Capacidades <span className="text-neon">estimuladas</span>
+            Habilidades <span className="text-neon">entrenadas</span>
           </h2>
           <span className="text-sm font-semibold text-muted-foreground">
             7 ejes
@@ -197,8 +197,8 @@ function ReportPage() {
       {/* Disclaimer */}
       <div className="rounded-xl border border-border/60 bg-background/40 p-4">
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Este reporte traduce la asistencia de tu hijo en capacidades físicas
-          estimuladas. En <span className="font-semibold text-neon">ADN</span> promovemos
+          Este reporte traduce la asistencia de tu hijo en habilidades físicas
+          entrenadas. En <span className="font-semibold text-neon">ADN</span> promovemos
           la salud integral a través del juego y el desafío adaptado.
         </p>
       </div>
