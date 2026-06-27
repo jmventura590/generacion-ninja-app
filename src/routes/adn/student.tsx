@@ -105,7 +105,7 @@ function StudentDashboard() {
     if (!student) return;
     const preset = AVATAR_PRESETS.find((p) => p.id === id)!;
     await supabase.from("avatars").upsert(
-      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: preset.skin, hair_color: preset.hairColor },
+      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: "#000", hair_color: "#000" },
       { onConflict: "student_id" },
     );
   }
