@@ -171,7 +171,7 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
             return (
               <button key={p.id} onClick={() => onSelect(p.id)}
                 className={`relative aspect-square rounded-xl border-2 p-1 transition ${active ? "border-[var(--adn-fluor)] bg-[#39ff14]/10" : "border-white/10 bg-black/40 hover:border-white/30"}`}>
-                <AvatarSVG preset={p} size={64} cheering={false} />
+                <AvatarImage preset={p} size={72} />
                 {active && (
                   <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[var(--adn-fluor)] text-black grid place-items-center shadow-[0_0_12px_#39ff14]">
                     <Check size={12} strokeWidth={3}/>
