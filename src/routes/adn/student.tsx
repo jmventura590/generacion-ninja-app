@@ -37,31 +37,30 @@ import avG3 from "@/assets/avatars/g3.png";
 import avG4 from "@/assets/avatars/g4.png";
 import avG5 from "@/assets/avatars/g5.png";
 
-const ADN_LOGO_URL = "/assets/adn-logo.jpg";
-
 type Gender = "boy" | "girl";
 type AvatarPreset = {
   id: string;
   gender: Gender;
   img: string;
   label: string;
-  // chest position (% of avatar box) for the printed ADN logo overlay
-  chest: { top: string; left: string; width: string };
 };
 
-// 10 personajes únicos: piel/pelo/ojos naturales, pose distinta cada uno.
+// 10 personajes únicos: el logo ADN ya está estampado en la remera de cada PNG
+// con la profundidad correcta (los brazos/pelo que pasan delante del torso
+// tapan el logo igual que taparían la tela real).
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  img: avB1, label: "Saludo",       chest: { top: "48%", left: "50%", width: "18%" } },
-  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba",chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados",chest: { top: "56%", left: "50%", width: "13%" } },
-  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump",    chest: { top: "48%", left: "45%", width: "18%" } },
-  { id: "b5", gender: "boy",  img: avB5, label: "Confiado",     chest: { top: "44%", left: "50%", width: "18%" } },
-  { id: "g1", gender: "girl", img: avG1, label: "Peace",        chest: { top: "46%", left: "48%", width: "18%" } },
-  { id: "g2", gender: "girl", img: avG2, label: "OK",           chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "g3", gender: "girl", img: avG3, label: "Salto en V",   chest: { top: "44%", left: "45%", width: "18%" } },
-  { id: "g4", gender: "girl", img: avG4, label: "Trenzas",      chest: { top: "42%", left: "48%", width: "18%" } },
-  { id: "g5", gender: "girl", img: avG5, label: "Festejo",      chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "b1", gender: "boy",  img: avB1, label: "Saludo" },
+  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba" },
+  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados" },
+  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump" },
+  { id: "b5", gender: "boy",  img: avB5, label: "Confiado" },
+  { id: "g1", gender: "girl", img: avG1, label: "Peace" },
+  { id: "g2", gender: "girl", img: avG2, label: "OK" },
+  { id: "g3", gender: "girl", img: avG3, label: "Salto en V" },
+  { id: "g4", gender: "girl", img: avG4, label: "Trenzas" },
+  { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
 ];
+
 
 
 function StudentDashboard() {
@@ -186,7 +185,7 @@ function AvatarStudio({ selectedId, onSelect }: { selectedId: string; onSelect: 
   );
 }
 
-/* ─── Avatar Image (PNG ilustración + logo ADN real superpuesto) ─── */
+/* ─── Avatar Image (PNG con logo ADN ya estampado) ─── */
 function AvatarImage({ preset, size = 120 }: { preset: AvatarPreset; size?: number }) {
   return (
     <div
@@ -203,26 +202,10 @@ function AvatarImage({ preset, size = 120 }: { preset: AvatarPreset; size?: numb
         draggable={false}
         className="absolute inset-0 w-full h-full object-contain"
       />
-      {/* Logo ADN real (silueta blanca sobre fondo negro) — screen blend
-          deja sólo la silueta blanca visible sobre la remera negra. */}
-      <img
-        src={ADN_LOGO_URL}
-        alt=""
-        draggable={false}
-        aria-hidden
-        style={{
-          position: "absolute",
-          top: preset.chest.top,
-          left: preset.chest.left,
-          width: preset.chest.width,
-          transform: "translate(-50%, -50%)",
-          mixBlendMode: "screen",
-          pointerEvents: "none",
-        }}
-      />
     </div>
   );
 }
+
 
 
 /* ─── Level Up Celebration ─────────────────── */
