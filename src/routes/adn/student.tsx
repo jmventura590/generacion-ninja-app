@@ -250,7 +250,7 @@ function LevelUpCelebration({ preset, beltLabel, onClose }: { preset: AvatarPres
              style={{ background: "radial-gradient(circle, #39ff14 0%, #df00ff 60%, transparent 75%)" }} />
         {/* Bouncing avatar */}
         <div className="relative animate-bounce">
-          <AvatarSVG preset={preset} size={240} cheering />
+          <AvatarImage preset={preset} size={240} />
         </div>
       </div>
 
