@@ -132,26 +132,32 @@ export type Database = {
       }
       skill_bars: {
         Row: {
-          agility_xp: number
+          balance_xp: number
           coordination_xp: number
           grip_xp: number
           jump_xp: number
+          resistance_xp: number
+          speed_xp: number
           strength_xp: number
           student_id: string
         }
         Insert: {
-          agility_xp?: number
+          balance_xp?: number
           coordination_xp?: number
           grip_xp?: number
           jump_xp?: number
+          resistance_xp?: number
+          speed_xp?: number
           strength_xp?: number
           student_id: string
         }
         Update: {
-          agility_xp?: number
+          balance_xp?: number
           coordination_xp?: number
           grip_xp?: number
           jump_xp?: number
+          resistance_xp?: number
+          speed_xp?: number
           strength_xp?: number
           student_id?: string
         }
@@ -272,7 +278,9 @@ export type Database = {
     }
     Functions: {
       belt_for_xp: { Args: { _xp: number }; Returns: string }
+      level_for_xp: { Args: { _xp: number }; Returns: number }
       record_system_heartbeat: { Args: never; Returns: undefined }
+      xp_required_for_level: { Args: { level_n: number }; Returns: number }
     }
     Enums: {
       app_role: "coach" | "student_parent"
