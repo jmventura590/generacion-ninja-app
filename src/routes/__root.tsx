@@ -1,4 +1,4 @@
-import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useRouter } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useRouter, useRouterState } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 
@@ -86,10 +86,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdn = pathname.startsWith("/adn");
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell />
-      {/* Outlet is rendered inside AppShell */}
+      {isAdn ? <Outlet /> : <AppShell />}
       <noscript><Outlet /></noscript>
     </QueryClientProvider>
   );
