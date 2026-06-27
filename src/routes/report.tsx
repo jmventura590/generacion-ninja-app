@@ -142,7 +142,7 @@ function ReportPage() {
       <div className="rounded-2xl border border-border/70 bg-surface p-4 shadow-card">
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-base font-bold text-foreground">
-            Capacidades <span className="text-neon">estimuladas</span>
+            Habilidades <span className="text-neon">entrenadas</span>
           </h2>
           <span className="text-sm font-semibold text-muted-foreground">
             7 ejes
