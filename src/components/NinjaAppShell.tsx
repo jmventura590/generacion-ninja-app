@@ -5,7 +5,6 @@ interface NinjaAppShellProps {
   renderAvatar: () => React.ReactNode;
   renderEvolucion: () => React.ReactNode;
   renderMapa: () => React.ReactNode;
-  renderShop: () => React.ReactNode;
   renderReporte: () => React.ReactNode;
   initialTab?: NinjaNavTab;
 }
@@ -14,7 +13,6 @@ const NinjaAppShell: React.FC<NinjaAppShellProps> = ({
   renderAvatar,
   renderEvolucion,
   renderMapa,
-  renderShop,
   renderReporte,
   initialTab = "avatar",
 }) => {
@@ -25,7 +23,6 @@ const NinjaAppShell: React.FC<NinjaAppShellProps> = ({
       case "avatar": return renderAvatar();
       case "evolucion": return renderEvolucion();
       case "mapa": return renderMapa();
-      case "shop": return renderShop();
       case "reporte": return renderReporte();
       default: return null;
     }

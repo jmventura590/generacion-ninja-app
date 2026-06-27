@@ -123,7 +123,7 @@ function CoachDashboard() {
   }
 
   return (
-    <div className="min-h-screen pb-32">
+    <div className="min-h-screen [padding-bottom:calc(8rem+env(safe-area-inset-bottom))]">
       <header className="px-5 pt-6 pb-3 flex items-center justify-between">
         <div>
           <div className="text-[10px] tracking-[0.4em] text-white/40">COACH</div>
@@ -179,7 +179,7 @@ function CoachDashboard() {
         </div>
       </section>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/95 to-transparent">
         <button onClick={submitAttendance} disabled={submitting} className="adn-btn-primary w-full py-4 text-base">
           {submitting ? "Registrando..." : "Registrar asistencia de clase"}
         </button>

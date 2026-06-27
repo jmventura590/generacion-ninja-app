@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Map, Store, Check } from "lucide-react";
+import { LogOut, User, BarChart3, Map, Check } from "lucide-react";
 import { BELTS, beltFromXp, OBSTACLES, SKILLS, type SkillKey } from "@/lib/adn-game";
+import adnLogo from "@/assets/adn-logo.jpg";
 
 export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
@@ -17,7 +18,6 @@ const TABS = [
   { key: "avatar", label: "Avatar",   Icon: User },
   { key: "evo",    label: "Evolución",Icon: BarChart3 },
   { key: "map",    label: "Mapa",     Icon: Map },
-  { key: "shop",   label: "Shop",     Icon: Store },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
@@ -103,7 +103,7 @@ function StudentDashboard() {
   const preset = AVATAR_PRESETS.find((p) => p.id === avatarId) ?? AVATAR_PRESETS[0];
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-32 [padding-bottom:calc(8rem+env(safe-area-inset-bottom))]">
       <header className="px-5 pt-6 pb-2 flex items-center justify-between">
         <div>
           <div className="text-[10px] tracking-[0.4em] text-white/40">FAMILIA</div>
@@ -116,10 +116,9 @@ function StudentDashboard() {
         {tab === "avatar" && <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} />}
         {tab === "evo"    && <Evolution student={student} skills={skills} belt={belt} />}
         {tab === "map"    && <ObstacleMap skills={skills} />}
-        {tab === "shop"   && <Shop />}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-4 bg-black/95 border-t border-white/10 backdrop-blur">
+      <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-3 bg-black/95 border-t border-white/10 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ key, label, Icon }) => (
           <button key={key} onClick={() => setTab(key)}
             className={`flex flex-col items-center gap-1 py-3 text-[10px] tracking-widest ${tab === key ? "adn-fluor" : "text-white/50"}`}>
@@ -206,17 +205,10 @@ function AvatarSVG({ preset, size = 120, cheering = false }: { preset: AvatarPre
       {/* arms (behind shirt) */}
       {armPose}
 
-      {/* shirt — BLACK with white ADN logo */}
+      {/* shirt — BLACK with real ADN logo image on the chest */}
       <path d="M44 198 L60 130 Q100 120 140 130 L156 198 Z" fill="#0a0a0a" stroke="#222" strokeWidth="2"/>
-      {/* ADN logo: white ninja silhouette climbing between the letters A · D · N */}
-      <g transform="translate(76 148) scale(0.9)" fill="#ffffff">
-        <text x="0" y="18" fontSize="14" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="1">A</text>
-        <text x="18" y="18" fontSize="14" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="1">D</text>
-        <text x="38" y="18" fontSize="14" fontWeight="900" fontFamily="Orbitron, sans-serif" letterSpacing="1">N</text>
-        {/* tiny ninja silhouette over D */}
-        <circle cx="27" cy="6" r="2.3"/>
-        <path d="M25 8 L25 13 L23 16 M29 8 L29 13 L31 16 M27 9 L27 14" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-      </g>
+      <image href={adnLogo} x="64" y="138" width="72" height="48" preserveAspectRatio="xMidYMid meet" />
+
 
       {/* neck */}
       <rect x="90" y="108" width="20" height="18" fill={skin}/>
@@ -420,38 +412,3 @@ function ObstacleMap({ skills }: { skills: Skills }) {
   );
 }
 
-/* ─── Shop ─────────────────────────── */
-function Shop() {
-  return (
-    <div className="space-y-4">
-      <div className="text-[10px] tracking-[0.3em] text-white/50 px-1">ADN SHOP · MOSTRADOR</div>
-      <div className="adn-card p-4">
-        <div className="text-sm font-bold mb-3">Muñequeras de silicona</div>
-        <div className="flex gap-3 flex-wrap">
-          {BELTS.map((b) => (
-            <div key={b.key} className="flex flex-col items-center text-[11px]">
-              <div className="h-12 w-12 rounded-full border-4" style={{ borderColor: b.hex, boxShadow: `0 0 12px ${b.hex}77` }} />
-              <span className="mt-1 text-white/70">{b.label.replace("Muñequera ", "")}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="adn-card p-4">
-        <div className="text-sm font-bold mb-3">Pins metálicos de obstáculos</div>
-        <div className="grid grid-cols-3 gap-3">
-          {OBSTACLES.map((o) => (
-            <div key={o.name} className="text-center">
-              <div className="aspect-square rounded-xl bg-black/60 p-2 border border-white/10">
-                <img src={o.img} alt={o.name} loading="lazy" width={768} height={768} className="w-full h-full object-contain" />
-              </div>
-              <div className="mt-1 text-[11px] text-white/70">{o.name}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <p className="text-[11px] text-white/50 text-center px-4">
-        Insignias opcionales para celebrar tu esfuerzo y constancia en el mundo real.
-      </p>
-    </div>
-  );
-}
