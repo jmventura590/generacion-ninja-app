@@ -22,34 +22,47 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 /* ─── Avatar Presets ───────────────────────────
- * 10 avatares (5 nenes + 5 nenas), 6-14 años.
- * Variación de piel, color de pelo y peinado (lacio, rulos, trenzas, gorra).
- * Todos visten remera negra con logo ADN blanco en el pecho.
+ * 10 ilustraciones (5 nenes + 5 nenas), estilo marcador a mano igual al Mapa.
+ * Cada PNG tiene remera negra LISA; el logo ADN real se superpone vía <img>
+ * con mix-blend-mode: screen para que la silueta blanca aparezca impresa.
  */
+import avB1 from "@/assets/avatars/b1.png";
+import avB2 from "@/assets/avatars/b2.png";
+import avB3 from "@/assets/avatars/b3.png";
+import avB4 from "@/assets/avatars/b4.png";
+import avB5 from "@/assets/avatars/b5.png";
+import avG1 from "@/assets/avatars/g1.png";
+import avG2 from "@/assets/avatars/g2.png";
+import avG3 from "@/assets/avatars/g3.png";
+import avG4 from "@/assets/avatars/g4.png";
+import avG5 from "@/assets/avatars/g5.png";
+
+const ADN_LOGO_URL = "/assets/adn-logo.jpg";
+
 type Gender = "boy" | "girl";
-type HairStyle = "short" | "curly" | "long" | "braids" | "spiky" | "ponytail" | "buzz" | "bun" | "wavy" | "sideswept";
 type AvatarPreset = {
   id: string;
   gender: Gender;
-  skin: string;
-  hairColor: string;
-  style: HairStyle;
+  img: string;
+  label: string;
+  // chest position (% of avatar box) for the printed ADN logo overlay
+  chest: { top: string; left: string; width: string };
 };
 
-// 10 nenes/nenas (6-14 años), looks variados y realistas.
-// Solo 1 rapado (b3). Sin gorra. Pelos en tonos naturales.
+// 10 personajes únicos: piel/pelo/ojos naturales, pose distinta cada uno.
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  skin: "#f7d4b3", hairColor: "#3a1f0e", style: "short"     }, // castaño corto, piel clara
-  { id: "b2", gender: "boy",  skin: "#e2b08a", hairColor: "#1b1b1b", style: "curly"     }, // rulos negros
-  { id: "b3", gender: "boy",  skin: "#b88357", hairColor: "#0a0a0a", style: "buzz"      }, // único rapado
-  { id: "b4", gender: "boy",  skin: "#d9a274", hairColor: "#5a2d10", style: "spiky"     }, // pelo parado castaño
-  { id: "b5", gender: "boy",  skin: "#f0c8a0", hairColor: "#caa15a", style: "sideswept" }, // rubio peinado al costado
-  { id: "g1", gender: "girl", skin: "#f7d4b3", hairColor: "#a86b3a", style: "long"      }, // pelo largo castaño claro
-  { id: "g2", gender: "girl", skin: "#c89373", hairColor: "#2a1608", style: "braids"    }, // trenzas oscuras
-  { id: "g3", gender: "girl", skin: "#b88357", hairColor: "#1b1b1b", style: "ponytail"  }, // colita negra
-  { id: "g4", gender: "girl", skin: "#7e4f2a", hairColor: "#0a0a0a", style: "bun"       }, // rodete negro
-  { id: "g5", gender: "girl", skin: "#f0c8a0", hairColor: "#b8341f", style: "wavy"      }, // pelirroja ondulada
+  { id: "b1", gender: "boy",  img: avB1, label: "Saludo",       chest: { top: "44%", left: "50%", width: "20%" } },
+  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba",chest: { top: "44%", left: "53%", width: "20%" } },
+  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados",chest: { top: "40%", left: "50%", width: "18%" } },
+  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump",    chest: { top: "44%", left: "52%", width: "20%" } },
+  { id: "b5", gender: "boy",  img: avB5, label: "Confiado",     chest: { top: "38%", left: "50%", width: "20%" } },
+  { id: "g1", gender: "girl", img: avG1, label: "Peace",        chest: { top: "42%", left: "52%", width: "20%" } },
+  { id: "g2", gender: "girl", img: avG2, label: "OK",           chest: { top: "42%", left: "52%", width: "20%" } },
+  { id: "g3", gender: "girl", img: avG3, label: "Salto",        chest: { top: "44%", left: "50%", width: "22%" } },
+  { id: "g4", gender: "girl", img: avG4, label: "Lista",        chest: { top: "40%", left: "50%", width: "20%" } },
+  { id: "g5", gender: "girl", img: avG5, label: "Festejo",      chest: { top: "40%", left: "50%", width: "20%" } },
 ];
+
 
 function StudentDashboard() {
   const navigate = useNavigate();
