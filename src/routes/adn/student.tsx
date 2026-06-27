@@ -51,16 +51,16 @@ type AvatarPreset = {
 
 // 10 personajes únicos: piel/pelo/ojos naturales, pose distinta cada uno.
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  img: avB1, label: "Saludo",       chest: { top: "44%", left: "50%", width: "20%" } },
-  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba",chest: { top: "44%", left: "53%", width: "20%" } },
-  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados",chest: { top: "40%", left: "50%", width: "18%" } },
-  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump",    chest: { top: "44%", left: "52%", width: "20%" } },
-  { id: "b5", gender: "boy",  img: avB5, label: "Confiado",     chest: { top: "38%", left: "50%", width: "20%" } },
-  { id: "g1", gender: "girl", img: avG1, label: "Peace",        chest: { top: "42%", left: "52%", width: "20%" } },
-  { id: "g2", gender: "girl", img: avG2, label: "OK",           chest: { top: "42%", left: "52%", width: "20%" } },
-  { id: "g3", gender: "girl", img: avG3, label: "Salto en V",   chest: { top: "44%", left: "50%", width: "22%" } },
-  { id: "g4", gender: "girl", img: avG4, label: "Trenzas",      chest: { top: "40%", left: "50%", width: "20%" } },
-  { id: "g5", gender: "girl", img: avG5, label: "Festejo",      chest: { top: "40%", left: "50%", width: "20%" } },
+  { id: "b1", gender: "boy",  img: avB1, label: "Saludo",       chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba",chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados",chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump",    chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "b5", gender: "boy",  img: avB5, label: "Confiado",     chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "g1", gender: "girl", img: avG1, label: "Peace",        chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "g2", gender: "girl", img: avG2, label: "OK",           chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "g3", gender: "girl", img: avG3, label: "Salto en V",   chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "g4", gender: "girl", img: avG4, label: "Trenzas",      chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "g5", gender: "girl", img: avG5, label: "Festejo",      chest: { top: "44%", left: "50%", width: "18%" } },
 ];
 
 
