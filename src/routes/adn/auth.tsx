@@ -137,7 +137,6 @@ function AuthPage() {
           <div className="flex gap-1 text-[11px]">
             <button type="button" onClick={() => setMode("student")} className={`flex-1 py-2 rounded-lg ${mode==="student" ? "bg-white/10 text-white" : "text-white/50"}`}>Alumno</button>
             <button type="button" onClick={() => setMode("signin")} className={`flex-1 py-2 rounded-lg ${mode==="signin" ? "bg-white/10 text-white" : "text-white/50"}`}>Familia (email)</button>
-            <button type="button" onClick={() => setMode("signup")} className={`flex-1 py-2 rounded-lg ${mode==="signup" ? "bg-white/10 text-white" : "text-white/50"}`}>Crear</button>
           </div>
 
           {mode === "student" ? (
@@ -152,15 +151,9 @@ function AuthPage() {
             </form>
           ) : (
             <form onSubmit={submit} className="space-y-3">
-              {mode === "signup" && (
-                <p className="text-[11px] text-white/50 leading-snug">
-                  Esto es para que una <b>familia</b> cree su cuenta con email.
-                  Si sos <b>alumno</b>, usá la pestaña <b>"Alumno"</b> con el usuario y contraseña que te dio el coach.
-                </p>
-              )}
               <input className="adn-input" type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               <input className="adn-input" type="password" placeholder="contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-              <button disabled={busy} className="adn-btn-primary w-full py-3">{mode === "signin" ? "Ingresar" : "Crear cuenta"}</button>
+              <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar</button>
             </form>
           )}
         </div>
