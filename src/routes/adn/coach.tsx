@@ -253,6 +253,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
     setBusy(true);
     try {
       const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null } });
+      if (!r.ok) { toast.error(r.error); return; }
       setResult({ username: r.username, password: r.password });
       setName(""); setBirth(""); setUsername("");
       toast.success("Alumno creado.");
