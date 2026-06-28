@@ -102,6 +102,7 @@ function StudentDashboard() {
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
   const [birthday, setBirthday] = useState<null | { seed: string }>(null);
+  const [streak, setStreak] = useState<number>(0);
   const prevBeltRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -132,6 +133,10 @@ function StudentDashboard() {
         if (n) counts[n] = (counts[n] ?? 0) + 1;
       });
       setObstacleCounts(counts);
+
+      // Racha de semanas consecutivas con asistencia (cálculo en DB)
+      const { data: streakData } = await supabase.rpc("attendance_streak_weeks", { _student_id: stu.id });
+      setStreak(typeof streakData === "number" ? streakData : 0);
 
       // Detectar subida de muñequera
       const storageKey = `adn:lastBelt:${stu.id}`;
