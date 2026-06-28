@@ -14,6 +14,7 @@ import { Route as AdnRouteRouteImport } from './routes/adn/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdnIndexRouteImport } from './routes/adn/index'
 import { Route as AdnStudentRouteImport } from './routes/adn/student'
+import { Route as AdnSettingsRouteImport } from './routes/adn/settings'
 import { Route as AdnCoachRouteImport } from './routes/adn/coach'
 import { Route as AdnAuthRouteImport } from './routes/adn/auth'
 
@@ -42,6 +43,11 @@ const AdnStudentRoute = AdnStudentRouteImport.update({
   path: '/student',
   getParentRoute: () => AdnRouteRoute,
 } as any)
+const AdnSettingsRoute = AdnSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdnRouteRoute,
+} as any)
 const AdnCoachRoute = AdnCoachRouteImport.update({
   id: '/coach',
   path: '/coach',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
+  '/adn/settings': typeof AdnSettingsRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn/': typeof AdnIndexRoute
 }
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
+  '/adn/settings': typeof AdnSettingsRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn': typeof AdnIndexRoute
 }
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
+  '/adn/settings': typeof AdnSettingsRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn/': typeof AdnIndexRoute
 }
@@ -88,10 +97,18 @@ export interface FileRouteTypes {
     | '/report'
     | '/adn/auth'
     | '/adn/coach'
+    | '/adn/settings'
     | '/adn/student'
     | '/adn/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/report' | '/adn/auth' | '/adn/coach' | '/adn/student' | '/adn'
+  to:
+    | '/'
+    | '/report'
+    | '/adn/auth'
+    | '/adn/coach'
+    | '/adn/settings'
+    | '/adn/student'
+    | '/adn'
   id:
     | '__root__'
     | '/'
@@ -99,6 +116,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/adn/auth'
     | '/adn/coach'
+    | '/adn/settings'
     | '/adn/student'
     | '/adn/'
   fileRoutesById: FileRoutesById
@@ -146,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdnStudentRouteImport
       parentRoute: typeof AdnRouteRoute
     }
+    '/adn/settings': {
+      id: '/adn/settings'
+      path: '/settings'
+      fullPath: '/adn/settings'
+      preLoaderRoute: typeof AdnSettingsRouteImport
+      parentRoute: typeof AdnRouteRoute
+    }
     '/adn/coach': {
       id: '/adn/coach'
       path: '/coach'
@@ -166,6 +191,7 @@ declare module '@tanstack/react-router' {
 interface AdnRouteRouteChildren {
   AdnAuthRoute: typeof AdnAuthRoute
   AdnCoachRoute: typeof AdnCoachRoute
+  AdnSettingsRoute: typeof AdnSettingsRoute
   AdnStudentRoute: typeof AdnStudentRoute
   AdnIndexRoute: typeof AdnIndexRoute
 }
@@ -173,6 +199,7 @@ interface AdnRouteRouteChildren {
 const AdnRouteRouteChildren: AdnRouteRouteChildren = {
   AdnAuthRoute: AdnAuthRoute,
   AdnCoachRoute: AdnCoachRoute,
+  AdnSettingsRoute: AdnSettingsRoute,
   AdnStudentRoute: AdnStudentRoute,
   AdnIndexRoute: AdnIndexRoute,
 }

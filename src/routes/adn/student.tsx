@@ -376,6 +376,9 @@ function AvatarStudio({
   level: number;
 }) {
   const selected = AVATAR_PRESETS.find((p) => p.id === selectedId) ?? AVATAR_PRESETS[0];
+  const currentBelt = [...BELTS].reverse().find((b) => level >= b.minLevel) ?? BELTS[0];
+  // Fondo base uniforme para que los 10 thumbs arranquen iguales.
+  const thumbBg = "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)";
   return (
     <div className="space-y-5">
       <div className="adn-card p-5 flex flex-col items-center">
@@ -383,7 +386,7 @@ function AvatarStudio({
         <p className="mt-3 text-xs text-white/50 text-center">
           Tu avatar luce los accesorios desbloqueados hasta el nivel actual.
         </p>
-        <AccessoriesLegend accessories={accessories} level={level} />
+        <AccessoriesLegend accessories={accessories} level={level} beltLabel={currentBelt.label} />
       </div>
 
       <div className="adn-card p-5">
@@ -393,7 +396,8 @@ function AvatarStudio({
             const active = p.id === selectedId;
             return (
               <button key={p.id} onClick={() => onSelect(p.id)}
-                className={`relative aspect-square rounded-xl border-2 p-1 transition ${active ? "border-[var(--adn-fluor)] bg-[#39ff14]/10" : "border-white/10 bg-black/40 hover:border-white/30"}`}>
+                style={{ background: thumbBg }}
+                className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden ${active ? "border-[var(--adn-fluor)]" : "border-white/10 hover:border-white/30"}`}>
                 <AvatarImage preset={p} size={72} />
                 {active && (
                   <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[var(--adn-fluor)] text-black grid place-items-center shadow-[0_0_12px_#39ff14]">
@@ -409,19 +413,20 @@ function AvatarStudio({
   );
 }
 
-function AccessoriesLegend({ accessories, level }: { accessories: Accessories; level: number }) {
-  const items: { unlocked: boolean; label: string; at: number }[] = [
-    { unlocked: !!accessories.wristband, label: "Muñequera",  at: 3 },
-    { unlocked: !!accessories.cap,        label: "Gorro",      at: 5 },
-    { unlocked: !!accessories.background, label: "Escenario",  at: 8 },
+function AccessoriesLegend({ accessories, level, beltLabel }: { accessories: Accessories; level: number; beltLabel: string }) {
+  const wristLabel = beltLabel.replace(/^Muñequera\s+/i, "");
+  const items: { unlocked: boolean; label: string; at: number; equipped?: string }[] = [
+    { unlocked: !!accessories.wristband, label: "Muñequera",  at: 3, equipped: wristLabel },
+    { unlocked: !!accessories.cap,        label: "Gorro",      at: 5, equipped: accessories.cap ?? undefined },
+    { unlocked: !!accessories.background, label: "Escenario",  at: 8, equipped: accessories.background ?? undefined },
   ];
   return (
     <div className="mt-4 grid grid-cols-3 gap-2 w-full">
       {items.map((it) => (
         <div key={it.label} className={`rounded-lg p-2 text-center border ${it.unlocked ? "border-[var(--adn-fluor)]/50 bg-[#39ff14]/5" : "border-white/10 bg-black/30 opacity-60"}`}>
           <div className="text-[9px] tracking-widest text-white/60">{it.label.toUpperCase()}</div>
-          <div className={`text-[10px] mt-0.5 ${it.unlocked ? "adn-fluor" : "text-white/50"}`}>
-            {it.unlocked ? "Equipado" : `Nivel ${it.at}`}
+          <div className={`text-[10px] mt-0.5 capitalize ${it.unlocked ? "adn-fluor" : "text-white/50"}`}>
+            {it.unlocked ? (it.equipped || "Equipado") : `Nivel ${it.at}`}
           </div>
         </div>
       ))}
