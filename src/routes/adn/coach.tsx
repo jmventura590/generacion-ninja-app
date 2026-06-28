@@ -241,6 +241,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");
   const [username, setUsername] = useState("");
+  const [familyEmail, setFamilyEmail] = useState("");
   const [groupId, setGroupId] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ username: string; password: string } | null>(null);
@@ -252,10 +253,10 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
     e.preventDefault();
     setBusy(true);
     try {
-      const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null } });
+      const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null, family_google_email: familyEmail || null } });
       if (!r.ok) { toast.error(r.error); return; }
       setResult({ username: r.username, password: r.password });
-      setName(""); setBirth(""); setUsername("");
+      setName(""); setBirth(""); setUsername(""); setFamilyEmail("");
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
@@ -308,6 +309,13 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">EMAIL DE GOOGLE AUTORIZADO (OPCIONAL)</label>
+            <input type="email" className="adn-input" value={familyEmail}
+              onChange={(e) => setFamilyEmail(e.target.value)}
+              placeholder="mama@gmail.com" autoComplete="off" />
+            <div className="text-[10px] text-white/40 mt-1">Si se completa, ese email podrá ingresar con Google y ver SOLO los datos de este alumno.</div>
           </div>
           <button disabled={busy} className="adn-btn-primary w-full py-3 text-sm">
             {busy ? "Creando..." : "Crear cuenta del alumno"}
