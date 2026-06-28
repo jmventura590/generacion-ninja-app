@@ -241,6 +241,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");
   const [username, setUsername] = useState("");
+  const [familyEmail, setFamilyEmail] = useState("");
   const [groupId, setGroupId] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ username: string; password: string } | null>(null);
@@ -252,10 +253,10 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
     e.preventDefault();
     setBusy(true);
     try {
-      const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null } });
+      const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null, family_google_email: familyEmail || null } });
       if (!r.ok) { toast.error(r.error); return; }
       setResult({ username: r.username, password: r.password });
-      setName(""); setBirth(""); setUsername("");
+      setName(""); setBirth(""); setUsername(""); setFamilyEmail("");
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
