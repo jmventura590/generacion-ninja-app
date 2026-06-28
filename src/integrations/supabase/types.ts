@@ -330,6 +330,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attendance_streak_weeks: {
+        Args: { _student_id: string }
+        Returns: number
+      }
       belt_for_xp: { Args: { _xp: number }; Returns: string }
       level_for_xp: { Args: { _xp: number }; Returns: number }
       recompute_student_xp: {
