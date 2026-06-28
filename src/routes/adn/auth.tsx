@@ -163,6 +163,12 @@ function AuthPage() {
             </form>
           ) : (
             <form onSubmit={submit} className="space-y-3">
+              {mode === "signup" && (
+                <p className="text-[11px] text-white/50 leading-snug">
+                  Esto es para que una <b>familia</b> cree su cuenta con email.
+                  Si sos <b>alumno</b>, usá la pestaña <b>"Alumno"</b> con el usuario y contraseña que te dio el coach.
+                </p>
+              )}
               <input className="adn-input" type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               <input className="adn-input" type="password" placeholder="contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
               <button disabled={busy} className="adn-btn-primary w-full py-3">{mode === "signin" ? "Ingresar" : "Crear cuenta"}</button>
