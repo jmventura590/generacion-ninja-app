@@ -40,7 +40,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     const birth = data.birth_date;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return fail("Fecha de nacimiento inválida.");
     const age = ageFromBirth(birth);
-    if (age < 4 || age > 99) return fail("Edad fuera de rango. Verificá la fecha de nacimiento.");
+    if (age < 3 || age > 99) return fail("Edad fuera de rango. Verificá la fecha de nacimiento.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
