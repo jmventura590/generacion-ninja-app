@@ -50,7 +50,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       .select("id")
       .eq("username", username)
       .maybeSingle();
-    if (dup) throw new Error("Ese usuario ya está en uso.");
+    if (dup) return fail("Ese usuario ya está en uso.");
 
     const password = genPassword(6);
     const email = `${username}@${USERNAME_DOMAIN}`;
