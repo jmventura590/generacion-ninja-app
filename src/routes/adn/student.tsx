@@ -202,6 +202,7 @@ function StudentDashboard() {
             onAvatar={() => setTab("avatar")}
             onEvo={() => setTab("evo")}
             belt={belt}
+            streak={streak}
           />
         )}
         {tab === "avatar" && (
@@ -251,16 +252,54 @@ function SubScreen({ title, onBack, children }: { title: string; onBack: () => v
 
 /* ─── Medallero (pantalla principal) ─── */
 function Medallero({
-  counts, onAvatar, onEvo, belt,
+  counts, onAvatar, onEvo, belt, streak,
 }: {
   counts: Record<string, number>;
   onAvatar: () => void;
   onEvo: () => void;
   belt: ReturnType<typeof beltFromXp>;
+  streak: number;
 }) {
   const unlockedCount = OBSTACLES.filter((o) => (counts[o.name] ?? 0) >= UNLOCK_THRESHOLD).length;
+  const active = streak > 0;
   return (
     <div className="space-y-5">
+      {/* Racha de asistencia */}
+      <div
+        className={`adn-card relative overflow-hidden p-4 ${active ? "border-[var(--adn-fluor)]/60 shadow-[0_0_22px_#39ff1433]" : ""}`}
+      >
+        {active && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-60"
+            style={{ background: "radial-gradient(120% 80% at 0% 0%, #39ff1422 0%, transparent 55%)" }}
+          />
+        )}
+        <div className="relative flex items-center gap-3">
+          <div
+            className={`h-12 w-12 shrink-0 rounded-xl grid place-items-center border ${
+              active
+                ? "border-[var(--adn-fluor)] bg-[#39ff14]/10 text-[var(--adn-fluor)] shadow-[0_0_14px_#39ff1455] animate-pulse"
+                : "border-white/15 bg-white/5 text-white/50"
+            }`}
+          >
+            {active ? <Flame size={24} strokeWidth={2.5}/> : <CalendarOff size={22}/>}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] tracking-[0.3em] text-white/50">RACHA NINJA</div>
+            <div className="flex items-baseline gap-1.5">
+              <span className={`text-2xl font-black leading-none ${active ? "adn-fluor" : "text-white/70"}`}>{streak}</span>
+              <span className="text-xs text-white/60">{streak === 1 ? "semana" : "semanas"}</span>
+            </div>
+            <div className="text-[11px] text-white/70 mt-0.5 leading-snug">
+              {active
+                ? `Llevás ${streak} ${streak === 1 ? "semana" : "semanas"} seguidas entrenando. ¡Así se hace!`
+                : "Volvé a clase para arrancar tu racha."}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="adn-card p-4 flex items-center justify-between">
         <div>
           <div className="text-[10px] tracking-[0.3em] text-white/50">MEDALLERO</div>
