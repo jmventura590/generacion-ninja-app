@@ -25,8 +25,25 @@ function AuthPage() {
   const seedFn = useServerFn(seedAdnDemo);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [username, setUsername] = useState("");
+  const [studentPwd, setStudentPwd] = useState("");
+  const [mode, setMode] = useState<"student" | "signin" | "signup">("student");
   const [busy, setBusy] = useState(false);
+
+  async function studentLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const u = username.trim().toLowerCase();
+      const { error } = await supabase.auth.signInWithPassword({ email: `${u}@${USERNAME_DOMAIN}`, password: studentPwd });
+      if (error) throw error;
+      navigate({ to: "/adn" });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Usuario o contraseña incorrectos.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
