@@ -23,6 +23,7 @@ const MOCKS = [
 function AuthPage() {
   const navigate = useNavigate();
   const seedFn = useServerFn(seedAdnDemo);
+  const enforceWhitelistFn = useServerFn(enforceGoogleWhitelist);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
