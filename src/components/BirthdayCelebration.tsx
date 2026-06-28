@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import confetti from "canvas-confetti";
+import { supabase } from "@/integrations/supabase/client";
 
 import cake from "@/assets/birthday/cake.png";
 import gift from "@/assets/birthday/gift.png";
@@ -11,7 +12,7 @@ import star from "@/assets/birthday/star.png";
 import rocket from "@/assets/birthday/rocket.png";
 import medal from "@/assets/birthday/medal.png";
 
-const GIFT_SCENES: { img: string; label: string }[] = [
+export const GIFT_SCENES: { img: string; label: string }[] = [
   { img: cake,     label: "Torta neón" },
   { img: gift,     label: "Regalo sorpresa" },
   { img: balloons, label: "Globos voladores" },
@@ -22,29 +23,31 @@ const GIFT_SCENES: { img: string; label: string }[] = [
   { img: medal,    label: "Medalla de honor" },
 ];
 
-// 20 mensajes en castellano (es-AR)
-const MESSAGES: string[] = [
-  "¡Feliz cumple, ninja! Que este año esté lleno de saltos, risas y pasamanos.",
-  "Hoy el Gimnasio entero te festeja. ¡Que cumplas muchísimos más!",
-  "Un año más fuerte, un año más rápido, un año más ninja. ¡Feliz cumple!",
-  "Que tu energía de hoy te dure todo el año. ¡Feliz cumpleaños!",
-  "El obstáculo de hoy es soplar las velitas. ¡Vos podés!",
-  "Hoy no entrenás: hoy festejás. ¡Feliz cumple, crack!",
-  "Que el año que arranca tenga la misma garra con la que entrenás. ¡Feliz cumple!",
-  "Una palmada gigante para vos. ¡Feliz cumpleaños, ninja!",
-  "Hoy te ganaste el medallero entero. ¡Feliz cumple!",
-  "Que cada día de este año sea un PR. ¡Feliz cumpleaños!",
-  "¡Sos parte de la familia ADN! Que tengas un día increíble.",
-  "Hoy el cohete despega para vos. ¡Feliz cumple!",
-  "Brillás como un neón. ¡Feliz cumpleaños, campeón/a!",
-  "Que este año subas todos los niveles que te propongas. ¡Feliz cumple!",
-  "Hoy vale doble: doble torta y doble festejo. ¡Feliz cumpleaños!",
-  "Tus profes y tus compañeros te mandan el mejor de los abrazos.",
-  "Que tu año sea como un pasamanos: agarrate fuerte y disfrutalo.",
-  "Hoy soplás velitas, mañana soplás récords. ¡Feliz cumple!",
-  "Que el ninja interior te acompañe siempre. ¡Feliz cumpleaños!",
-  "¡Otro año más en el Gimnasio! Gracias por entrenar con nosotros. ¡Feliz cumple!",
+// Fallback si la DB todavía no respondió.
+export const DEFAULT_MESSAGES: string[] = [
+  "¡Feliz cumple, ninja! Hoy el gimnasio entero festeja con vos.",
+  "Un año más fuerte, más rápido, más vos. ¡Feliz cumpleaños!",
+  "Hoy no hay obstáculo que se te resista. ¡Feliz cumple, campeón!",
+  "Otro año de garra y constancia. ¡Que lo festejes a lo grande!",
+  "Hoy es tu día, ninja. Disfrutalo a pleno, te lo ganaste.",
+  "Un año más cerca de tu próxima muñequera. ¡Feliz cumpleaños!",
+  "Que este nuevo año venga con más saltos, más fuerza y más logros.",
+  "¡Feliz cumple! Hoy el circuito de obstáculos te aplaude.",
+  "Cada vez más fuerte, cada vez más ninja. ¡Feliz cumpleaños!",
+  "Hoy festejamos no solo tu cumple, también tu esfuerzo de todo el año.",
+  "¡Feliz cumpleaños! Que este año esté lleno de nuevos desafíos.",
+  "Un año más grande, un ninja más fuerte. ¡Que lo disfrutes!",
+  "Hoy te toca a vos brillar. ¡Feliz cumpleaños, campeón!",
+  "Gracias por tu constancia este año. ¡Feliz cumple, ninja!",
+  "Que la energía de hoy te acompañe en cada entrenamiento del año que empieza.",
+  "¡Feliz cumpleaños! Seguí entrenando con esa garra que te caracteriza.",
+  "Hoy el gimnasio se viste de fiesta por vos. ¡Feliz cumple!",
+  "Un año más de aventuras, obstáculos y logros. ¡Felicidades, ninja!",
+  "Que cumplas muchos años más, y todos entrenando con esta misma energía.",
+  "¡Feliz cumpleaños! Hoy celebramos lo lejos que llegaste, y lo lejos que vas a llegar.",
 ];
+
+void star; // (no se usa actualmente como escena, pero queda disponible)
 
 function pickIndex(seed: string, mod: number) {
   let h = 0;
@@ -58,11 +61,24 @@ export function BirthdayCelebration({
   onClose,
 }: {
   studentName: string;
-  seed: string; // ej: `${studentId}-${year}` para que sea estable durante el día
+  seed: string;
   onClose: () => void;
 }) {
+  const [messages, setMessages] = useState<string[]>(DEFAULT_MESSAGES);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await (supabase.from as any)("app_settings")
+          .select("value").eq("key", "birthday_messages").maybeSingle();
+        const arr = Array.isArray(data?.value) ? (data!.value as string[]).filter((m) => typeof m === "string" && m.trim()) : null;
+        if (arr && arr.length) setMessages(arr);
+      } catch { /* fallback */ }
+    })();
+  }, []);
+
   const scene = useMemo(() => GIFT_SCENES[pickIndex(seed + ":scene", GIFT_SCENES.length)], [seed]);
-  const message = useMemo(() => MESSAGES[pickIndex(seed + ":msg", MESSAGES.length)], [seed]);
+  const message = useMemo(() => messages[pickIndex(seed + ":msg", messages.length)], [seed, messages]);
 
   useEffect(() => {
     const colors = ["#39ff14", "#df00ff", "#ffffff", "#00ffae", "#ffd700"];
