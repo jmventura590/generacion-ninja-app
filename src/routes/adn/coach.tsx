@@ -241,10 +241,13 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");
   const [username, setUsername] = useState("");
-  const [familyEmail, setFamilyEmail] = useState("");
+  const [familyUsername, setFamilyUsername] = useState("");
   const [groupId, setGroupId] = useState<string>("");
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ username: string; password: string } | null>(null);
+  const [result, setResult] = useState<{
+    student: { username: string; password: string };
+    family: { username: string; password: string };
+  } | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => { if (open && !groupId && groups[0]) setGroupId(groups[0].id); }, [open, groups, groupId]);
@@ -253,10 +256,15 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
     e.preventDefault();
     setBusy(true);
     try {
-      const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null, family_google_email: familyEmail || null } });
+      const r = await createFn({ data: {
+        name, birth_date: birth,
+        username,
+        family_username: familyUsername,
+        group_id: groupId || null,
+      } });
       if (!r.ok) { toast.error(r.error); return; }
-      setResult({ username: r.username, password: r.password });
-      setName(""); setBirth(""); setUsername(""); setFamilyEmail("");
+      setResult({ student: r.student, family: r.family });
+      setName(""); setBirth(""); setUsername(""); setFamilyUsername("");
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
@@ -268,7 +276,9 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
 
   async function copyAll() {
     if (!result) return;
-    const text = `Usuario: ${result.username}\nContraseña: ${result.password}`;
+    const text =
+      `ALUMNO\nUsuario: ${result.student.username}\nContraseña: ${result.student.password}\n\n` +
+      `FAMILIA (solo lectura)\nUsuario: ${result.family.username}\nContraseña: ${result.family.password}`;
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }
     catch { toast.error("No se pudo copiar."); }
   }
@@ -294,11 +304,17 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
             <input type="date" className="adn-input" value={birth} onChange={(e) => setBirth(e.target.value)} required />
           </div>
           <div>
-            <label className="text-[10px] tracking-widest text-white/50">USUARIO</label>
+            <label className="text-[10px] tracking-widest text-white/50">USUARIO DEL ALUMNO</label>
             <input className="adn-input" value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
               required minLength={3} maxLength={24} placeholder="ej: benja08" />
-            <div className="text-[10px] text-white/40 mt-1">Sin espacios. 3-24 caracteres. Se usa como login.</div>
+          </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">USUARIO DE LA FAMILIA (SOLO LECTURA)</label>
+            <input className="adn-input" value={familyUsername}
+              onChange={(e) => setFamilyUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+              required minLength={3} maxLength={24} placeholder="ej: mama.benja08" />
+            <div className="text-[10px] text-white/40 mt-1">Distinto al del alumno. Le da acceso de solo lectura a Evolución, Medallero y Avatar.</div>
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">GRUPO / HORARIO</label>
@@ -310,24 +326,25 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
               ))}
             </select>
           </div>
-          <div>
-            <label className="text-[10px] tracking-widest text-white/50">EMAIL DE GOOGLE AUTORIZADO (OPCIONAL)</label>
-            <input type="email" className="adn-input" value={familyEmail}
-              onChange={(e) => setFamilyEmail(e.target.value)}
-              placeholder="mama@gmail.com" autoComplete="off" />
-            <div className="text-[10px] text-white/40 mt-1">Si se completa, ese email podrá ingresar con Google y ver SOLO los datos de este alumno.</div>
-          </div>
           <button disabled={busy} className="adn-btn-primary w-full py-3 text-sm">
-            {busy ? "Creando..." : "Crear cuenta del alumno"}
+            {busy ? "Creando..." : "Crear cuentas (alumno + familia)"}
           </button>
 
           {result && (
-            <div className="mt-3 rounded-lg border border-[var(--adn-fluor)]/40 bg-[var(--adn-fluor)]/5 p-3 space-y-2">
-              <div className="text-[10px] tracking-widest adn-fluor">CUENTA CREADA — COMPARTIR CON LA FAMILIA</div>
-              <div className="text-sm font-mono"><span className="text-white/50">usuario:</span> <span className="text-white font-bold">{result.username}</span></div>
-              <div className="text-sm font-mono"><span className="text-white/50">contraseña:</span> <span className="text-white font-bold">{result.password}</span></div>
+            <div className="mt-3 rounded-lg border border-[var(--adn-fluor)]/40 bg-[var(--adn-fluor)]/5 p-3 space-y-3">
+              <div className="text-[10px] tracking-widest adn-fluor">CUENTAS CREADAS — COMPARTIR</div>
+              <div className="space-y-1">
+                <div className="text-[10px] tracking-widest text-white/50">ALUMNO</div>
+                <div className="text-sm font-mono"><span className="text-white/50">usuario:</span> <span className="text-white font-bold">{result.student.username}</span></div>
+                <div className="text-sm font-mono"><span className="text-white/50">contraseña:</span> <span className="text-white font-bold">{result.student.password}</span></div>
+              </div>
+              <div className="space-y-1 pt-2 border-t border-white/10">
+                <div className="text-[10px] tracking-widest text-white/50">FAMILIA (SOLO LECTURA)</div>
+                <div className="text-sm font-mono"><span className="text-white/50">usuario:</span> <span className="text-white font-bold">{result.family.username}</span></div>
+                <div className="text-sm font-mono"><span className="text-white/50">contraseña:</span> <span className="text-white font-bold">{result.family.password}</span></div>
+              </div>
               <button type="button" onClick={copyAll} className="adn-btn-secondary px-3 py-2 text-xs flex items-center gap-2">
-                {copied ? <Check size={14}/> : <Copy size={14}/>} {copied ? "Copiado" : "Copiar datos"}
+                {copied ? <Check size={14}/> : <Copy size={14}/>} {copied ? "Copiado" : "Copiar las dos cuentas"}
               </button>
             </div>
           )}
@@ -337,6 +354,6 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   );
 }
 
-// Suprime warning: USERNAME_DOMAIN se exporta para uso del login.
 void USERNAME_DOMAIN;
+
 
