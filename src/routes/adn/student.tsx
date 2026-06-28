@@ -3,9 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Album, Check } from "lucide-react";
+import { LogOut, User, BarChart3, Check } from "lucide-react";
 import { BELTS, beltFromXp, SKILLS, type SkillKey } from "@/lib/adn-game";
-import AlbumTab from "@/components/AlbumTab";
 
 
 export const Route = createFileRoute("/adn/student")({
@@ -18,7 +17,6 @@ type Skills = Record<SkillKey, number>;
 const TABS = [
   { key: "avatar", label: "Avatar",    Icon: User },
   { key: "evo",    label: "Evolución", Icon: BarChart3 },
-  { key: "album",  label: "Álbum",     Icon: Album },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
@@ -130,10 +128,9 @@ function StudentDashboard() {
       <main className="px-5 mt-4">
         {tab === "avatar" && <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} />}
         {tab === "evo"    && <Evolution student={student} skills={skills} belt={belt} />}
-        {tab === "album"  && <AlbumTab studentId={student.id} />}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-3 bg-black/95 border-t border-white/10 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed bottom-0 left-0 right-0 grid grid-cols-2 bg-black/95 border-t border-white/10 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ key, label, Icon }) => (
           <button key={key} onClick={() => setTab(key)}
             className={`flex flex-col items-center gap-1 py-3 text-[10px] tracking-widest ${tab === key ? "adn-fluor" : "text-white/50"}`}>
