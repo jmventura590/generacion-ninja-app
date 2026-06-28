@@ -310,6 +310,13 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
               ))}
             </select>
           </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">EMAIL DE GOOGLE AUTORIZADO (OPCIONAL)</label>
+            <input type="email" className="adn-input" value={familyEmail}
+              onChange={(e) => setFamilyEmail(e.target.value)}
+              placeholder="mama@gmail.com" autoComplete="off" />
+            <div className="text-[10px] text-white/40 mt-1">Si se completa, ese email podrá ingresar con Google y ver SOLO los datos de este alumno.</div>
+          </div>
           <button disabled={busy} className="adn-btn-primary w-full py-3 text-sm">
             {busy ? "Creando..." : "Crear cuenta del alumno"}
           </button>
