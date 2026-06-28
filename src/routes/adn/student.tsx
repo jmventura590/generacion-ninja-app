@@ -106,7 +106,9 @@ function StudentDashboard() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { navigate({ to: "/adn/auth" }); return; }
-      const { data: s } = await supabase.from("student_profiles").select("*").eq("user_id", session.user.id).maybeSingle();
+      const { data: s } = await supabase.from("student_profiles").select("*")
+        .or(`user_id.eq.${session.user.id},family_user_id.eq.${session.user.id}`)
+        .maybeSingle();
       if (!s) { toast.error("No hay alumno asociado a tu cuenta."); return; }
       const stu = s as Student;
       setStudent(stu);
