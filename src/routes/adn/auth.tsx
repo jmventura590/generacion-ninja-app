@@ -88,6 +88,22 @@ function AuthPage() {
     }
   }
 
+  async function checkWhitelistAndProceed() {
+    try {
+      const r = await enforceWhitelistFn({});
+      if (!r.ok) {
+        await supabase.auth.signOut();
+        toast.error(r.error);
+        return false;
+      }
+      return true;
+    } catch (e: any) {
+      await supabase.auth.signOut();
+      toast.error(e?.message ?? "No se pudo validar la cuenta.");
+      return false;
+    }
+  }
+
   async function googleSignIn() {
     setBusy(true);
     try {
@@ -99,13 +115,34 @@ function AuthPage() {
         return;
       }
       if (result.redirected) return; // browser navigating away
-      navigate({ to: "/adn" });
+      // popup/web_message flow: ya tenemos sesión → validar whitelist
+      const ok = await checkWhitelistAndProceed();
+      if (ok) navigate({ to: "/adn" });
     } catch (e: any) {
       toast.error(e?.message ?? "Error con Google");
     } finally {
       setBusy(false);
     }
   }
+
+  // Validar whitelist también cuando volvemos del redirect de Google (full-page).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || cancelled) return;
+      const provider = (session.user.app_metadata as any)?.provider;
+      const providers: string[] = (session.user.app_metadata as any)?.providers ?? [];
+      const isGoogle = provider === "google" || providers.includes("google");
+      if (!isGoogle) { navigate({ to: "/adn" }); return; }
+      setBusy(true);
+      const ok = await checkWhitelistAndProceed();
+      setBusy(false);
+      if (ok && !cancelled) navigate({ to: "/adn" });
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen px-5 py-10 flex items-center justify-center">
