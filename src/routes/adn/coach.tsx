@@ -160,6 +160,11 @@ function CoachDashboard() {
       </header>
 
       <section className="px-5 space-y-4">
+        <AddStudentCard groups={groups} onCreated={async () => {
+          const { data: s } = await supabase.from("student_profiles").select("id, student_name, age, total_xp, group_id").order("student_name");
+          setStudents((s ?? []) as Student[]);
+        }} />
+
         <div className="adn-card p-4">
           <div className="text-[10px] tracking-[0.3em] text-white/50 mb-2">A · Grupo / Horario</div>
           <select className="adn-input" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
