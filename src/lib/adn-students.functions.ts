@@ -26,19 +26,21 @@ export const createStudentAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { name: string; birth_date: string; username: string; group_id: string | null }) => d)
   .handler(async ({ data, context }) => {
+    const fail = (msg: string) => ({ ok: false as const, error: msg });
+
     // Autorización: solo coach
     const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
     const isCoach = (roles ?? []).some((r: any) => r.role === "coach");
-    if (!isCoach) throw new Error("Solo coaches pueden dar de alta alumnos.");
+    if (!isCoach) return fail("Solo coaches pueden dar de alta alumnos.");
 
     const username = data.username.trim().toLowerCase();
-    if (!/^[a-z0-9_.-]{3,24}$/.test(username)) throw new Error("Usuario inválido (3-24 letras/números/._-).");
+    if (!/^[a-z0-9_.-]{3,24}$/.test(username)) return fail("Usuario inválido (3-24 letras/números/._-).");
     const name = data.name.trim();
-    if (!name) throw new Error("Nombre requerido.");
+    if (!name) return fail("Nombre requerido.");
     const birth = data.birth_date;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) throw new Error("Fecha de nacimiento inválida.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return fail("Fecha de nacimiento inválida.");
     const age = ageFromBirth(birth);
-    if (age < 4 || age > 18) throw new Error("Edad fuera de rango (4-18).");
+    if (age < 4 || age > 99) return fail("Edad fuera de rango. Verificá la fecha de nacimiento.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
