@@ -204,6 +204,7 @@ export type Database = {
       student_profiles: {
         Row: {
           age: number
+          birth_date: string | null
           created_at: string
           current_belt_color: string
           group_id: string | null
@@ -211,9 +212,11 @@ export type Database = {
           student_name: string
           total_xp: number
           user_id: string | null
+          username: string | null
         }
         Insert: {
           age: number
+          birth_date?: string | null
           created_at?: string
           current_belt_color?: string
           group_id?: string | null
@@ -221,9 +224,11 @@ export type Database = {
           student_name: string
           total_xp?: number
           user_id?: string | null
+          username?: string | null
         }
         Update: {
           age?: number
+          birth_date?: string | null
           created_at?: string
           current_belt_color?: string
           group_id?: string | null
@@ -231,6 +236,7 @@ export type Database = {
           student_name?: string
           total_xp?: number
           user_id?: string | null
+          username?: string | null
         }
         Relationships: [
           {
