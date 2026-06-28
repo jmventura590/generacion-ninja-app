@@ -10,7 +10,7 @@ export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
 });
 
-type Student = { id: string; student_name: string; age: number | null; total_xp: number; current_belt_color: string };
+type Student = { id: string; student_name: string; age: number | null; total_xp: number; current_belt_color: string; birth_date: string | null };
 type Skills = Record<SkillKey, number>;
 
 /* ─── Avatares (10 personajes base) ─── */
@@ -50,7 +50,8 @@ import obPalestra from "@/assets/obstacles/palestra.png";
 import obPegboard from "@/assets/obstacles/pegboard.png";
 import obPelotas from "@/assets/obstacles/pelotas.png";
 import obTronco from "@/assets/obstacles/tronco.png";
-import obPuente from "@/assets/adn-puente.png";
+import obPuente from "@/assets/obstacles/puente.png";
+import { BirthdayCelebration } from "@/components/BirthdayCelebration";
 
 const OBSTACLES: { name: string; img: string }[] = [
   { name: "Muro Curvado",      img: obMuro },
@@ -100,6 +101,7 @@ function StudentDashboard() {
   const [avatarId, setAvatarId] = useState<string>("b1");
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
+  const [birthday, setBirthday] = useState<null | { seed: string }>(null);
   const prevBeltRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -142,6 +144,21 @@ function StudentDashboard() {
         }
       }
       localStorage.setItem(storageKey, stu.current_belt_color);
+
+      // Cumpleaños: si hoy coincide día/mes con birth_date, mostrar 1 vez al año
+      if (stu.birth_date) {
+        const today = new Date();
+        const [by, bm, bd] = stu.birth_date.split("-").map(Number);
+        if (bm === today.getMonth() + 1 && bd === today.getDate()) {
+          const year = today.getFullYear();
+          const bdayKey = `adn:bday:${stu.id}:${year}`;
+          if (!localStorage.getItem(bdayKey)) {
+            setBirthday({ seed: `${stu.id}-${year}` });
+            localStorage.setItem(bdayKey, "1");
+          }
+          void by;
+        }
+      }
     })();
   }, [navigate]);
 
@@ -200,6 +217,14 @@ function StudentDashboard() {
           accessories={accessories}
           beltLabel={celebrate.beltLabel}
           onClose={() => setCelebrate(null)}
+        />
+      )}
+
+      {birthday && (
+        <BirthdayCelebration
+          studentName={student.student_name}
+          seed={birthday.seed}
+          onClose={() => setBirthday(null)}
         />
       )}
     </div>
