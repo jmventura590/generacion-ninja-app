@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck, UserPlus, Copy, Check } from "lucide-react";
+import { createStudentAccount, USERNAME_DOMAIN } from "@/lib/adn-students.functions";
 
 export const Route = createFileRoute("/adn/coach")({
   component: CoachDashboard,
