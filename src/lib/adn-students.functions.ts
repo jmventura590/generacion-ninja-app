@@ -27,7 +27,8 @@ export const createStudentAccount = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string; birth_date: string; username: string; group_id: string | null }) => d)
   .handler(async ({ data, context }) => {
     // Autorización: solo coach
-    const { data: isCoach } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "coach" });
+    const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
+    const isCoach = (roles ?? []).some((r: any) => r.role === "coach");
     if (!isCoach) throw new Error("Solo coaches pueden dar de alta alumnos.");
 
     const username = data.username.trim().toLowerCase();
