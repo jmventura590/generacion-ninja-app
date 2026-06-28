@@ -233,3 +233,101 @@ function CoachDashboard() {
     </div>
   );
 }
+
+/* ───────── Agregar alumno ───────── */
+function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () => void | Promise<void> }) {
+  const createFn = useServerFn(createStudentAccount);
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [birth, setBirth] = useState("");
+  const [username, setUsername] = useState("");
+  const [groupId, setGroupId] = useState<string>("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ username: string; password: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => { if (open && !groupId && groups[0]) setGroupId(groups[0].id); }, [open, groups, groupId]);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const r = await createFn({ data: { name, birth_date: birth, username, group_id: groupId || null } });
+      setResult({ username: r.username, password: r.password });
+      setName(""); setBirth(""); setUsername("");
+      toast.success("Alumno creado.");
+      await onCreated();
+    } catch (err: any) {
+      toast.error(err?.message ?? "No se pudo crear el alumno.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copyAll() {
+    if (!result) return;
+    const text = `Usuario: ${result.username}\nContraseña: ${result.password}`;
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500); }
+    catch { toast.error("No se pudo copiar."); }
+  }
+
+  return (
+    <div className="adn-card p-4">
+      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <UserPlus size={18} className="adn-fluor" />
+          <span className="text-sm font-bold">Agregar alumno</span>
+        </div>
+        <span className="text-white/40 text-xs">{open ? "Cerrar" : "Abrir"}</span>
+      </button>
+
+      {open && (
+        <form onSubmit={submit} className="mt-4 space-y-3">
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">NOMBRE (sin apellido)</label>
+            <input className="adn-input" value={name} onChange={(e) => setName(e.target.value)} required maxLength={40} />
+          </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">FECHA DE NACIMIENTO</label>
+            <input type="date" className="adn-input" value={birth} onChange={(e) => setBirth(e.target.value)} required />
+          </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">USUARIO</label>
+            <input className="adn-input" value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+              required minLength={3} maxLength={24} placeholder="ej: benja08" />
+            <div className="text-[10px] text-white/40 mt-1">Sin espacios. 3-24 caracteres. Se usa como login.</div>
+          </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">GRUPO / HORARIO</label>
+            <select className="adn-input" value={groupId} onChange={(e) => setGroupId(e.target.value)} required>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id} className="bg-black">
+                  {g.code} — {g.days_label} {g.starts_at.slice(0,5)}-{g.ends_at.slice(0,5)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button disabled={busy} className="adn-btn-primary w-full py-3 text-sm">
+            {busy ? "Creando..." : "Crear cuenta del alumno"}
+          </button>
+
+          {result && (
+            <div className="mt-3 rounded-lg border border-[var(--adn-fluor)]/40 bg-[var(--adn-fluor)]/5 p-3 space-y-2">
+              <div className="text-[10px] tracking-widest adn-fluor">CUENTA CREADA — COMPARTIR CON LA FAMILIA</div>
+              <div className="text-sm font-mono"><span className="text-white/50">usuario:</span> <span className="text-white font-bold">{result.username}</span></div>
+              <div className="text-sm font-mono"><span className="text-white/50">contraseña:</span> <span className="text-white font-bold">{result.password}</span></div>
+              <button type="button" onClick={copyAll} className="adn-btn-secondary px-3 py-2 text-xs flex items-center gap-2">
+                {copied ? <Check size={14}/> : <Copy size={14}/>} {copied ? "Copiado" : "Copiar datos"}
+              </button>
+            </div>
+          )}
+        </form>
+      )}
+    </div>
+  );
+}
+
+// Suprime warning: USERNAME_DOMAIN se exporta para uso del login.
+void USERNAME_DOMAIN;
+
