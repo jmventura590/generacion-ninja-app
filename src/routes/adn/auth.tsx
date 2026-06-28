@@ -27,7 +27,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [studentPwd, setStudentPwd] = useState("");
-  const [mode, setMode] = useState<"student" | "signin" | "signup">("student");
+  const [mode, setMode] = useState<"student" | "signin">("student");
   const [busy, setBusy] = useState(false);
 
   async function studentLogin(e: React.FormEvent) {
