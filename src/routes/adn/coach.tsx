@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, ShieldCheck, UserPlus, Copy, Check } from "lucide-react";
+import { LogOut, ShieldCheck, UserPlus, Copy, Check, CalendarDays, Trash2, History } from "lucide-react";
 import { createStudentAccount, USERNAME_DOMAIN } from "@/lib/adn-students.functions";
 
 export const Route = createFileRoute("/adn/coach")({
@@ -13,6 +13,27 @@ export const Route = createFileRoute("/adn/coach")({
 type Student = { id: string; student_name: string; age: number | null; total_xp: number; group_id: string | null };
 type ClassType = { id: string; name: string };
 type Group = { id: string; code: string; days_label: string; starts_at: string; ends_at: string; sort_order: number };
+type ExistingLog = { id: string; student_id: string; class_type_id: string };
+
+const ALLOWED_DAYS: Record<string, number[]> = {
+  "Lun/Mié/Vie": [1, 3, 5],
+  "Mar/Jue": [2, 4],
+  "Sábado": [6],
+};
+
+function todayISO() {
+  const t = new Date();
+  const off = t.getTimezoneOffset();
+  return new Date(t.getTime() - off * 60_000).toISOString().slice(0, 10);
+}
+function weekdayOf(iso: string) {
+  // iso is YYYY-MM-DD in local time
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1).getDay();
+}
+function dayLabelEs(iso: string) {
+  return new Date(iso + "T12:00:00").toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
+}
 
 function CoachDashboard() {
   const navigate = useNavigate();
@@ -27,7 +48,8 @@ function CoachDashboard() {
   const [selectedClassIds, setSelectedClassIds] = useState<Record<string, boolean>>({});
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [alreadyToday, setAlreadyToday] = useState<Set<string>>(new Set());
+  const [date, setDate] = useState<string>(todayISO());
+  const [existing, setExisting] = useState<ExistingLog[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -43,30 +65,67 @@ function CoachDashboard() {
     })();
   }, [navigate]);
 
+  const reloadStudents = useCallback(async () => {
+    const { data: s } = await supabase.from("student_profiles").select("id, student_name, age, total_xp, group_id").order("student_name");
+    setStudents((s ?? []) as Student[]);
+  }, []);
+
   useEffect(() => {
     if (!pinOk) return;
     (async () => {
       const { data: g } = await supabase.from("class_groups").select("*").order("sort_order");
-      const list = (g ?? []) as Group[];
-      setGroups(list);
-      if (!groupId && list[0]) setGroupId(list[0].id);
-
-      const { data: s } = await supabase.from("student_profiles").select("id, student_name, age, total_xp, group_id").order("student_name");
-      setStudents((s ?? []) as Student[]);
+      setGroups((g ?? []) as Group[]);
+      await reloadStudents();
       const { data: c } = await supabase.from("class_types").select("id, name").order("name");
       setClasses((c ?? []) as ClassType[]);
-
-      const today = new Date().toISOString().slice(0, 10);
-      const { data: logs } = await supabase.from("attendance_logs").select("student_id").eq("date", today);
-      setAlreadyToday(new Set((logs ?? []).map((l: any) => l.student_id)));
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pinOk]);
+  }, [pinOk, reloadStudents]);
+
+  // Filter groups by weekday of selected date
+  const dow = weekdayOf(date);
+  const groupsForDate = useMemo(
+    () => groups.filter((g) => (ALLOWED_DAYS[g.days_label] ?? []).includes(dow)),
+    [groups, dow]
+  );
+
+  // Auto-pick a valid group when date / groups change
+  useEffect(() => {
+    if (groupsForDate.length === 0) { setGroupId(""); return; }
+    if (!groupsForDate.some((g) => g.id === groupId)) setGroupId(groupsForDate[0].id);
+  }, [groupsForDate, groupId]);
+
+  // Load existing attendance for (date) — across all students; we filter by group on render.
+  const reloadExisting = useCallback(async () => {
+    if (!date) { setExisting([]); return; }
+    const { data, error } = await supabase
+      .from("attendance_logs")
+      .select("id, student_id, class_type_id")
+      .eq("date", date);
+    if (error) { setExisting([]); return; }
+    setExisting((data ?? []) as ExistingLog[]);
+  }, [date]);
+
+  useEffect(() => { if (pinOk) reloadExisting(); }, [pinOk, reloadExisting]);
+
+  // Reset selection when changing date or group
+  useEffect(() => { setPicked({}); setSelectedClassIds({}); }, [date, groupId]);
 
   const filtered = useMemo(
     () => students.filter((st) => st.group_id === groupId),
     [students, groupId]
   );
+
+  // student_id → set of class_type_ids already registered on `date`
+  const existingByStudent = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const e of existing) {
+      if (!m.has(e.student_id)) m.set(e.student_id, new Set());
+      m.get(e.student_id)!.add(e.class_type_id);
+    }
+    return m;
+  }, [existing]);
+
+  const isRetro = date !== todayISO();
 
   const selectedCount = useMemo(
     () => Object.values(selectedClassIds).filter(Boolean).length,
@@ -77,7 +136,6 @@ function CoachDashboard() {
     setSelectedClassIds((p) => ({ ...p, [id]: !p[id] }));
   }
   function togglePick(id: string) {
-    if (alreadyToday.has(id)) return;
     setPicked((p) => ({ ...p, [id]: !p[id] }));
   }
 
@@ -89,34 +147,53 @@ function CoachDashboard() {
       return;
     }
     setSubmitting(true);
-    const today = new Date().toISOString().slice(0, 10);
     const { data: { session } } = await supabase.auth.getSession();
     const coachId = session?.user.id ?? null;
     const n = classIds.length;
+
+    // Skip combos already present for that date (unique index would block them anyway).
     const rows = studentIds.flatMap((sid) =>
-      classIds.map((cid) => ({
-        student_id: sid,
-        class_type_id: cid,
-        date: today,
-        coach_id: coachId,
-        obstacles_in_class: n,
-      }))
+      classIds
+        .filter((cid) => !(existingByStudent.get(sid)?.has(cid)))
+        .map((cid) => ({
+          student_id: sid,
+          class_type_id: cid,
+          date,
+          coach_id: coachId,
+          obstacles_in_class: n,
+        }))
     );
+    if (rows.length === 0) {
+      toast.message("Todas esas marcas ya estaban registradas.");
+      setSubmitting(false);
+      return;
+    }
     const { error, count } = await supabase.from("attendance_logs").insert(rows, { count: "exact" });
     if (error) {
       toast.error(error.message);
     } else {
-      const perStudentXp = classes.length // estimate: 100/N * N = ~100 per student
-        ? 100
-        : 0;
-      toast.success(`Registradas ${count ?? rows.length} marcas (${studentIds.length} alumnos × ${n} obstáculos). ~${perStudentXp} XP por alumno.`);
+      toast.success(`Registradas ${count ?? rows.length} marcas en ${dayLabelEs(date)}.`);
       setPicked({});
       setSelectedClassIds({});
-      setAlreadyToday((prev) => { const s = new Set(prev); studentIds.forEach((i) => s.add(i)); return s; });
-      const { data: s } = await supabase.from("student_profiles").select("id, student_name, age, total_xp, group_id").order("student_name");
-      setStudents((s ?? []) as Student[]);
+      await reloadExisting();
+      await reloadStudents();
     }
     setSubmitting(false);
+  }
+
+  async function deleteStudentMarksForDate(studentId: string, studentName: string) {
+    const ids = (existingByStudent.get(studentId) ? [...(existingByStudent.get(studentId)!)] : []);
+    if (ids.length === 0) return;
+    if (!confirm(`Borrar las ${ids.length} marca/s de ${studentName} en ${dayLabelEs(date)}? Se va a recalcular el XP y la muñequera.`)) return;
+    const { error } = await supabase
+      .from("attendance_logs")
+      .delete()
+      .eq("date", date)
+      .eq("student_id", studentId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Marcas borradas. XP recalculado.`);
+    await reloadExisting();
+    await reloadStudents();
   }
 
   async function logout() { await supabase.auth.signOut(); navigate({ to: "/adn/auth" }); }
@@ -132,7 +209,7 @@ function CoachDashboard() {
         >
           <ShieldCheck className="mx-auto adn-fluor" size={42} />
           <h1 className="text-xl font-black">Acceso Coach</h1>
-          <p className="text-xs text-white/60">Ingresá el PIN maestro</p>
+          <p className="text-sm text-white/60">Ingresá el PIN maestro</p>
           <input
             autoFocus inputMode="numeric" pattern="[0-9]*" maxLength={4}
             value={pin}
@@ -148,6 +225,8 @@ function CoachDashboard() {
   }
 
   const xpPerObstacle = selectedCount > 0 ? Math.floor(100 / selectedCount) : 0;
+  const pickedCount = Object.values(picked).filter(Boolean).length;
+  const studentsWithExisting = filtered.filter((st) => (existingByStudent.get(st.id)?.size ?? 0) > 0);
 
   return (
     <div className="min-h-screen [padding-bottom:calc(8rem+env(safe-area-inset-bottom))]">
@@ -160,74 +239,138 @@ function CoachDashboard() {
       </header>
 
       <section className="px-5 space-y-4">
-        <AddStudentCard groups={groups} onCreated={async () => {
-          const { data: s } = await supabase.from("student_profiles").select("id, student_name, age, total_xp, group_id").order("student_name");
-          setStudents((s ?? []) as Student[]);
-        }} />
+        <AddStudentCard groups={groups} onCreated={reloadStudents} />
 
-        <div className="adn-card p-4">
-          <div className="text-[10px] tracking-[0.3em] text-white/50 mb-2">A · Grupo / Horario</div>
-          <select className="adn-input" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id} className="bg-black">
-                {g.code} — {g.days_label} {g.starts_at.slice(0,5)}-{g.ends_at.slice(0,5)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="adn-card p-4">
+        {/* Fecha */}
+        <div className={`adn-card p-4 ${isRetro ? "border border-[var(--adn-violet)]/60" : ""}`}>
           <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] tracking-[0.3em] text-white/50">B · Obstáculos trabajados ({selectedCount})</div>
-            {selectedCount > 0 && (
-              <div className="text-[10px] text-white/60">{xpPerObstacle} XP × obstáculo · pozo 100 XP</div>
-            )}
+            <div className="text-[10px] tracking-[0.3em] text-white/50 flex items-center gap-2">
+              <CalendarDays size={12} className="adn-fluor" /> FECHA DE LA CLASE
+            </div>
+            {isRetro && <span className="text-[10px] adn-violet flex items-center gap-1"><History size={12}/>RETROACTIVO</span>}
+            {!isRetro && <button type="button" onClick={() => setDate(todayISO())} className="text-[10px] text-white/40 hover:text-white">hoy</button>}
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {classes.map((c) => {
-              const on = !!selectedClassIds[c.id];
-              return (
-                <button key={c.id} type="button" onClick={() => toggleClass(c.id)}
-                  className={`py-2.5 px-3 rounded-lg text-xs font-bold border text-left ${on ? "border-[var(--adn-fluor)] bg-[var(--adn-fluor)]/10 text-white" : "border-white/10 text-white/60"}`}>
-                  <span className="inline-block w-3 h-3 rounded-sm border mr-2 align-middle"
-                    style={{ borderColor: on ? "var(--adn-fluor)" : "rgba(255,255,255,0.3)", background: on ? "var(--adn-fluor)" : "transparent" }} />
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
+          <input
+            type="date"
+            className="adn-input"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+          <div className="text-sm text-white/60 mt-2 capitalize">{dayLabelEs(date)}</div>
+          {isRetro && (
+            <button type="button" onClick={() => setDate(todayISO())} className="mt-2 text-xs adn-fluor hover:underline">
+              Volver a hoy
+            </button>
+          )}
         </div>
 
+        {/* Grupo */}
         <div className="adn-card p-4">
-          <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">C · Alumnos del grupo ({filtered.length})</div>
-          <ul className="divide-y divide-white/5">
-            {filtered.length === 0 && <li className="py-6 text-center text-white/40 text-sm">No hay alumnos asignados a este grupo.</li>}
-            {filtered.map((st) => {
-              const done = alreadyToday.has(st.id);
-              const on = !!picked[st.id];
-              return (
-                <li key={st.id}>
-                  <button onClick={() => togglePick(st.id)} disabled={done}
-                    className={`w-full flex items-center justify-between py-3 px-1 text-left ${done ? "opacity-50" : ""}`}>
-                    <div>
-                      <div className="font-bold text-white">{st.student_name} <span className="text-white/40 text-xs">· {st.age ?? "?"}a</span></div>
-                      <div className="text-xs text-white/40">{st.total_xp} XP</div>
-                    </div>
-                    <div className={`h-6 w-6 rounded-md border-2 flex items-center justify-center ${on ? "bg-[var(--adn-fluor)] border-[var(--adn-fluor)]" : "border-white/30"}`}>
-                      {on && <span className="text-black font-black text-sm">✓</span>}
-                      {done && !on && <span className="text-[10px] text-white/60">OK</span>}
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="text-[10px] tracking-[0.3em] text-white/50 mb-2">A · Grupo / Horario ({groupsForDate.length} para este día)</div>
+          {groupsForDate.length === 0 ? (
+            <div className="text-sm text-white/50 py-3">No hay grupos programados para {dayLabelEs(date)}.</div>
+          ) : (
+            <select className="adn-input" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
+              {groupsForDate.map((g) => (
+                <option key={g.id} value={g.id} className="bg-black">
+                  {g.code} — {g.days_label} {g.starts_at.slice(0,5)}-{g.ends_at.slice(0,5)}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
+
+        {groupId && (
+          <>
+            {/* Obstáculos */}
+            <div className="adn-card p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] tracking-[0.3em] text-white/50">B · Obstáculos trabajados ({selectedCount})</div>
+                {selectedCount > 0 && (
+                  <div className="text-[10px] text-white/60">{xpPerObstacle} XP × obstáculo · pozo 100 XP</div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {classes.map((c) => {
+                  const on = !!selectedClassIds[c.id];
+                  return (
+                    <button key={c.id} type="button" onClick={() => toggleClass(c.id)}
+                      className={`py-2.5 px-3 rounded-lg text-xs font-bold border text-left ${on ? "border-[var(--adn-fluor)] bg-[var(--adn-fluor)]/10 text-white" : "border-white/10 text-white/60"}`}>
+                      <span className="inline-block w-3 h-3 rounded-sm border mr-2 align-middle"
+                        style={{ borderColor: on ? "var(--adn-fluor)" : "rgba(255,255,255,0.3)", background: on ? "var(--adn-fluor)" : "transparent" }} />
+                      {c.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Alumnos */}
+            <div className="adn-card p-4">
+              <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">C · Alumnos del grupo ({filtered.length})</div>
+              <ul className="divide-y divide-white/5">
+                {filtered.length === 0 && <li className="py-6 text-center text-white/40 text-sm">No hay alumnos asignados a este grupo.</li>}
+                {filtered.map((st) => {
+                  const existCount = existingByStudent.get(st.id)?.size ?? 0;
+                  const on = !!picked[st.id];
+                  return (
+                    <li key={st.id}>
+                      <button onClick={() => togglePick(st.id)}
+                        className="w-full flex items-center justify-between py-3 px-1 text-left">
+                        <div>
+                          <div className="font-bold text-white">{st.student_name} <span className="text-white/40 text-xs">· {st.age ?? "?"}a</span></div>
+                          <div className="text-xs text-white/40">
+                            {st.total_xp} XP
+                            {existCount > 0 && <span className="ml-2 px-1.5 py-0.5 rounded bg-[var(--adn-fluor)]/15 adn-fluor">{existCount} marca/s en esta fecha</span>}
+                          </div>
+                        </div>
+                        <div className={`h-6 w-6 rounded-md border-2 flex items-center justify-center ${on ? "bg-[var(--adn-fluor)] border-[var(--adn-fluor)]" : "border-white/30"}`}>
+                          {on && <span className="text-black font-black text-sm">✓</span>}
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {/* Marcas existentes para esa fecha */}
+            {studentsWithExisting.length > 0 && (
+              <div className="adn-card p-4">
+                <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">D · Marcas ya registradas en esta fecha</div>
+                <ul className="divide-y divide-white/5">
+                  {studentsWithExisting.map((st) => {
+                    const ids = existingByStudent.get(st.id) ?? new Set<string>();
+                    const names = classes.filter((c) => ids.has(c.id)).map((c) => c.name);
+                    return (
+                      <li key={st.id} className="py-3 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-bold text-white">{st.student_name}</div>
+                          <div className="text-xs text-white/50 mt-0.5">{names.join(" · ")}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => deleteStudentMarksForDate(st.id, st.student_name)}
+                          className="shrink-0 inline-flex items-center gap-1 text-xs px-2 py-1.5 rounded-md border border-white/15 text-white/80 hover:border-red-500/60 hover:text-red-400"
+                        >
+                          <Trash2 size={14}/> Borrar
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div className="text-[10px] text-white/40 mt-3">Borrar marcas recalcula automáticamente el XP y la muñequera del alumno.</div>
+              </div>
+            )}
+          </>
+        )}
       </section>
 
       <div className="fixed bottom-0 left-0 right-0 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black via-black/95 to-transparent">
-        <button onClick={submitAttendance} disabled={submitting} className="adn-btn-primary w-full py-4 text-base">
-          {submitting ? "Registrando..." : `Registrar asistencia (${Object.values(picked).filter(Boolean).length} alumnos · ${selectedCount} obstáculos)`}
+        <button onClick={submitAttendance} disabled={submitting || !groupId} className="adn-btn-primary w-full py-4 text-base">
+          {submitting
+            ? "Registrando..."
+            : `Registrar${isRetro ? " (retro)" : ""} (${pickedCount} alumnos · ${selectedCount} obstáculos)`}
         </button>
       </div>
     </div>
@@ -355,5 +498,3 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
 }
 
 void USERNAME_DOMAIN;
-
-

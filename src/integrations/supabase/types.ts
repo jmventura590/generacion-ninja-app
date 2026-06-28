@@ -332,6 +332,10 @@ export type Database = {
     Functions: {
       belt_for_xp: { Args: { _xp: number }; Returns: string }
       level_for_xp: { Args: { _xp: number }; Returns: number }
+      recompute_student_xp: {
+        Args: { _student_id: string }
+        Returns: undefined
+      }
       record_system_heartbeat: { Args: never; Returns: undefined }
       xp_required_for_level: { Args: { level_n: number }; Returns: number }
     }
