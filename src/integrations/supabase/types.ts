@@ -207,8 +207,8 @@ export type Database = {
           birth_date: string | null
           created_at: string
           current_belt_color: string
-          family_google_email: string | null
           family_user_id: string | null
+          family_username: string | null
           group_id: string | null
           id: string
           student_name: string
@@ -221,8 +221,8 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           current_belt_color?: string
-          family_google_email?: string | null
           family_user_id?: string | null
+          family_username?: string | null
           group_id?: string | null
           id?: string
           student_name: string
@@ -235,8 +235,8 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           current_belt_color?: string
-          family_google_email?: string | null
           family_user_id?: string | null
+          family_username?: string | null
           group_id?: string | null
           id?: string
           student_name?: string
@@ -331,7 +331,6 @@ export type Database = {
     }
     Functions: {
       belt_for_xp: { Args: { _xp: number }; Returns: string }
-      is_email_authorized: { Args: { _email: string }; Returns: boolean }
       level_for_xp: { Args: { _xp: number }; Returns: number }
       record_system_heartbeat: { Args: never; Returns: undefined }
       xp_required_for_level: { Args: { level_n: number }; Returns: number }
