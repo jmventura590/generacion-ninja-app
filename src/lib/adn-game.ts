@@ -52,7 +52,7 @@ export type SkillKey = (typeof SKILLS)[number]["key"];
 
 import muroImg from "@/assets/adn-muro.png";
 import pasamanosImg from "@/assets/adn-pasamanos.png";
-import puenteImg from "@/assets/adn-puente.png";
+import puenteImg from "@/assets/obstacles/puente.png";
 
 export const OBSTACLES: {
   name: string;
