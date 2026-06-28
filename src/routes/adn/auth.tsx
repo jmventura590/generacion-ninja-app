@@ -141,18 +141,34 @@ function AuthPage() {
         </button>
 
         <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-white/30">
-          <span className="flex-1 h-px bg-white/10" /> o con email <span className="flex-1 h-px bg-white/10" />
+          <span className="flex-1 h-px bg-white/10" /> o con usuario / email <span className="flex-1 h-px bg-white/10" />
         </div>
 
-        <form onSubmit={submit} className="adn-card p-5 space-y-3">
-          <div className="flex gap-2 text-xs">
-            <button type="button" onClick={() => setMode("signin")} className={`flex-1 py-2 rounded-lg ${mode==="signin" ? "bg-white/10 text-white" : "text-white/50"}`}>Ingresar</button>
-            <button type="button" onClick={() => setMode("signup")} className={`flex-1 py-2 rounded-lg ${mode==="signup" ? "bg-white/10 text-white" : "text-white/50"}`}>Crear cuenta</button>
+        <div className="adn-card p-5 space-y-3">
+          <div className="flex gap-1 text-[11px]">
+            <button type="button" onClick={() => setMode("student")} className={`flex-1 py-2 rounded-lg ${mode==="student" ? "bg-white/10 text-white" : "text-white/50"}`}>Alumno</button>
+            <button type="button" onClick={() => setMode("signin")} className={`flex-1 py-2 rounded-lg ${mode==="signin" ? "bg-white/10 text-white" : "text-white/50"}`}>Familia (email)</button>
+            <button type="button" onClick={() => setMode("signup")} className={`flex-1 py-2 rounded-lg ${mode==="signup" ? "bg-white/10 text-white" : "text-white/50"}`}>Crear</button>
           </div>
-          <input className="adn-input" type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <input className="adn-input" type="password" placeholder="contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-          <button disabled={busy} className="adn-btn-primary w-full py-3">{mode === "signin" ? "Ingresar" : "Crear cuenta"}</button>
-        </form>
+
+          {mode === "student" ? (
+            <form onSubmit={studentLogin} className="space-y-3">
+              <input className="adn-input" placeholder="usuario" value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+                autoCapitalize="off" autoCorrect="off" required minLength={3} />
+              <input className="adn-input" type="password" placeholder="contraseña" value={studentPwd}
+                onChange={(e) => setStudentPwd(e.target.value)} required minLength={4} />
+              <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar</button>
+              <p className="text-[10px] text-white/40 text-center">El coach te entrega usuario y contraseña.</p>
+            </form>
+          ) : (
+            <form onSubmit={submit} className="space-y-3">
+              <input className="adn-input" type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input className="adn-input" type="password" placeholder="contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+              <button disabled={busy} className="adn-btn-primary w-full py-3">{mode === "signin" ? "Ingresar" : "Crear cuenta"}</button>
+            </form>
+          )}
+        </div>
 
         <div className="adn-card p-4 space-y-3">
           <div className="flex items-center justify-between">
