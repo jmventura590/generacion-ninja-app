@@ -1,15 +1,16 @@
 // Belt + obstacle helpers shared across ADN routes.
 
-export type BeltKey = "white" | "green" | "blue" | "red" | "black";
+export type BeltKey = "none" | "white" | "green" | "blue" | "red" | "black";
 
-// Belt thresholds expressed as LEVELS reached using the exponential XP curve.
-// xp_required_for_level(n) = round(100 * 1.15^n); level is cumulative.
+// Belt thresholds (LEVELS). Mantener sincronizado con public.app_settings.belt_thresholds.
+// Defaults: Blanca 11 · Verde 16 · Azul 21 · Roja 26 · Negra 31.
 export const BELTS: { key: BeltKey; label: string; subtitle: string; minLevel: number; hex: string }[] = [
-  { key: "white", label: "Muñequera Blanca", subtitle: "Nivel Inicial",        minLevel: 0,  hex: "#ffffff" },
-  { key: "green", label: "Muñequera Verde",  subtitle: "Constancia Inicial",   minLevel: 5,  hex: "#39ff14" },
-  { key: "blue",  label: "Muñequera Azul",   subtitle: "Compromiso Avanzado",  minLevel: 10, hex: "#3aa0ff" },
-  { key: "red",   label: "Muñequera Roja",   subtitle: "Elite Ninja",          minLevel: 15, hex: "#ff2d55" },
-  { key: "black", label: "Muñequera Negra",  subtitle: "Maestro del Circuito", minLevel: 20, hex: "#222222" },
+  { key: "none",  label: "Sin Muñequera",   subtitle: "Camino Inicial",       minLevel: 0,  hex: "#555555" },
+  { key: "white", label: "Muñequera Blanca", subtitle: "Nivel Inicial",        minLevel: 11, hex: "#ffffff" },
+  { key: "green", label: "Muñequera Verde",  subtitle: "Constancia Inicial",   minLevel: 16, hex: "#39ff14" },
+  { key: "blue",  label: "Muñequera Azul",   subtitle: "Compromiso Avanzado",  minLevel: 21, hex: "#3aa0ff" },
+  { key: "red",   label: "Muñequera Roja",   subtitle: "Elite Ninja",          minLevel: 26, hex: "#ff2d55" },
+  { key: "black", label: "Muñequera Negra",  subtitle: "Maestro del Circuito", minLevel: 31, hex: "#222222" },
 ];
 
 export function xpRequiredForLevel(level: number): number {
