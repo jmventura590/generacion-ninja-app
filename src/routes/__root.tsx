@@ -1,19 +1,18 @@
-import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useRouter, useRouterState } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useRouter } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { AppShell } from "../components/AppShell";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="text-center">
         <h1 className="text-7xl font-black text-neon">404</h1>
-        <p className="mt-3 text-sm text-muted-foreground">This obstacle doesn't exist.</p>
-        <a href="/" className="mt-6 inline-block rounded-md bg-gradient-neon px-4 py-2 text-sm font-bold text-primary-foreground">
-          Back to my path
+        <p className="mt-3 text-sm text-muted-foreground">Este obstáculo no existe.</p>
+        <a href="/adn" className="mt-6 inline-block rounded-md bg-gradient-neon px-4 py-2 text-sm font-bold text-primary-foreground">
+          Volver al inicio
         </a>
       </div>
     </div>
@@ -28,13 +27,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-sm text-center">
-        <h1 className="text-xl font-bold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Try again in a moment.</p>
+        <h1 className="text-xl font-bold">Algo salió mal</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Probá de nuevo en un momento.</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
           className="mt-6 rounded-md bg-gradient-neon px-4 py-2 text-sm font-bold text-primary-foreground"
         >
-          Try again
+          Reintentar
         </button>
       </div>
     </div>
@@ -46,7 +45,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "ADN Generación Ninja — Mi Camino Ninja" },
+      { title: "ADN Generación Ninja" },
       { name: "description", content: "Seguimiento de asistencia gamificado para el gimnasio de obstáculos ADN Generación Ninja." },
       { name: "theme-color", content: "#121212" },
       { property: "og:title", content: "ADN Generación Ninja" },
@@ -72,7 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="es" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -86,12 +85,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isAdn = pathname.startsWith("/adn");
   return (
     <QueryClientProvider client={queryClient}>
-      {isAdn ? <Outlet /> : <AppShell />}
-      <noscript><Outlet /></noscript>
+      <Outlet />
     </QueryClientProvider>
   );
 }
