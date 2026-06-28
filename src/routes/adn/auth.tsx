@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { seedAdnDemo } from "@/lib/adn-seed.functions";
 
 export const Route = createFileRoute("/adn/auth")({

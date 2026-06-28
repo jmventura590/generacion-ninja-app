@@ -9,15 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as AdnRouteRouteImport } from './routes/adn/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdnIndexRouteImport } from './routes/adn/index'
 import { Route as AdnStudentRouteImport } from './routes/adn/student'
 import { Route as AdnCoachRouteImport } from './routes/adn/coach'
 import { Route as AdnAuthRouteImport } from './routes/adn/auth'
 
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdnRouteRoute = AdnRouteRouteImport.update({
   id: '/adn',
   path: '/adn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdnIndexRoute = AdnIndexRouteImport.update({
@@ -42,13 +54,17 @@ const AdnAuthRoute = AdnAuthRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/adn': typeof AdnRouteRouteWithChildren
+  '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn/': typeof AdnIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
   '/adn/student': typeof AdnStudentRoute
@@ -56,7 +72,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/adn': typeof AdnRouteRouteWithChildren
+  '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
   '/adn/student': typeof AdnStudentRoute
@@ -64,12 +82,21 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/adn' | '/adn/auth' | '/adn/coach' | '/adn/student' | '/adn/'
+  fullPaths:
+    | '/'
+    | '/adn'
+    | '/report'
+    | '/adn/auth'
+    | '/adn/coach'
+    | '/adn/student'
+    | '/adn/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/adn/auth' | '/adn/coach' | '/adn/student' | '/adn'
+  to: '/' | '/report' | '/adn/auth' | '/adn/coach' | '/adn/student' | '/adn'
   id:
     | '__root__'
+    | '/'
     | '/adn'
+    | '/report'
     | '/adn/auth'
     | '/adn/coach'
     | '/adn/student'
@@ -77,16 +104,32 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AdnRouteRoute: typeof AdnRouteRouteWithChildren
+  ReportRoute: typeof ReportRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/adn': {
       id: '/adn'
       path: '/adn'
       fullPath: '/adn'
       preLoaderRoute: typeof AdnRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/adn/': {
@@ -139,7 +182,9 @@ const AdnRouteRouteWithChildren = AdnRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AdnRouteRoute: AdnRouteRouteWithChildren,
+  ReportRoute: ReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
