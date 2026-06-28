@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { seedAdnDemo } from "@/lib/adn-seed.functions";
-import { USERNAME_DOMAIN } from "@/lib/adn-students.functions";
+import { USERNAME_DOMAIN, enforceGoogleWhitelist } from "@/lib/adn-students.functions";
 
 export const Route = createFileRoute("/adn/auth")({
   component: AuthPage,
