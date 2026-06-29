@@ -4,7 +4,7 @@ import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff } from "lucide-react";
-import { BELTS, beltFromXp, SKILLS, type SkillKey } from "@/lib/adn-game";
+import { BELTS, beltFromXp, SKILLS, type SkillKey, type BeltKey } from "@/lib/adn-game";
 
 export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
@@ -41,7 +41,21 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
 ];
 
-/* ─── Obstáculos del Medallero (nombres = class_types en DB) ─── */
+/* ─── Escenarios (9 fondos: 1 default + 8 desbloqueables) ─── */
+type Scenario = { id: string; name: string; css: string };
+const SCENARIOS: Scenario[] = [
+  { id: "default", name: "Base",       css: "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)" },
+  { id: "neon",    name: "Neón",       css: "radial-gradient(circle at 50% 60%, #39ff1455 0%, #0a0a25 70%)" },
+  { id: "fire",    name: "Fuego",      css: "radial-gradient(circle at 50% 65%, #ff4d00aa 0%, #df00ff55 45%, #100010 80%)" },
+  { id: "cosmos",  name: "Cosmos",     css: "radial-gradient(circle at 50% 50%, #df00ffaa 0%, #00ffaeaa 35%, #0a0a25 80%)" },
+  { id: "ice",     name: "Hielo",      css: "radial-gradient(circle at 50% 55%, #3aa0ffaa 0%, #00f7ff55 40%, #02061a 85%)" },
+  { id: "gold",    name: "Dorado",     css: "radial-gradient(circle at 50% 60%, #ffd700aa 0%, #ff8a00aa 45%, #1a0d00 85%)" },
+  { id: "stars",   name: "Estrellas",  css: "radial-gradient(circle at 30% 30%, #ffffff44 0%, transparent 6%), radial-gradient(circle at 70% 60%, #ffffff66 0%, transparent 5%), radial-gradient(circle at 50% 80%, #3aa0ff77 0%, #02021a 80%)" },
+  { id: "jungle",  name: "Jungla",     css: "radial-gradient(circle at 50% 60%, #00ffae77 0%, #0a3d0a 50%, #02100a 85%)" },
+  { id: "lava",    name: "Lava",       css: "radial-gradient(circle at 50% 80%, #ff2d55cc 0%, #ff8a00aa 35%, #1a0000 85%)" },
+];
+
+/* ─── Obstáculos del Medallero ─── */
 import obMuro from "@/assets/obstacles/muro.png";
 import obPasamanos from "@/assets/obstacles/pasamanos.png";
 import obEscalera from "@/assets/obstacles/escalera.png";
@@ -53,43 +67,53 @@ import obTronco from "@/assets/obstacles/tronco.png";
 import obPuente from "@/assets/obstacles/puente.png";
 import { BirthdayCelebration } from "@/components/BirthdayCelebration";
 
-const OBSTACLES: { name: string; img: string }[] = [
-  { name: "Muro Curvado",      img: obMuro },
-  { name: "Pasamanos",         img: obPasamanos },
-  { name: "Escalera Invertida",img: obEscalera },
-  { name: "5 Escalones",       img: obEscalones },
-  { name: "Palestra",          img: obPalestra },
-  { name: "Pegboard",          img: obPegboard },
-  { name: "Pelotas Colgantes", img: obPelotas },
-  { name: "Tronco Giratorio",  img: obTronco },
-  { name: "Puente Colgante",   img: obPuente },
+/** Lista en orden (1..9) — unlock mapping abajo se basa en este orden. */
+const OBSTACLES: { name: string; img: string; unlock: (s: Skills) => boolean }[] = [
+  // 1 Salto
+  { name: "Muro Curvado",       img: obMuro,      unlock: (s) => skillFull(s.jump_xp) },
+  // 2 Agarre + Resistencia
+  { name: "Pasamanos",          img: obPasamanos, unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  // 3 Agarre + Resistencia
+  { name: "Escalera Invertida", img: obEscalera,  unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  // 4 Salto
+  { name: "5 Escalones",        img: obEscalones, unlock: (s) => skillFull(s.jump_xp) },
+  // 5 Fuerza
+  { name: "Palestra",           img: obPalestra,  unlock: (s) => skillFull(s.strength_xp) },
+  // 6 Fuerza
+  { name: "Pegboard",           img: obPegboard,  unlock: (s) => skillFull(s.strength_xp) },
+  // 7 Velocidad
+  { name: "Pelotas Colgantes",  img: obPelotas,   unlock: (s) => skillFull(s.speed_xp) },
+  // 8 Equilibrio + Coordinación
+  { name: "Tronco Giratorio",   img: obTronco,    unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+  // 9 Equilibrio + Coordinación
+  { name: "Puente Colgante",    img: obPuente,    unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
 ];
 
-const UNLOCK_THRESHOLD = 1; // ≥1 asistencia con ese obstáculo = desbloqueado
+const SKILL_MAX = 500; // 100% de la barra
+function skillFull(v: number | undefined) { return (v ?? 0) >= SKILL_MAX; }
 
-/* ─── Accesorios de avatar por nivel ─── */
-type CapVariant = "green" | "blue" | "red" | "gold";
-type BgVariant = "neon" | "fire" | "cosmos";
-type Accessories = {
-  wristband: { color: string } | null; // L3+
-  cap: CapVariant | null;              // L5, L10, L15, L20
-  background: BgVariant | null;        // L8, L15, L20
-};
-
-function accessoriesForLevel(level: number, beltHex: string): Accessories {
-  return {
-    wristband: level >= 3 ? { color: beltHex } : null,
-    cap:
-      level >= 20 ? "gold" :
-      level >= 15 ? "red"  :
-      level >= 10 ? "blue" :
-      level >= 5  ? "green" : null,
-    background:
-      level >= 20 ? "cosmos" :
-      level >= 15 ? "fire"   :
-      level >= 8  ? "neon"   : null,
+/* ─── Helpers de aleatoriedad determinística por alumno ─── */
+function seededShuffle<T>(arr: T[], seed: string): T[] {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+  const rand = () => {
+    h = Math.imul(h ^ (h >>> 15), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
   };
+  const out = arr.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
+
+type Belt = (typeof BELTS)[number];
+type BeltThresholds = Record<Exclude<BeltKey, "none">, number>;
+const DEFAULT_THRESHOLDS: BeltThresholds = { white: 11, green: 16, blue: 21, red: 26, black: 31 };
+
+type Accessories = { wristband: { color: string; key: BeltKey } | null; background: Scenario };
 
 type TabKey = "medals" | "avatar" | "evo";
 
@@ -99,7 +123,10 @@ function StudentDashboard() {
   const [student, setStudent] = useState<Student | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
   const [avatarId, setAvatarId] = useState<string>("b1");
+  const [scenarioId, setScenarioId] = useState<string>("default");
+  const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
+  const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
   const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
   const [birthday, setBirthday] = useState<null | { seed: string }>(null);
   const [streak, setStreak] = useState<number>(0);
@@ -119,26 +146,44 @@ function StudentDashboard() {
       const { data: sk } = await supabase.from("skill_bars").select("*").eq("student_id", stu.id).maybeSingle();
       if (sk) setSkills(sk as any);
 
-      const { data: av } = await supabase.from("avatars").select("hair").eq("student_id", stu.id).maybeSingle();
+      const { data: av } = await supabase.from("avatars").select("hair, hair_color").eq("student_id", stu.id).maybeSingle();
       if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair)) setAvatarId(av.hair);
+      if (av?.hair_color && SCENARIOS.some((sc) => sc.id === av.hair_color)) setScenarioId(av.hair_color);
 
-      // Conteo real de asistencias por tipo de clase (obstáculo)
+      // Asistencia: días distintos + conteo por obstáculo
       const { data: logs } = await supabase
         .from("attendance_logs")
-        .select("class_type_id, class_types(name)")
+        .select("date, class_type_id, class_types(name)")
         .eq("student_id", stu.id);
       const counts: Record<string, number> = {};
+      const days = new Set<string>();
       (logs ?? []).forEach((r: any) => {
         const n = r.class_types?.name;
         if (n) counts[n] = (counts[n] ?? 0) + 1;
+        if (r.date) days.add(String(r.date));
       });
       setObstacleCounts(counts);
+      setAttendanceDays(days.size);
 
-      // Racha de semanas consecutivas con asistencia (cálculo en DB)
+      // Thresholds dinámicos desde app_settings
+      try {
+        const { data: ts } = await (supabase.from as any)("app_settings")
+          .select("value").eq("key", "belt_thresholds").maybeSingle();
+        if (ts?.value && typeof ts.value === "object") {
+          setThresholds({
+            white: Number(ts.value.white ?? DEFAULT_THRESHOLDS.white),
+            green: Number(ts.value.green ?? DEFAULT_THRESHOLDS.green),
+            blue:  Number(ts.value.blue  ?? DEFAULT_THRESHOLDS.blue),
+            red:   Number(ts.value.red   ?? DEFAULT_THRESHOLDS.red),
+            black: Number(ts.value.black ?? DEFAULT_THRESHOLDS.black),
+          });
+        }
+      } catch { /* fallback */ }
+
       const { data: streakData } = await supabase.rpc("attendance_streak_weeks", { _student_id: stu.id });
       setStreak(typeof streakData === "number" ? streakData : 0);
 
-      // Detectar subida de muñequera
+      // Subida de muñequera
       const storageKey = `adn:lastBelt:${stu.id}`;
       const lastSeen = localStorage.getItem(storageKey);
       prevBeltRef.current = lastSeen;
@@ -150,10 +195,10 @@ function StudentDashboard() {
       }
       localStorage.setItem(storageKey, stu.current_belt_color);
 
-      // Cumpleaños: si hoy coincide día/mes con birth_date, mostrar 1 vez al año
+      // Cumpleaños
       if (stu.birth_date) {
         const today = new Date();
-        const [by, bm, bd] = stu.birth_date.split("-").map(Number);
+        const [, bm, bd] = stu.birth_date.split("-").map(Number);
         if (bm === today.getMonth() + 1 && bd === today.getDate()) {
           const year = today.getFullYear();
           const bdayKey = `adn:bday:${stu.id}:${year}`;
@@ -161,18 +206,45 @@ function StudentDashboard() {
             setBirthday({ seed: `${stu.id}-${year}` });
             localStorage.setItem(bdayKey, "1");
           }
-          void by;
         }
       }
     })();
   }, [navigate]);
 
+  // Desbloqueos derivados de asistencia
+  const avatarOrder = useMemo(
+    () => student ? seededShuffle(AVATAR_PRESETS.map((p) => p.id), `${student.id}:avatars`) : AVATAR_PRESETS.map((p) => p.id),
+    [student],
+  );
+  const scenarioOrder = useMemo(() => {
+    if (!student) return SCENARIOS.map((s) => s.id);
+    const rest = SCENARIOS.filter((s) => s.id !== "default").map((s) => s.id);
+    return ["default", ...seededShuffle(rest, `${student.id}:scenarios`)];
+  }, [student]);
+
+  const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
+  const scenariosUnlockedCount = Math.min(SCENARIOS.length, 1 + Math.floor(attendanceDays / 15));
+  const unlockedAvatarIds = new Set(avatarOrder.slice(0, avatarsUnlockedCount));
+  const unlockedScenarioIds = new Set(scenarioOrder.slice(0, scenariosUnlockedCount));
+
   async function selectAvatar(id: string) {
+    if (!unlockedAvatarIds.has(id)) { toast.info("Personaje bloqueado. Seguí asistiendo a clase."); return; }
     setAvatarId(id);
     if (!student) return;
     const preset = AVATAR_PRESETS.find((p) => p.id === id)!;
     await supabase.from("avatars").upsert(
-      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: "#000", hair_color: "#000" },
+      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: "#000", hair_color: scenarioId },
+      { onConflict: "student_id" },
+    );
+  }
+
+  async function selectScenario(id: string) {
+    if (!unlockedScenarioIds.has(id)) { toast.info("Escenario bloqueado. Seguí asistiendo a clase."); return; }
+    setScenarioId(id);
+    if (!student) return;
+    const preset = AVATAR_PRESETS.find((p) => p.id === avatarId)!;
+    await supabase.from("avatars").upsert(
+      { student_id: student.id, hair: preset.id, gender: preset.gender, skin: "#000", hair_color: id },
       { onConflict: "student_id" },
     );
   }
@@ -182,8 +254,13 @@ function StudentDashboard() {
   if (!student || !skills) return <div className="p-10 text-center text-white/60">Cargando...</div>;
 
   const belt = beltFromXp(student.total_xp);
+  const beltDb = BELTS.find((b) => b.key === student.current_belt_color) ?? belt.current;
   const preset = AVATAR_PRESETS.find((p) => p.id === avatarId) ?? AVATAR_PRESETS[0];
-  const accessories = accessoriesForLevel(belt.level, belt.current.hex);
+  const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0];
+  const accessories: Accessories = {
+    wristband: beltDb.key === "none" ? null : { color: beltDb.hex, key: beltDb.key },
+    background: scenario,
+  };
 
   return (
     <div className="min-h-screen pb-6 [padding-bottom:calc(1.5rem+env(safe-area-inset-bottom))]">
@@ -198,6 +275,7 @@ function StudentDashboard() {
       <main className="px-5 mt-4">
         {tab === "medals" && (
           <Medallero
+            skills={skills}
             counts={obstacleCounts}
             onAvatar={() => setTab("avatar")}
             onEvo={() => setTab("evo")}
@@ -207,12 +285,27 @@ function StudentDashboard() {
         )}
         {tab === "avatar" && (
           <SubScreen title="Avatar" onBack={() => setTab("medals")}>
-            <AvatarStudio selectedId={avatarId} onSelect={selectAvatar} accessories={accessories} level={belt.level} />
+            <AvatarStudio
+              selectedId={avatarId}
+              onSelect={selectAvatar}
+              accessories={accessories}
+              currentBelt={beltDb}
+              thresholds={thresholds}
+              level={belt.level}
+              unlockedAvatarIds={unlockedAvatarIds}
+              avatarOrder={avatarOrder}
+              avatarsUnlockedCount={avatarsUnlockedCount}
+              unlockedScenarioIds={unlockedScenarioIds}
+              scenariosUnlockedCount={scenariosUnlockedCount}
+              attendanceDays={attendanceDays}
+              selectedScenarioId={scenarioId}
+              onSelectScenario={selectScenario}
+            />
           </SubScreen>
         )}
         {tab === "evo" && (
           <SubScreen title="Evolución" onBack={() => setTab("medals")}>
-            <Evolution student={student} skills={skills} belt={belt} />
+            <Evolution student={student} skills={skills} belt={belt} beltDb={beltDb} />
           </SubScreen>
         )}
       </main>
@@ -237,7 +330,7 @@ function StudentDashboard() {
   );
 }
 
-/* ─── SubScreen wrapper con botón Volver ─── */
+/* ─── SubScreen wrapper ─── */
 function SubScreen({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
   return (
     <div>
@@ -252,37 +345,31 @@ function SubScreen({ title, onBack, children }: { title: string; onBack: () => v
 
 /* ─── Medallero (pantalla principal) ─── */
 function Medallero({
-  counts, onAvatar, onEvo, belt, streak,
+  skills, counts, onAvatar, onEvo, belt, streak,
 }: {
+  skills: Skills;
   counts: Record<string, number>;
   onAvatar: () => void;
   onEvo: () => void;
   belt: ReturnType<typeof beltFromXp>;
   streak: number;
 }) {
-  const unlockedCount = OBSTACLES.filter((o) => (counts[o.name] ?? 0) >= UNLOCK_THRESHOLD).length;
+  void counts;
+  const unlocks = OBSTACLES.map((o) => o.unlock(skills));
+  const unlockedCount = unlocks.filter(Boolean).length;
   const active = streak > 0;
   return (
     <div className="space-y-5">
       {/* Racha de asistencia */}
-      <div
-        className={`adn-card relative overflow-hidden p-4 ${active ? "border-[var(--adn-fluor)]/60 shadow-[0_0_22px_#39ff1433]" : ""}`}
-      >
+      <div className={`adn-card relative overflow-hidden p-4 ${active ? "border-[var(--adn-fluor)]/60 shadow-[0_0_22px_#39ff1433]" : ""}`}>
         {active && (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-60"
-            style={{ background: "radial-gradient(120% 80% at 0% 0%, #39ff1422 0%, transparent 55%)" }}
-          />
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60"
+            style={{ background: "radial-gradient(120% 80% at 0% 0%, #39ff1422 0%, transparent 55%)" }} />
         )}
         <div className="relative flex items-center gap-3">
-          <div
-            className={`h-12 w-12 shrink-0 rounded-xl grid place-items-center border ${
-              active
-                ? "border-[var(--adn-fluor)] bg-[#39ff14]/10 text-[var(--adn-fluor)] shadow-[0_0_14px_#39ff1455] animate-pulse"
-                : "border-white/15 bg-white/5 text-white/50"
-            }`}
-          >
+          <div className={`h-12 w-12 shrink-0 rounded-xl grid place-items-center border ${
+            active ? "border-[var(--adn-fluor)] bg-[#39ff14]/10 text-[var(--adn-fluor)] shadow-[0_0_14px_#39ff1455] animate-pulse"
+                   : "border-white/15 bg-white/5 text-white/50"}`}>
             {active ? <Flame size={24} strokeWidth={2.5}/> : <CalendarOff size={22}/>}
           </div>
           <div className="min-w-0 flex-1">
@@ -292,9 +379,8 @@ function Medallero({
               <span className="text-xs text-white/60">{streak === 1 ? "semana" : "semanas"}</span>
             </div>
             <div className="text-[11px] text-white/70 mt-0.5 leading-snug">
-              {active
-                ? `Llevás ${streak} ${streak === 1 ? "semana" : "semanas"} seguidas entrenando. ¡Así se hace!`
-                : "Volvé a clase para arrancar tu racha."}
+              {active ? `Llevás ${streak} ${streak === 1 ? "semana" : "semanas"} seguidas entrenando. ¡Así se hace!`
+                      : "Volvé a clase para arrancar tu racha."}
             </div>
           </div>
         </div>
@@ -312,52 +398,39 @@ function Medallero({
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        {OBSTACLES.map((o) => {
-          const c = counts[o.name] ?? 0;
-          const unlocked = c >= UNLOCK_THRESHOLD;
+        {OBSTACLES.map((o, idx) => {
+          const unlocked = unlocks[idx];
           return (
-            <div
-              key={o.name}
+            <div key={o.name}
               className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden ${
-                unlocked
-                  ? "bg-black/40 border-[var(--adn-fluor)]/50 shadow-[0_0_18px_#39ff1433]"
-                  : "bg-black/30 border-white/10"
-              }`}
-            >
-              <img
-                src={o.img}
-                alt={o.name}
-                className={`w-full flex-1 object-contain ${unlocked ? "" : "blur-[4px] opacity-60"}`}
-                draggable={false}
-              />
-              <div className="text-[9px] uppercase text-center text-white/70 leading-tight w-full px-1 truncate">
-                {o.name}
-              </div>
-              <span
-                className={`absolute top-1.5 right-1.5 h-6 w-6 rounded-full grid place-items-center ${
-                  unlocked ? "bg-[var(--adn-fluor)] text-black shadow-[0_0_10px_#39ff14]" : "bg-white/10 text-white/60"
-                }`}
-              >
-                {unlocked ? <Check size={13} strokeWidth={3}/> : <Lock size={12}/>}
-              </span>
+                unlocked ? "bg-black/40 border-[var(--adn-fluor)]/50 shadow-[0_0_18px_#39ff1433]"
+                         : "bg-black/30 border-white/10"}`}>
+              <img src={o.img} alt={o.name}
+                className={`w-full flex-1 object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
+                draggable={false} />
+              <div className="text-[9px] uppercase text-center text-white/70 leading-tight w-full px-1 truncate">{o.name}</div>
+              {unlocked ? (
+                <span className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full grid place-items-center bg-[var(--adn-fluor)] text-black shadow-[0_0_10px_#39ff14]">
+                  <Check size={13} strokeWidth={3}/>
+                </span>
+              ) : (
+                <span className="absolute inset-0 grid place-items-center pointer-events-none">
+                  <span className="h-9 w-9 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_12px_#39ff1466]">
+                    <Lock size={16} className="adn-fluor" />
+                  </span>
+                </span>
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Accesos: Avatar (izq) + Evolución (der) */}
       <div className="grid grid-cols-2 gap-3 pt-2">
-        <button
-          onClick={onAvatar}
-          className="adn-card p-5 flex flex-col items-center gap-2 hover:border-[var(--adn-fluor)]/60 transition"
-        >
+        <button onClick={onAvatar} className="adn-card p-5 flex flex-col items-center gap-2 hover:border-[var(--adn-fluor)]/60 transition">
           <User size={28} className="adn-fluor"/>
           <div className="text-xs tracking-[0.3em] font-bold">AVATAR</div>
         </button>
-        <button
-          onClick={onEvo}
-          className="adn-card p-5 flex flex-col items-center gap-2 hover:border-[var(--adn-fluor)]/60 transition"
-        >
+        <button onClick={onEvo} className="adn-card p-5 flex flex-col items-center gap-2 hover:border-[var(--adn-fluor)]/60 transition">
           <BarChart3 size={28} className="adn-fluor"/>
           <div className="text-xs tracking-[0.3em] font-bold">EVOLUCIÓN</div>
         </button>
@@ -368,38 +441,133 @@ function Medallero({
 
 /* ─── Avatar Studio ─── */
 function AvatarStudio({
-  selectedId, onSelect, accessories, level,
+  selectedId, onSelect, accessories, currentBelt, thresholds, level,
+  unlockedAvatarIds, avatarOrder, avatarsUnlockedCount,
+  unlockedScenarioIds, scenariosUnlockedCount, attendanceDays,
+  selectedScenarioId, onSelectScenario,
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
   accessories: Accessories;
+  currentBelt: Belt;
+  thresholds: BeltThresholds;
   level: number;
+  unlockedAvatarIds: Set<string>;
+  avatarOrder: string[];
+  avatarsUnlockedCount: number;
+  unlockedScenarioIds: Set<string>;
+  scenariosUnlockedCount: number;
+  attendanceDays: number;
+  selectedScenarioId: string;
+  onSelectScenario: (id: string) => void;
 }) {
   const selected = AVATAR_PRESETS.find((p) => p.id === selectedId) ?? AVATAR_PRESETS[0];
-  const currentBelt = [...BELTS].reverse().find((b) => level >= b.minLevel) ?? BELTS[0];
-  // Fondo base uniforme para que los 10 thumbs arranquen iguales.
-  const thumbBg = "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)";
+
+  // Lista ordenada de muñequeras para el panel izq (incluye "none" como base bloqueado/inicial)
+  const beltLadder: { belt: Belt; required: number }[] = [
+    { belt: BELTS.find((b) => b.key === "white")!, required: thresholds.white },
+    { belt: BELTS.find((b) => b.key === "green")!, required: thresholds.green },
+    { belt: BELTS.find((b) => b.key === "blue")!,  required: thresholds.blue  },
+    { belt: BELTS.find((b) => b.key === "red")!,   required: thresholds.red   },
+    { belt: BELTS.find((b) => b.key === "black")!, required: thresholds.black },
+  ];
+
   return (
     <div className="space-y-5">
-      <div className="adn-card p-5 flex flex-col items-center">
-        <AvatarImage preset={selected} size={240} accessories={accessories} />
-        <p className="mt-3 text-xs text-white/50 text-center">
-          Tu avatar luce los accesorios desbloqueados hasta el nivel actual.
-        </p>
-        <AccessoriesLegend accessories={accessories} level={level} beltLabel={currentBelt.label} />
+      {/* Zona central: paneles laterales + avatar */}
+      <div className="adn-card p-4">
+        <div className="grid grid-cols-[64px_1fr_64px] gap-3 items-stretch">
+          {/* PANEL IZQ — Escala vertical de pulseras */}
+          <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2">
+            <div className="text-[8px] tracking-[0.25em] text-white/50 text-center leading-tight">PULSE-<br/>RAS</div>
+            {beltLadder.slice().reverse().map(({ belt, required }) => {
+              const unlocked = level >= required;
+              const isCurrent = belt.key === currentBelt.key && currentBelt.key !== "none";
+              return (
+                <div key={belt.key} className="flex flex-col items-center">
+                  <div
+                    title={`${belt.label} · L${required}`}
+                    className={`h-7 w-7 rounded-full border-2 grid place-items-center ${
+                      isCurrent ? "animate-pulse" : ""
+                    }`}
+                    style={{
+                      background: unlocked ? belt.hex : "#2a2a2a",
+                      borderColor: isCurrent ? "#39ff14" : unlocked ? "#ffffff55" : "#444",
+                      filter: unlocked ? "none" : "grayscale(1)",
+                      boxShadow: isCurrent ? `0 0 14px ${belt.hex}, 0 0 22px #39ff14aa` : unlocked ? `0 0 8px ${belt.hex}66` : "none",
+                      opacity: unlocked ? 1 : 0.55,
+                    }}
+                  >
+                    {!unlocked && <Lock size={10} className="text-white/70"/>}
+                  </div>
+                  <div className="text-[8px] text-white/50 mt-0.5">L{required}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* CENTRO — Avatar con escenario */}
+          <div className="rounded-xl overflow-hidden border border-white/10 grid place-items-center"
+               style={{ background: accessories.background.css, minHeight: 240 }}>
+            <AvatarImage preset={selected} size={220} accessories={accessories} />
+          </div>
+
+          {/* PANEL DER — Escenarios desbloqueados */}
+          <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2">
+            <div className="text-[8px] tracking-[0.25em] text-white/50 text-center leading-tight">ESCENA-<br/>RIOS</div>
+            {SCENARIOS.slice(0, 5).map((sc) => {
+              const unlocked = unlockedScenarioIds.has(sc.id);
+              const active = sc.id === selectedScenarioId;
+              return (
+                <button key={sc.id}
+                  onClick={() => onSelectScenario(sc.id)}
+                  title={unlocked ? sc.name : "Bloqueado"}
+                  className={`relative h-9 w-9 rounded-md border-2 overflow-hidden transition ${
+                    active ? "border-[var(--adn-fluor)] shadow-[0_0_10px_#39ff14]" : "border-white/15"
+                  }`}
+                  style={{ background: sc.css, filter: unlocked ? "none" : "grayscale(1) brightness(0.5)" }}>
+                  {!unlocked && (
+                    <span className="absolute inset-0 grid place-items-center bg-black/40">
+                      <Lock size={12} className="adn-fluor"/>
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-3 text-center text-[10px] text-white/50">
+          {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{AVATAR_PRESETS.length} personajes · {attendanceDays} días asistidos
+        </div>
+        <div className="mt-1 text-center text-[9px] text-white/40">
+          Cada 15 días desbloqueás un escenario nuevo · Cada 4 semanas un personaje nuevo
+        </div>
       </div>
 
+      {/* Galería de personajes */}
       <div className="adn-card p-5">
         <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · 10 PERSONAJES</div>
         <div className="grid grid-cols-5 gap-2.5">
-          {AVATAR_PRESETS.map((p) => {
+          {avatarOrder.map((id) => {
+            const p = AVATAR_PRESETS.find((x) => x.id === id)!;
             const active = p.id === selectedId;
+            const unlocked = unlockedAvatarIds.has(p.id);
             return (
               <button key={p.id} onClick={() => onSelect(p.id)}
-                style={{ background: thumbBg }}
-                className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden ${active ? "border-[var(--adn-fluor)]" : "border-white/10 hover:border-white/30"}`}>
+                style={{ background: "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)" }}
+                className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden ${
+                  active ? "border-[var(--adn-fluor)]" : "border-white/10 hover:border-white/30"
+                }`}>
                 <AvatarImage preset={p} size={72} />
-                {active && (
+                {!unlocked && (
+                  <span className="absolute inset-0 grid place-items-center bg-black/40">
+                    <span className="h-7 w-7 rounded-full bg-black/80 border border-[var(--adn-fluor)]/60 grid place-items-center shadow-[0_0_10px_#39ff14aa]">
+                      <Lock size={12} className="adn-fluor"/>
+                    </span>
+                  </span>
+                )}
+                {active && unlocked && (
                   <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-[var(--adn-fluor)] text-black grid place-items-center shadow-[0_0_12px_#39ff14]">
                     <Check size={12} strokeWidth={3}/>
                   </span>
@@ -408,34 +576,37 @@ function AvatarStudio({
             );
           })}
         </div>
+        <div className="mt-3 text-[10px] text-white/40 text-center">
+          Iniciás con 1 personaje al azar. Los demás se desbloquean cada 4 semanas de asistencia.
+        </div>
       </div>
     </div>
   );
 }
 
-function AccessoriesLegend({ accessories, level, beltLabel }: { accessories: Accessories; level: number; beltLabel: string }) {
-  const wristLabel = beltLabel.replace(/^Muñequera\s+/i, "");
-  const items: { unlocked: boolean; label: string; at: number; equipped?: string }[] = [
-    { unlocked: !!accessories.wristband, label: "Muñequera",  at: 3, equipped: wristLabel },
-    { unlocked: !!accessories.cap,        label: "Gorro",      at: 5, equipped: accessories.cap ?? undefined },
-    { unlocked: !!accessories.background, label: "Escenario",  at: 8, equipped: accessories.background ?? undefined },
-  ];
+/* ─── Brazo + muñequera (SVG cómic) para Evolución ─── */
+function ForearmWristband({ color, size = 64 }: { color: string; size?: number }) {
   return (
-    <div className="mt-4 grid grid-cols-3 gap-2 w-full">
-      {items.map((it) => (
-        <div key={it.label} className={`rounded-lg p-2 text-center border ${it.unlocked ? "border-[var(--adn-fluor)]/50 bg-[#39ff14]/5" : "border-white/10 bg-black/30 opacity-60"}`}>
-          <div className="text-[9px] tracking-widest text-white/60">{it.label.toUpperCase()}</div>
-          <div className={`text-[10px] mt-0.5 capitalize ${it.unlocked ? "adn-fluor" : "text-white/50"}`}>
-            {it.unlocked ? (it.equipped || "Equipado") : `Nivel ${it.at}`}
-          </div>
-        </div>
-      ))}
-      <div className="col-span-3 text-[10px] text-white/40 text-center mt-1">Nivel actual: L{level}</div>
-    </div>
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden>
+      {/* antebrazo */}
+      <g stroke="#000" strokeWidth="2.5" strokeLinejoin="round">
+        <path d="M 25 88 L 30 35 Q 32 22 50 22 Q 68 22 70 35 L 75 88 Z" fill="#f4c8a8"/>
+        {/* mano cerrada (puño) */}
+        <path d="M 30 35 Q 28 14 50 14 Q 72 14 70 35 Z" fill="#f4c8a8"/>
+        {/* nudillos */}
+        <path d="M 36 22 Q 40 18 44 22 M 46 20 Q 50 16 54 20 M 56 22 Q 60 18 64 22" fill="none" strokeWidth="1.5"/>
+      </g>
+      {/* muñequera */}
+      <rect x="26" y="40" width="48" height="14" rx="3" fill={color} stroke="#000" strokeWidth="2.5"/>
+      {/* logo ADN */}
+      <text x="50" y="50.5" textAnchor="middle" fontSize="8" fontWeight="900" fill="#000" fontFamily="Orbitron, sans-serif">ADN</text>
+      {/* brillo */}
+      <path d="M 30 43 L 70 43" stroke="#ffffff" strokeWidth="1.2" opacity="0.6"/>
+    </svg>
   );
 }
 
-/* ─── Avatar Image con capas de accesorios ─── */
+/* ─── Avatar Image (sin gorro; muñequera = chip neón sobre la imagen) ─── */
 function AvatarImage({
   preset, size = 120, accessories,
 }: {
@@ -443,74 +614,28 @@ function AvatarImage({
   size?: number;
   accessories?: Accessories;
 }) {
-  const bg = accessories?.background;
-  const cap = accessories?.cap;
   const wrist = accessories?.wristband;
-
-  const bgStyle: React.CSSProperties | undefined =
-    bg === "neon"   ? { background: "radial-gradient(circle at 50% 60%, #39ff1455 0%, transparent 65%)" } :
-    bg === "fire"   ? { background: "radial-gradient(circle at 50% 65%, #ff4d00aa 0%, #df00ff55 45%, transparent 75%)" } :
-    bg === "cosmos" ? { background: "radial-gradient(circle at 50% 50%, #df00ffaa 0%, #00ffaeaa 35%, #0a0a25 80%)" } :
-    undefined;
-
-  const capColor =
-    cap === "gold"  ? "#ffd700" :
-    cap === "red"   ? "#ff2d55" :
-    cap === "blue"  ? "#3aa0ff" :
-    cap === "green" ? "#39ff14" : null;
-
   return (
     <div className="relative mx-auto select-none" style={{ width: size, height: size }} aria-label={`avatar ${preset.id}`}>
-      {/* Capa 0: fondo/escenario */}
-      {bgStyle && (
-        <div
-          className="absolute inset-0 rounded-2xl animate-pulse"
-          style={{ ...bgStyle, animationDuration: "3s" }}
-        />
-      )}
-      {/* Capa 1: aura de muñequera (tinte del rango) */}
       {wrist && (
-        <div
-          className="absolute inset-1 rounded-full"
-          style={{ boxShadow: `inset 0 0 ${size * 0.18}px ${wrist.color}aa, 0 0 ${size * 0.12}px ${wrist.color}77` }}
-        />
+        <div className="absolute inset-1 rounded-full pointer-events-none"
+          style={{ boxShadow: `inset 0 0 ${size * 0.18}px ${wrist.color}aa, 0 0 ${size * 0.12}px ${wrist.color}77` }} />
       )}
-      {/* Capa 2: personaje */}
-      <img
-        src={preset.img}
-        alt=""
-        width={size}
-        height={size}
-        loading="lazy"
-        draggable={false}
-        className="absolute inset-0 w-full h-full object-contain"
-      />
-      {/* Capa 3: gorra/casco encima de la cabeza */}
-      {capColor && (
-        <svg
-          viewBox="0 0 100 100"
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          aria-hidden
-        >
-          {/* casco semi-realista, posicionado sobre la zona de cabeza típica */}
-          <g transform="translate(50 18)">
-            {/* sombra */}
-            <ellipse cx="0" cy="6" rx="16" ry="3" fill="#000" opacity="0.25"/>
-            {/* casco principal */}
-            <path
-              d="M -16 4 Q -16 -12 0 -12 Q 16 -12 16 4 Z"
-              fill={capColor}
-              stroke="#000"
-              strokeWidth="1.2"
-            />
-            {/* visera */}
-            <path d="M -18 4 L 18 4 L 14 7 L -14 7 Z" fill={capColor} stroke="#000" strokeWidth="1.2"/>
-            {/* logo ADN */}
-            <text x="0" y="0" textAnchor="middle" fontSize="6" fontWeight="900" fill="#000" fontFamily="Orbitron, sans-serif">ADN</text>
-            {/* brillo */}
-            <path d="M -10 -6 Q -6 -10 2 -10" fill="none" stroke="#fff" strokeWidth="1.2" opacity="0.7" strokeLinecap="round"/>
-          </g>
-        </svg>
+      <img src={preset.img} alt="" width={size} height={size} loading="lazy" draggable={false}
+        className="absolute inset-0 w-full h-full object-contain" />
+      {wrist && (
+        /* muñequera pintada en la muñeca izquierda (bottom-left del lienzo) */
+        <div className="absolute pointer-events-none"
+          style={{
+            left: size * 0.08, bottom: size * 0.12,
+            width: size * 0.22, height: size * 0.08,
+            background: wrist.color, borderRadius: 4,
+            border: "1.5px solid #000",
+            boxShadow: `0 0 ${size * 0.08}px ${wrist.color}cc`,
+          }}>
+          <div className="text-[7px] font-black text-black text-center leading-none pt-[2px]"
+            style={{ fontFamily: "Orbitron, sans-serif" }}>ADN</div>
+        </div>
       )}
     </div>
   );
@@ -536,7 +661,6 @@ function LevelUpCelebration({
     };
     tick();
   }, []);
-
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 animate-fade-in">
       <div className="text-[11px] tracking-[0.5em] text-white/60">SUBISTE DE NIVEL</div>
@@ -548,26 +672,23 @@ function LevelUpCelebration({
           <AvatarImage preset={preset} size={240} accessories={accessories} />
         </div>
       </div>
-      <p className="mt-6 text-sm text-white/70 text-center max-w-xs">
-        Tu constancia rinde frutos. ¡Seguí entrenando, ninja!
-      </p>
+      <p className="mt-6 text-sm text-white/70 text-center max-w-xs">Tu constancia rinde frutos. ¡Seguí entrenando, ninja!</p>
       <button onClick={onClose} className="adn-btn-primary mt-6 px-8 py-3 text-sm">SEGUIR</button>
     </div>
   );
 }
 
 /* ─── Evolución ─── */
-function Evolution({ student, skills, belt }: { student: Student; skills: Skills; belt: ReturnType<typeof beltFromXp> }) {
-  const beltLabel = BELTS.find((b) => b.key === student.current_belt_color)?.label ?? belt.current.label;
+function Evolution({ student, skills, belt, beltDb }: { student: Student; skills: Skills; belt: ReturnType<typeof beltFromXp>; beltDb: Belt }) {
   return (
     <div className="space-y-5">
       <div className="adn-card p-5">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-full border-4" style={{ borderColor: belt.current.hex, boxShadow: `0 0 18px ${belt.current.hex}88` }} />
+          <ForearmWristband color={beltDb.key === "none" ? "#555" : beltDb.hex} size={72} />
           <div>
             <div className="text-[10px] tracking-[0.3em] text-white/50">RANGO ACTUAL</div>
-            <div className="text-xl font-black">{beltLabel}</div>
-            <div className="text-xs text-white/60">{belt.current.subtitle} · {student.total_xp} XP</div>
+            <div className="text-xl font-black">{beltDb.label}</div>
+            <div className="text-xs text-white/60">{beltDb.subtitle} · {student.total_xp} XP</div>
           </div>
         </div>
         {belt.next && (
@@ -588,12 +709,13 @@ function Evolution({ student, skills, belt }: { student: Student; skills: Skills
         <div className="space-y-3">
           {SKILLS.map(({ key, label }) => {
             const v = skills[key] ?? 0;
-            const pct = Math.min(100, (v / 500) * 100);
+            const pct = Math.min(100, (v / SKILL_MAX) * 100);
+            const full = pct >= 100;
             return (
               <div key={key}>
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-white">{label}</span>
-                  <span className="text-white/50">{v} XP</span>
+                  <span className={full ? "adn-fluor font-bold" : "text-white/50"}>{v} / {SKILL_MAX} XP</span>
                 </div>
                 <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
                   <div className="adn-bar-fill" style={{ width: `${pct}%` }} />
@@ -601,6 +723,9 @@ function Evolution({ student, skills, belt }: { student: Student; skills: Skills
               </div>
             );
           })}
+        </div>
+        <div className="mt-3 text-[10px] text-white/40 leading-snug">
+          Completá las barras al 100% para desbloquear los obstáculos del medallero.
         </div>
       </div>
     </div>
