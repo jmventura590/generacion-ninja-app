@@ -607,29 +607,16 @@ function AvatarStudio({
   );
 }
 
-/* ─── Brazo + muñequera (SVG cómic) para Evolución ─── */
-function ForearmWristband({ color, size = 64 }: { color: string; size?: number }) {
+/* ─── Brazo + muñequera (PNG) para Evolución ─── */
+function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: number }) {
   return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden>
-      {/* antebrazo */}
-      <g stroke="#000" strokeWidth="2.5" strokeLinejoin="round">
-        <path d="M 25 88 L 30 35 Q 32 22 50 22 Q 68 22 70 35 L 75 88 Z" fill="#f4c8a8"/>
-        {/* mano cerrada (puño) */}
-        <path d="M 30 35 Q 28 14 50 14 Q 72 14 70 35 Z" fill="#f4c8a8"/>
-        {/* nudillos */}
-        <path d="M 36 22 Q 40 18 44 22 M 46 20 Q 50 16 54 20 M 56 22 Q 60 18 64 22" fill="none" strokeWidth="1.5"/>
-      </g>
-      {/* muñequera */}
-      <rect x="26" y="40" width="48" height="14" rx="3" fill={color} stroke="#000" strokeWidth="2.5"/>
-      {/* logo ADN */}
-      <text x="50" y="50.5" textAnchor="middle" fontSize="8" fontWeight="900" fill="#000" fontFamily="Orbitron, sans-serif">ADN</text>
-      {/* brillo */}
-      <path d="M 30 43 L 70 43" stroke="#ffffff" strokeWidth="1.2" opacity="0.6"/>
-    </svg>
+    <img src={WRISTBAND_IMG[beltKey]} alt="muñequera" width={size} height={size}
+      loading="lazy" draggable={false}
+      style={{ width: size, height: size, objectFit: "contain" }} />
   );
 }
 
-/* ─── Avatar Image (sin gorro; muñequera = chip neón sobre la imagen) ─── */
+/* ─── Avatar Image (transparente, sin recuadro, sin cartel ADN) ─── */
 function AvatarImage({
   preset, size = 120, accessories,
 }: {
@@ -641,24 +628,50 @@ function AvatarImage({
   return (
     <div className="relative mx-auto select-none" style={{ width: size, height: size }} aria-label={`avatar ${preset.id}`}>
       {wrist && (
-        <div className="absolute inset-1 rounded-full pointer-events-none"
-          style={{ boxShadow: `inset 0 0 ${size * 0.18}px ${wrist.color}aa, 0 0 ${size * 0.12}px ${wrist.color}77` }} />
+        /* Halo sutil del color de la pulsera (solo glow, sin cartel) */
+        <div className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ boxShadow: `0 0 ${size * 0.14}px ${wrist.color}77` }} />
       )}
       <img src={preset.img} alt="" width={size} height={size} loading="lazy" draggable={false}
         className="absolute inset-0 w-full h-full object-contain" />
-      {wrist && (
-        /* muñequera pintada en la muñeca izquierda (bottom-left del lienzo) */
-        <div className="absolute pointer-events-none"
-          style={{
-            left: size * 0.08, bottom: size * 0.12,
-            width: size * 0.22, height: size * 0.08,
-            background: wrist.color, borderRadius: 4,
-            border: "1.5px solid #000",
-            boxShadow: `0 0 ${size * 0.08}px ${wrist.color}cc`,
-          }}>
-          <div className="text-[7px] font-black text-black text-center leading-none pt-[2px]"
-            style={{ fontFamily: "Orbitron, sans-serif" }}>ADN</div>
+    </div>
+  );
+}
+
+/* ─── Cambiar contraseña (familia / alumno) ─── */
+function ChangePasswordCard() {
+  const [open, setOpen] = useState(false);
+  const [pwd1, setPwd1] = useState("");
+  const [pwd2, setPwd2] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (pwd1.length < 6) { toast.error("Mínimo 6 caracteres."); return; }
+    if (pwd1 !== pwd2) { toast.error("Las contraseñas no coinciden."); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: pwd1 });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Contraseña actualizada.");
+    setPwd1(""); setPwd2(""); setOpen(false);
+  }
+  return (
+    <div className="adn-card p-4">
+      <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="adn-fluor text-sm">🔐</span>
+          <span className="text-sm font-bold">Cambiar contraseña</span>
         </div>
+        <span className="text-white/40 text-xs">{open ? "Cerrar" : "Abrir"}</span>
+      </button>
+      {open && (
+        <form onSubmit={submit} className="mt-3 space-y-2">
+          <input className="adn-input" type="password" placeholder="nueva contraseña" value={pwd1}
+            onChange={(e) => setPwd1(e.target.value)} minLength={6} required autoComplete="new-password" />
+          <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
+            onChange={(e) => setPwd2(e.target.value)} minLength={6} required autoComplete="new-password" />
+          <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
+        </form>
       )}
     </div>
   );
