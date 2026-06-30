@@ -312,6 +312,7 @@ function StudentDashboard() {
               attendanceDays={attendanceDays}
               selectedScenarioId={scenarioId}
               onSelectScenario={selectScenario}
+              scenarioOrder={scenarioOrder}
             />
           </SubScreen>
         )}
@@ -456,7 +457,7 @@ function AvatarStudio({
   selectedId, onSelect, accessories, currentBelt, thresholds, level,
   unlockedAvatarIds, avatarOrder, avatarsUnlockedCount,
   unlockedScenarioIds, scenariosUnlockedCount, attendanceDays,
-  selectedScenarioId, onSelectScenario,
+  selectedScenarioId, onSelectScenario, scenarioOrder,
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
@@ -472,6 +473,7 @@ function AvatarStudio({
   attendanceDays: number;
   selectedScenarioId: string;
   onSelectScenario: (id: string) => void;
+  scenarioOrder: string[];
 }) {
   const selected = AVATAR_PRESETS.find((p) => p.id === selectedId) ?? AVATAR_PRESETS[0];
 
