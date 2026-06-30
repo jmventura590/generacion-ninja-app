@@ -109,11 +109,7 @@ export function BirthdayCelebration({
         {studentName.toUpperCase()}
       </h2>
 
-      <div className="relative mt-6 w-[240px] h-[240px]">
-        <div
-          className="absolute inset-0 rounded-full blur-3xl opacity-80 animate-pulse"
-          style={{ background: "radial-gradient(circle, #39ff14 0%, #df00ff 60%, transparent 75%)" }}
-        />
+      <div className="relative mt-6 w-[260px] h-[260px] flex items-center justify-center">
         <img
           src={scene.img}
           alt={scene.label}
@@ -121,7 +117,7 @@ export function BirthdayCelebration({
           height={1024}
           loading="eager"
           draggable={false}
-          className="relative w-full h-full object-contain drop-shadow-[0_0_18px_#39ff14] animate-bounce"
+          className="relative w-full h-full object-contain drop-shadow-[0_0_28px_#39ff14aa] animate-bounce"
         />
       </div>
 
