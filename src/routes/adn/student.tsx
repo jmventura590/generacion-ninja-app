@@ -488,59 +488,64 @@ function AvatarStudio({
     <div className="space-y-5">
       {/* Zona central: paneles laterales + avatar */}
       <div className="adn-card p-4">
-        <div className="grid grid-cols-[64px_1fr_64px] gap-3 items-stretch">
-          {/* PANEL IZQ — Escala vertical de pulseras */}
+        <div className="grid grid-cols-[72px_1fr_72px] gap-3 items-stretch">
+          {/* PANEL IZQ — Pulseras (mismo patrón visual que Medallero) */}
           <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2">
             <div className="text-[8px] tracking-[0.25em] text-white/50 text-center leading-tight">PULSE-<br/>RAS</div>
             {beltLadder.slice().reverse().map(({ belt, required }) => {
               const unlocked = level >= required;
               const isCurrent = belt.key === currentBelt.key && currentBelt.key !== "none";
               return (
-                <div key={belt.key} className="flex flex-col items-center">
-                  <div
-                    title={`${belt.label} · L${required}`}
-                    className={`h-7 w-7 rounded-full border-2 grid place-items-center ${
-                      isCurrent ? "animate-pulse" : ""
-                    }`}
-                    style={{
-                      background: unlocked ? belt.hex : "#2a2a2a",
-                      borderColor: isCurrent ? "#39ff14" : unlocked ? "#ffffff55" : "#444",
-                      filter: unlocked ? "none" : "grayscale(1)",
-                      boxShadow: isCurrent ? `0 0 14px ${belt.hex}, 0 0 22px #39ff14aa` : unlocked ? `0 0 8px ${belt.hex}66` : "none",
-                      opacity: unlocked ? 1 : 0.55,
-                    }}
-                  >
-                    {!unlocked && <Lock size={10} className="text-white/70"/>}
-                  </div>
-                  <div className="text-[8px] text-white/50 mt-0.5">L{required}</div>
+                <div key={belt.key}
+                  title={`${belt.label} · L${required}`}
+                  className={`relative h-14 w-14 rounded-lg border overflow-hidden flex items-center justify-center ${
+                    isCurrent ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa] animate-pulse"
+                              : unlocked ? "border-white/20" : "border-white/10"
+                  }`}
+                  style={{ background: "rgba(0,0,0,0.35)" }}>
+                  <img src={WRISTBAND_IMG[belt.key]} alt={belt.label}
+                    className={`w-full h-full object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
+                    draggable={false} loading="lazy"/>
+                  {!unlocked && (
+                    <span className="absolute inset-0 grid place-items-center pointer-events-none">
+                      <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
+                        <Lock size={11} className="adn-fluor"/>
+                      </span>
+                    </span>
+                  )}
+                  <span className="absolute bottom-0 inset-x-0 text-[8px] text-center text-white/70 bg-black/60 leading-none py-0.5">L{required}</span>
                 </div>
               );
             })}
           </div>
 
-          {/* CENTRO — Avatar con escenario */}
-          <div className="rounded-xl overflow-hidden border border-white/10 grid place-items-center"
-               style={{ background: accessories.background.css, minHeight: 240 }}>
-            <AvatarImage preset={selected} size={220} accessories={accessories} />
+          {/* CENTRO — Avatar sobre escenario (sin recuadro negro) */}
+          <div className="rounded-2xl overflow-hidden grid place-items-center"
+               style={{ background: accessories.background.css, minHeight: 260 }}>
+            <AvatarImage preset={selected} size={240} accessories={accessories} />
           </div>
 
-          {/* PANEL DER — Escenarios desbloqueados */}
+          {/* PANEL DER — Escenarios (mismo patrón) */}
           <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2">
             <div className="text-[8px] tracking-[0.25em] text-white/50 text-center leading-tight">ESCENA-<br/>RIOS</div>
-            {SCENARIOS.slice(0, 5).map((sc) => {
+            {scenarioOrder.slice(0, 5).map((scId) => {
+              const sc = SCENARIOS.find((s) => s.id === scId)!;
               const unlocked = unlockedScenarioIds.has(sc.id);
               const active = sc.id === selectedScenarioId;
               return (
                 <button key={sc.id}
                   onClick={() => onSelectScenario(sc.id)}
                   title={unlocked ? sc.name : "Bloqueado"}
-                  className={`relative h-9 w-9 rounded-md border-2 overflow-hidden transition ${
-                    active ? "border-[var(--adn-fluor)] shadow-[0_0_10px_#39ff14]" : "border-white/15"
+                  className={`relative h-14 w-14 rounded-lg border overflow-hidden transition ${
+                    active ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa]"
+                           : unlocked ? "border-white/20" : "border-white/10"
                   }`}
-                  style={{ background: sc.css, filter: unlocked ? "none" : "grayscale(1) brightness(0.5)" }}>
+                  style={{ background: sc.css, filter: unlocked ? "none" : "grayscale(1) brightness(0.55)" }}>
                   {!unlocked && (
-                    <span className="absolute inset-0 grid place-items-center bg-black/40">
-                      <Lock size={12} className="adn-fluor"/>
+                    <span className="absolute inset-0 grid place-items-center bg-black/30 pointer-events-none">
+                      <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
+                        <Lock size={11} className="adn-fluor"/>
+                      </span>
                     </span>
                   )}
                 </button>
@@ -556,6 +561,10 @@ function AvatarStudio({
           Cada 15 días desbloqueás un escenario nuevo · Cada 4 semanas un personaje nuevo
         </div>
       </div>
+
+      {/* Cambiar contraseña */}
+      <ChangePasswordCard />
+
 
       {/* Galería de personajes */}
       <div className="adn-card p-5">
