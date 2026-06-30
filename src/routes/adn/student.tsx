@@ -701,12 +701,8 @@ function LevelUpCelebration({
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 animate-fade-in">
       <div className="text-[11px] tracking-[0.5em] text-white/60">SUBISTE DE NIVEL</div>
       <h2 className="mt-2 text-3xl font-black text-center adn-fluor" style={{ fontFamily: "Orbitron, sans-serif" }}>¡{beltLabel}!</h2>
-      <div className="relative mt-6">
-        <div className="absolute inset-0 rounded-full blur-3xl opacity-80 animate-pulse"
-             style={{ background: "radial-gradient(circle, #39ff14 0%, #df00ff 60%, transparent 75%)" }} />
-        <div className="relative animate-bounce">
-          <AvatarImage preset={preset} size={240} accessories={accessories} />
-        </div>
+      <div className="relative mt-6 animate-bounce">
+        <AvatarImage preset={preset} size={260} accessories={accessories} />
       </div>
       <p className="mt-6 text-sm text-white/70 text-center max-w-xs">Tu constancia rinde frutos. ¡Seguí entrenando, ninja!</p>
       <button onClick={onClose} className="adn-btn-primary mt-6 px-8 py-3 text-sm">SEGUIR</button>
