@@ -720,7 +720,7 @@ function Evolution({ student, skills, belt, beltDb }: { student: Student; skills
     <div className="space-y-5">
       <div className="adn-card p-5">
         <div className="flex items-center gap-4">
-          <ForearmWristband color={beltDb.key === "none" ? "#555" : beltDb.hex} size={72} />
+          <ForearmWristband beltKey={beltDb.key} size={96} />
           <div>
             <div className="text-[10px] tracking-[0.3em] text-white/50">RANGO ACTUAL</div>
             <div className="text-xl font-black">{beltDb.label}</div>
