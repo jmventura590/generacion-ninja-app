@@ -388,6 +388,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [birth, setBirth] = useState("");
   const [username, setUsername] = useState("");
   const [familyUsername, setFamilyUsername] = useState("");
+  const [familyEmail, setFamilyEmail] = useState("");
   const [groupId, setGroupId] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
@@ -406,11 +407,12 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
         name, birth_date: birth,
         username,
         family_username: familyUsername,
+        family_email: familyEmail,
         group_id: groupId || null,
       } });
       if (!r.ok) { toast.error(r.error); return; }
       setResult({ student: r.student, family: r.family });
-      setName(""); setBirth(""); setUsername(""); setFamilyUsername("");
+      setName(""); setBirth(""); setUsername(""); setFamilyUsername(""); setFamilyEmail("");
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
@@ -461,6 +463,13 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
               onChange={(e) => setFamilyUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
               required minLength={3} maxLength={24} placeholder="ej: mama.benja08" />
             <div className="text-[10px] text-white/40 mt-1">Distinto al del alumno. Le da acceso de solo lectura a Evolución, Medallero y Avatar.</div>
+          </div>
+          <div>
+            <label className="text-[10px] tracking-widest text-white/50">EMAIL DE CONTACTO (FAMILIA)</label>
+            <input className="adn-input" type="email" value={familyEmail}
+              onChange={(e) => setFamilyEmail(e.target.value.trim())}
+              required maxLength={120} placeholder="ej: mama.benja@gmail.com" />
+            <div className="text-[10px] text-white/40 mt-1">Se usa para recuperar la contraseña.</div>
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">GRUPO / HORARIO</label>
