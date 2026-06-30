@@ -228,6 +228,7 @@ export type Database = {
           birth_date: string | null
           created_at: string
           current_belt_color: string
+          family_email: string | null
           family_user_id: string | null
           family_username: string | null
           group_id: string | null
@@ -242,6 +243,7 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           current_belt_color?: string
+          family_email?: string | null
           family_user_id?: string | null
           family_username?: string | null
           group_id?: string | null
@@ -256,6 +258,7 @@ export type Database = {
           birth_date?: string | null
           created_at?: string
           current_belt_color?: string
+          family_email?: string | null
           family_user_id?: string | null
           family_username?: string | null
           group_id?: string | null
