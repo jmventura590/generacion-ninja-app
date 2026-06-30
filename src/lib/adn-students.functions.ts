@@ -171,10 +171,16 @@ export const resolveLoginEmail = createServerFn({ method: "POST" })
 
     const { data: asFamily } = await supabaseAdmin
       .from("student_profiles")
-      .select("id")
+      .select("id, family_email")
       .ilike("family_username", u)
       .maybeSingle();
-    if (asFamily) return { ok: true as const, email: `${u}@${FAMILY_DOMAIN}`, kind: "family" as const };
+    if (asFamily) {
+      // Familias nuevas usan email real; las viejas el dominio interno.
+      const email = (asFamily as any).family_email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((asFamily as any).family_email)
+        ? (asFamily as any).family_email
+        : `${u}@${FAMILY_DOMAIN}`;
+      return { ok: true as const, email, kind: "family" as const };
+    }
 
     return { ok: false as const, error: "Usuario no encontrado." };
   });
