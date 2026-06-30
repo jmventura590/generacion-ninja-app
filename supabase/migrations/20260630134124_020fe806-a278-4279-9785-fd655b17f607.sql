@@ -1,0 +1,1 @@
+ALTER TABLE public.student_profiles ADD COLUMN IF NOT EXISTS family_email TEXT;

@@ -34,6 +34,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     birth_date: string;
     username: string;
     family_username: string;
+    family_email: string;
     group_id: string | null;
   }) => d)
   .handler(async ({ data, context }) => {
@@ -48,6 +49,9 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     if (!USERNAME_RE.test(username)) return fail("Usuario del alumno inválido (3-24 letras/números/._-).");
     if (!USERNAME_RE.test(familyUsername)) return fail("Usuario de familia inválido (3-24 letras/números/._-).");
     if (username === familyUsername) return fail("El usuario de familia debe ser distinto al del alumno.");
+
+    const familyEmailInput = (data.family_email ?? "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(familyEmailInput)) return fail("Email de contacto inválido.");
 
     const name = data.name.trim();
     if (!name) return fail("Nombre requerido.");
@@ -72,10 +76,19 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       .maybeSingle();
     if (dupFam) return fail("Ese usuario de familia ya está en uso.");
 
+    // Email duplicado (otra familia ya usa este contacto)
+    const { data: dupEmail } = await supabaseAdmin
+      .from("student_profiles")
+      .select("id")
+      .ilike("family_email", familyEmailInput)
+      .maybeSingle();
+    if (dupEmail) return fail("Ese email de contacto ya está registrado en otra familia.");
+
     const studentPwd = genPassword(6);
     const familyPwd = genPassword(6);
     const studentEmail = `${username}@${STUDENT_DOMAIN}`;
-    const familyEmail = `${familyUsername}@${FAMILY_DOMAIN}`;
+    // La cuenta de familia usa el EMAIL REAL para que pueda recuperar contraseña.
+    const familyEmail = familyEmailInput;
 
     // 1) Cuenta del alumno
     const { data: createdStu, error: cErr } = await supabaseAdmin.auth.admin.createUser({
@@ -88,7 +101,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     const studentUserId = createdStu.user?.id;
     if (!studentUserId) throw new Error("No se pudo crear la cuenta del alumno.");
 
-    // 2) Cuenta de la familia (solo lectura)
+    // 2) Cuenta de la familia (solo lectura) — usa email real
     const { data: createdFam, error: fErr } = await supabaseAdmin.auth.admin.createUser({
       email: familyEmail,
       password: familyPwd,
@@ -112,6 +125,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
         user_id: studentUserId,
         family_user_id: familyUserId,
         family_username: familyUsername,
+        family_email: familyEmail,
         student_name: name,
         age,
         birth_date: birth,
@@ -157,10 +171,16 @@ export const resolveLoginEmail = createServerFn({ method: "POST" })
 
     const { data: asFamily } = await supabaseAdmin
       .from("student_profiles")
-      .select("id")
+      .select("id, family_email")
       .ilike("family_username", u)
       .maybeSingle();
-    if (asFamily) return { ok: true as const, email: `${u}@${FAMILY_DOMAIN}`, kind: "family" as const };
+    if (asFamily) {
+      // Familias nuevas usan email real; las viejas el dominio interno.
+      const email = (asFamily as any).family_email && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((asFamily as any).family_email)
+        ? (asFamily as any).family_email
+        : `${u}@${FAMILY_DOMAIN}`;
+      return { ok: true as const, email, kind: "family" as const };
+    }
 
     return { ok: false as const, error: "Usuario no encontrado." };
   });
