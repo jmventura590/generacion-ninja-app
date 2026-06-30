@@ -25,6 +25,18 @@ import avG3 from "@/assets/avatars/g3.png";
 import avG4 from "@/assets/avatars/g4.png";
 import avG5 from "@/assets/avatars/g5.png";
 
+/* ─── Pulseras (imágenes por color/rango) ─── */
+import wbNone from "@/assets/wristbands/none.png";
+import wbWhite from "@/assets/wristbands/white.png";
+import wbGreen from "@/assets/wristbands/green.png";
+import wbBlue from "@/assets/wristbands/blue.png";
+import wbRed from "@/assets/wristbands/red.png";
+import wbBlack from "@/assets/wristbands/black.png";
+
+const WRISTBAND_IMG: Record<BeltKey, string> = {
+  none: wbNone, white: wbWhite, green: wbGreen, blue: wbBlue, red: wbRed, black: wbBlack,
+};
+
 type Gender = "boy" | "girl";
 type AvatarPreset = { id: string; gender: Gender; img: string; label: string };
 
