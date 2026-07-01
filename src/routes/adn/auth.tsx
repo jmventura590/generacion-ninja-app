@@ -10,13 +10,11 @@ export const Route = createFileRoute("/adn/auth")({
   component: AuthPage,
 });
 
+// Solo cuentas piloto aparecen acá. Cuando se sume el flag `piloto` en la BD,
+// esta lista se cargará dinámicamente desde student_profiles.
 const MOCKS = [
   { label: "Coach (PIN 1986)", email: "coach@adn.test", password: "Coach1986!" },
   { label: "Benja (rojo)",     email: "benja@adn.test", password: "Ninja2026!" },
-  { label: "Cata (azul)",      email: "cata@adn.test", password: "Ninja2026!" },
-  { label: "Morena (verde)",   email: "morena@adn.test", password: "Ninja2026!" },
-  { label: "Bauti (blanco)",   email: "bauti@adn.test", password: "Ninja2026!" },
-  { label: "Fran (verde)",     email: "fran@adn.test", password: "Ninja2026!" },
 ];
 
 function AuthPage() {
@@ -109,12 +107,19 @@ function AuthPage() {
               <input className="adn-input" type="password" placeholder="contraseña" value={pwd}
                 onChange={(e) => setPwd(e.target.value)} required minLength={4} />
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar</button>
+              <button
+                type="button"
+                onClick={() => toast.info("Recuperación por email — próximamente. Pedile al coach una clave nueva.")}
+                className="w-full text-[11px] text-white/50 hover:text-[var(--adn-fluor)] underline underline-offset-2"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
               <p className="text-[10px] text-white/40 text-center">El coach entrega usuario y contraseña a cada alumno y a su familia.</p>
             </form>
           ) : (
             <form onSubmit={coachLogin} className="space-y-3">
               <input className="adn-input" type="email" placeholder="email del coach" value={coachEmail} onChange={(e) => setCoachEmail(e.target.value)} required />
-              <input className="adn-input" type="password" placeholder="contraseña" value={coachPwd} onChange={(e) => setCoachPwd(e.target.value)} required minLength={6} />
+              <input className="adn-input" type="password" placeholder="contraseña" value={coachPwd} onChange={(e) => setCoachPwd(e.target.value)} required minLength={4} />
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar como coach</button>
             </form>
           )}

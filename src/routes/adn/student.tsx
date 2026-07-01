@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff } from "lucide-react";
+import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff, X, KeyRound } from "lucide-react";
 import { BELTS, beltFromXp, SKILLS, type SkillKey, type BeltKey } from "@/lib/adn-game";
 
 export const Route = createFileRoute("/adn/student")({
@@ -53,18 +53,26 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
 ];
 
-/* ─── Escenarios (9 fondos: 1 default + 8 desbloqueables) ─── */
-type Scenario = { id: string; name: string; css: string };
+/* ─── Escenarios: monumentos de La Plata (1 default + 7 desbloqueables) ─── */
+import scMuseo from "@/assets/scenarios/museo.jpg";
+import scPlaza from "@/assets/scenarios/plaza-moreno.jpg";
+import scCatedral from "@/assets/scenarios/catedral.jpg";
+import scCastillo from "@/assets/scenarios/castillo.jpg";
+import scLago from "@/assets/scenarios/lago.jpg";
+import scParlamento from "@/assets/scenarios/parlamento.jpg";
+import scRambla from "@/assets/scenarios/rambla.jpg";
+import scAerea from "@/assets/scenarios/aerea.jpg";
+
+type Scenario = { id: string; name: string; img: string };
 const SCENARIOS: Scenario[] = [
-  { id: "default", name: "Base",       css: "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)" },
-  { id: "neon",    name: "Neón",       css: "radial-gradient(circle at 50% 60%, #39ff1455 0%, #0a0a25 70%)" },
-  { id: "fire",    name: "Fuego",      css: "radial-gradient(circle at 50% 65%, #ff4d00aa 0%, #df00ff55 45%, #100010 80%)" },
-  { id: "cosmos",  name: "Cosmos",     css: "radial-gradient(circle at 50% 50%, #df00ffaa 0%, #00ffaeaa 35%, #0a0a25 80%)" },
-  { id: "ice",     name: "Hielo",      css: "radial-gradient(circle at 50% 55%, #3aa0ffaa 0%, #00f7ff55 40%, #02061a 85%)" },
-  { id: "gold",    name: "Dorado",     css: "radial-gradient(circle at 50% 60%, #ffd700aa 0%, #ff8a00aa 45%, #1a0d00 85%)" },
-  { id: "stars",   name: "Estrellas",  css: "radial-gradient(circle at 30% 30%, #ffffff44 0%, transparent 6%), radial-gradient(circle at 70% 60%, #ffffff66 0%, transparent 5%), radial-gradient(circle at 50% 80%, #3aa0ff77 0%, #02021a 80%)" },
-  { id: "jungle",  name: "Jungla",     css: "radial-gradient(circle at 50% 60%, #00ffae77 0%, #0a3d0a 50%, #02100a 85%)" },
-  { id: "lava",    name: "Lava",       css: "radial-gradient(circle at 50% 80%, #ff2d55cc 0%, #ff8a00aa 35%, #1a0000 85%)" },
+  { id: "museo",      name: "Museo de La Plata",                   img: scMuseo },
+  { id: "plaza",      name: "Plaza Moreno y Catedral",             img: scPlaza },
+  { id: "catedral",   name: "Escaleras de la Catedral",            img: scCatedral },
+  { id: "castillo",   name: "República de los Niños · Castillo",   img: scCastillo },
+  { id: "lago",       name: "República de los Niños · Lago",       img: scLago },
+  { id: "parlamento", name: "República de los Niños · Parlamento", img: scParlamento },
+  { id: "rambla",     name: "Rambla Av. 32 y 17",                  img: scRambla },
+  { id: "aerea",      name: "Vista aérea de La Plata",             img: scAerea },
 ];
 
 /* ─── Obstáculos del Medallero ─── */
@@ -80,25 +88,16 @@ import obPuente from "@/assets/obstacles/puente.png";
 import { BirthdayCelebration } from "@/components/BirthdayCelebration";
 
 /** Lista en orden (1..9) — unlock mapping abajo se basa en este orden. */
-const OBSTACLES: { name: string; img: string; unlock: (s: Skills) => boolean }[] = [
-  // 1 Salto
-  { name: "Muro Curvado",       img: obMuro,      unlock: (s) => skillFull(s.jump_xp) },
-  // 2 Agarre + Resistencia
-  { name: "Pasamanos",          img: obPasamanos, unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  // 3 Agarre + Resistencia
-  { name: "Escalera Invertida", img: obEscalera,  unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  // 4 Salto
-  { name: "5 Escalones",        img: obEscalones, unlock: (s) => skillFull(s.jump_xp) },
-  // 5 Fuerza
-  { name: "Palestra",           img: obPalestra,  unlock: (s) => skillFull(s.strength_xp) },
-  // 6 Fuerza
-  { name: "Pegboard",           img: obPegboard,  unlock: (s) => skillFull(s.strength_xp) },
-  // 7 Velocidad
-  { name: "Pelotas Colgantes",  img: obPelotas,   unlock: (s) => skillFull(s.speed_xp) },
-  // 8 Equilibrio + Coordinación
-  { name: "Tronco Giratorio",   img: obTronco,    unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
-  // 9 Equilibrio + Coordinación
-  { name: "Puente Colgante",    img: obPuente,    unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+const OBSTACLES: { name: string; img: string; skillLabel: string; unlock: (s: Skills) => boolean }[] = [
+  { name: "Muro Curvado",       img: obMuro,      skillLabel: "Salto",                       unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Pasamanos",          img: obPasamanos, skillLabel: "Agarre + Resistencia",        unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "Escalera Invertida", img: obEscalera,  skillLabel: "Agarre + Resistencia",        unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "5 Escalones",        img: obEscalones, skillLabel: "Salto",                       unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Palestra",           img: obPalestra,  skillLabel: "Fuerza",                      unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pegboard",           img: obPegboard,  skillLabel: "Fuerza",                      unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pelotas Colgantes",  img: obPelotas,   skillLabel: "Velocidad",                   unlock: (s) => skillFull(s.speed_xp) },
+  { name: "Tronco Giratorio",   img: obTronco,    skillLabel: "Equilibrio + Coordinación",   unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+  { name: "Puente Colgante",    img: obPuente,    skillLabel: "Equilibrio + Coordinación",   unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
 ];
 
 const SKILL_MAX = 500; // 100% de la barra
@@ -129,19 +128,30 @@ type Accessories = { wristband: { color: string; key: BeltKey } | null; backgrou
 
 type TabKey = "medals" | "avatar" | "evo";
 
+/* ─── Zoom modal item ─── */
+type ZoomItem = {
+  img: string;
+  title: string;
+  subtitle?: string;
+  locked: boolean;
+  hint?: string;
+  bg?: "dark" | "scene";
+};
+
 function StudentDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("medals");
   const [student, setStudent] = useState<Student | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
   const [avatarId, setAvatarId] = useState<string>("b1");
-  const [scenarioId, setScenarioId] = useState<string>("default");
+  const [scenarioId, setScenarioId] = useState<string>("museo");
   const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
   const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
   const [birthday, setBirthday] = useState<null | { seed: string }>(null);
   const [streak, setStreak] = useState<number>(0);
+  const [zoom, setZoom] = useState<ZoomItem | null>(null);
   const prevBeltRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -162,7 +172,6 @@ function StudentDashboard() {
       if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair)) setAvatarId(av.hair);
       if (av?.hair_color && SCENARIOS.some((sc) => sc.id === av.hair_color)) setScenarioId(av.hair_color);
 
-      // Asistencia: días distintos + conteo por obstáculo
       const { data: logs } = await supabase
         .from("attendance_logs")
         .select("date, class_type_id, class_types(name)")
@@ -177,7 +186,6 @@ function StudentDashboard() {
       setObstacleCounts(counts);
       setAttendanceDays(days.size);
 
-      // Thresholds dinámicos desde app_settings
       try {
         const { data: ts } = await (supabase.from as any)("app_settings")
           .select("value").eq("key", "belt_thresholds").maybeSingle();
@@ -195,7 +203,6 @@ function StudentDashboard() {
       const { data: streakData } = await supabase.rpc("attendance_streak_weeks", { _student_id: stu.id });
       setStreak(typeof streakData === "number" ? streakData : 0);
 
-      // Subida de muñequera
       const storageKey = `adn:lastBelt:${stu.id}`;
       const lastSeen = localStorage.getItem(storageKey);
       prevBeltRef.current = lastSeen;
@@ -207,7 +214,6 @@ function StudentDashboard() {
       }
       localStorage.setItem(storageKey, stu.current_belt_color);
 
-      // Cumpleaños
       if (stu.birth_date) {
         const today = new Date();
         const [, bm, bd] = stu.birth_date.split("-").map(Number);
@@ -223,15 +229,14 @@ function StudentDashboard() {
     })();
   }, [navigate]);
 
-  // Desbloqueos derivados de asistencia
   const avatarOrder = useMemo(
     () => student ? seededShuffle(AVATAR_PRESETS.map((p) => p.id), `${student.id}:avatars`) : AVATAR_PRESETS.map((p) => p.id),
     [student],
   );
   const scenarioOrder = useMemo(() => {
     if (!student) return SCENARIOS.map((s) => s.id);
-    const rest = SCENARIOS.filter((s) => s.id !== "default").map((s) => s.id);
-    return ["default", ...seededShuffle(rest, `${student.id}:scenarios`)];
+    const rest = SCENARIOS.filter((s) => s.id !== "museo").map((s) => s.id);
+    return ["museo", ...seededShuffle(rest, `${student.id}:scenarios`)];
   }, [student]);
 
   const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
@@ -240,7 +245,7 @@ function StudentDashboard() {
   const unlockedScenarioIds = new Set(scenarioOrder.slice(0, scenariosUnlockedCount));
 
   async function selectAvatar(id: string) {
-    if (!unlockedAvatarIds.has(id)) { toast.info("Personaje bloqueado. Seguí asistiendo a clase."); return; }
+    if (!unlockedAvatarIds.has(id)) return; // click abre modal, no acción
     setAvatarId(id);
     if (!student) return;
     const preset = AVATAR_PRESETS.find((p) => p.id === id)!;
@@ -251,7 +256,7 @@ function StudentDashboard() {
   }
 
   async function selectScenario(id: string) {
-    if (!unlockedScenarioIds.has(id)) { toast.info("Escenario bloqueado. Seguí asistiendo a clase."); return; }
+    if (!unlockedScenarioIds.has(id)) return;
     setScenarioId(id);
     if (!student) return;
     const preset = AVATAR_PRESETS.find((p) => p.id === avatarId)!;
@@ -276,12 +281,20 @@ function StudentDashboard() {
 
   return (
     <div className="min-h-screen pb-6 [padding-bottom:calc(1.5rem+env(safe-area-inset-bottom))]">
-      <header className="px-5 pt-6 pb-2 flex items-center justify-between">
-        <div>
+      <header className="px-5 pt-6 pb-2 flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <div className="text-[10px] tracking-[0.4em] text-white/40">FAMILIA</div>
-          <h1 className="text-2xl font-black"><span className="adn-fluor">{student.student_name.toUpperCase()}</span></h1>
+          <h1 className="text-2xl font-black truncate"><span className="adn-fluor">{student.student_name.toUpperCase()}</span></h1>
         </div>
-        <button onClick={logout} className="text-white/60 hover:text-white text-sm flex items-center gap-1"><LogOut size={16}/>Salir</button>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <button
+            onClick={logout}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold bg-[#ff2d55]/15 border border-[#ff2d55]/60 text-[#ff6b8a] hover:bg-[#ff2d55]/25 hover:text-white transition"
+          >
+            <LogOut size={16}/> Salir
+          </button>
+          <ChangePasswordCard compact />
+        </div>
       </header>
 
       <main className="px-5 mt-4">
@@ -293,6 +306,7 @@ function StudentDashboard() {
             onEvo={() => setTab("evo")}
             belt={belt}
             streak={streak}
+            openZoom={setZoom}
           />
         )}
         {tab === "avatar" && (
@@ -313,6 +327,7 @@ function StudentDashboard() {
               selectedScenarioId={scenarioId}
               onSelectScenario={selectScenario}
               scenarioOrder={scenarioOrder}
+              openZoom={setZoom}
             />
           </SubScreen>
         )}
@@ -339,16 +354,21 @@ function StudentDashboard() {
           onClose={() => setBirthday(null)}
         />
       )}
+
+      {zoom && <ImageZoomModal item={zoom} onClose={() => setZoom(null)} />}
     </div>
   );
 }
 
-/* ─── SubScreen wrapper ─── */
+/* ─── SubScreen wrapper — botón Volver más grande y verde neón ─── */
 function SubScreen({ title, onBack, children }: { title: string; onBack: () => void; children: React.ReactNode }) {
   return (
     <div>
-      <button onClick={onBack} className="mb-3 flex items-center gap-1.5 text-xs text-white/60 hover:text-white">
-        <ArrowLeft size={14}/> Volver al medallero
+      <button
+        onClick={onBack}
+        className="mb-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold bg-[var(--adn-fluor)]/15 border border-[var(--adn-fluor)]/60 text-[var(--adn-fluor)] hover:bg-[var(--adn-fluor)]/25 hover:text-white shadow-[0_0_12px_#39ff1433] transition"
+      >
+        <ArrowLeft size={18} strokeWidth={2.5}/> Volver al medallero
       </button>
       <div className="text-[10px] tracking-[0.4em] text-white/40 mb-3">{title.toUpperCase()}</div>
       {children}
@@ -358,7 +378,7 @@ function SubScreen({ title, onBack, children }: { title: string; onBack: () => v
 
 /* ─── Medallero (pantalla principal) ─── */
 function Medallero({
-  skills, counts, onAvatar, onEvo, belt, streak,
+  skills, counts, onAvatar, onEvo, belt, streak, openZoom,
 }: {
   skills: Skills;
   counts: Record<string, number>;
@@ -366,6 +386,7 @@ function Medallero({
   onEvo: () => void;
   belt: ReturnType<typeof beltFromXp>;
   streak: number;
+  openZoom: (z: ZoomItem) => void;
 }) {
   void counts;
   const unlocks = OBSTACLES.map((o) => o.unlock(skills));
@@ -373,7 +394,6 @@ function Medallero({
   const active = streak > 0;
   return (
     <div className="space-y-5">
-      {/* Racha de asistencia */}
       <div className={`adn-card relative overflow-hidden p-4 ${active ? "border-[var(--adn-fluor)]/60 shadow-[0_0_22px_#39ff1433]" : ""}`}>
         {active && (
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60"
@@ -414,13 +434,22 @@ function Medallero({
         {OBSTACLES.map((o, idx) => {
           const unlocked = unlocks[idx];
           return (
-            <div key={o.name}
-              className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden ${
+            <button key={o.name}
+              type="button"
+              onClick={() => openZoom({
+                img: o.img,
+                title: o.name,
+                subtitle: `Habilidad: ${o.skillLabel}`,
+                locked: !unlocked,
+                hint: unlocked ? "¡Desbloqueado! Retirá tu Pin en recepción." : `Completá al 100% la barra de ${o.skillLabel} para desbloquear.`,
+                bg: "dark",
+              })}
+              className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden transition active:scale-[0.97] ${
                 unlocked ? "bg-black/40 border-[var(--adn-fluor)]/50 shadow-[0_0_18px_#39ff1433]"
                          : "bg-black/30 border-white/10"}`}>
               <img src={o.img} alt={o.name}
                 className={`w-full flex-1 object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
-                draggable={false} />
+                draggable={false} loading="lazy" />
               <div className="text-[9px] uppercase text-center text-white/70 leading-tight w-full px-1 truncate">{o.name}</div>
               {unlocked ? (
                 <span className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full grid place-items-center bg-[var(--adn-fluor)] text-black shadow-[0_0_10px_#39ff14]">
@@ -433,7 +462,7 @@ function Medallero({
                   </span>
                 </span>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -452,12 +481,24 @@ function Medallero({
   );
 }
 
+/* ─── Vertical label helper (writing-mode rotated) ─── */
+function VerticalLabel({ text }: { text: string }) {
+  return (
+    <div
+      className="text-[10px] tracking-[0.35em] text-white/50 font-bold whitespace-nowrap select-none"
+      style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+    >
+      {text}
+    </div>
+  );
+}
+
 /* ─── Avatar Studio ─── */
 function AvatarStudio({
   selectedId, onSelect, accessories, currentBelt, thresholds, level,
   unlockedAvatarIds, avatarOrder, avatarsUnlockedCount,
   unlockedScenarioIds, scenariosUnlockedCount, attendanceDays,
-  selectedScenarioId, onSelectScenario, scenarioOrder,
+  selectedScenarioId, onSelectScenario, scenarioOrder, openZoom,
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
@@ -474,10 +515,10 @@ function AvatarStudio({
   selectedScenarioId: string;
   onSelectScenario: (id: string) => void;
   scenarioOrder: string[];
+  openZoom: (z: ZoomItem) => void;
 }) {
   const selected = AVATAR_PRESETS.find((p) => p.id === selectedId) ?? AVATAR_PRESETS[0];
 
-  // Lista ordenada de muñequeras para el panel izq (incluye "none" como base bloqueado/inicial)
   const beltLadder: { belt: Belt; required: number }[] = [
     { belt: BELTS.find((b) => b.key === "white")!, required: thresholds.white },
     { belt: BELTS.find((b) => b.key === "green")!, required: thresholds.green },
@@ -486,73 +527,124 @@ function AvatarStudio({
     { belt: BELTS.find((b) => b.key === "black")!, required: thresholds.black },
   ];
 
+  // Días restantes para próximo escenario / personaje
+  const daysToNextScenario = 15 - (attendanceDays % 15);
+  const daysToNextAvatar = 28 - (attendanceDays % 28);
+
   return (
     <div className="space-y-5">
       {/* Zona central: paneles laterales + avatar */}
       <div className="adn-card p-4">
-        <div className="grid grid-cols-[72px_1fr_72px] gap-3 items-stretch">
-          {/* PANEL IZQ — Pulseras (mismo patrón visual que Medallero) */}
-          <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2">
-            <div className="text-[8px] tracking-[0.25em] text-white/50 text-center leading-tight">PULSE-<br/>RAS</div>
-            {beltLadder.slice().reverse().map(({ belt, required }) => {
-              const unlocked = level >= required;
-              const isCurrent = belt.key === currentBelt.key && currentBelt.key !== "none";
-              return (
-                <div key={belt.key}
-                  title={`${belt.label} · L${required}`}
-                  className={`relative h-14 w-14 rounded-lg border overflow-hidden flex items-center justify-center ${
-                    isCurrent ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa] animate-pulse"
-                              : unlocked ? "border-white/20" : "border-white/10"
-                  }`}
-                  style={{ background: "rgba(0,0,0,0.35)" }}>
-                  <img src={WRISTBAND_IMG[belt.key]} alt={belt.label}
-                    className={`w-full h-full object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
-                    draggable={false} loading="lazy"/>
-                  {!unlocked && (
-                    <span className="absolute inset-0 grid place-items-center pointer-events-none">
-                      <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
-                        <Lock size={11} className="adn-fluor"/>
+        <div className="grid grid-cols-[86px_1fr_86px] gap-3 items-stretch">
+          {/* PANEL IZQ — Pulseras */}
+          <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex items-stretch gap-1">
+            <div className="flex items-center justify-center py-1">
+              <VerticalLabel text="PULSERAS" />
+            </div>
+            <div className="flex-1 flex flex-col items-center gap-2">
+              {beltLadder.slice().reverse().map(({ belt, required }) => {
+                const unlocked = level >= required;
+                const isCurrent = belt.key === currentBelt.key && currentBelt.key !== "none";
+                return (
+                  <button key={belt.key}
+                    type="button"
+                    onClick={() => openZoom({
+                      img: WRISTBAND_IMG[belt.key],
+                      title: belt.label,
+                      subtitle: belt.subtitle,
+                      locked: !unlocked,
+                      hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : `Necesitás llegar al Nivel ${required} para conseguir esta muñequera.`,
+                      bg: "dark",
+                    })}
+                    title={`${belt.label} · L${required}`}
+                    className={`relative h-14 w-14 rounded-lg border overflow-hidden flex items-center justify-center transition active:scale-95 ${
+                      isCurrent ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa] animate-pulse"
+                                : unlocked ? "border-white/20" : "border-white/10"
+                    }`}
+                    style={{ background: "rgba(0,0,0,0.35)" }}>
+                    <img src={WRISTBAND_IMG[belt.key]} alt={belt.label}
+                      className={`w-full h-full object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
+                      draggable={false} loading="lazy"/>
+                    {!unlocked && (
+                      <span className="absolute inset-0 grid place-items-center pointer-events-none">
+                        <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
+                          <Lock size={11} className="adn-fluor"/>
+                        </span>
                       </span>
-                    </span>
-                  )}
-                  <span className="absolute bottom-0 inset-x-0 text-[8px] text-center text-white/70 bg-black/60 leading-none py-0.5">L{required}</span>
-                </div>
-              );
-            })}
+                    )}
+                    <span className="absolute bottom-0 inset-x-0 text-[8px] text-center text-white/70 bg-black/60 leading-none py-0.5">L{required}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* CENTRO — Avatar sobre escenario (sin recuadro negro) */}
-          <div className="rounded-2xl overflow-hidden grid place-items-center"
-               style={{ background: accessories.background.css, minHeight: 260 }}>
-            <AvatarImage preset={selected} size={240} accessories={accessories} />
+          {/* CENTRO — Avatar sobre escenario (sin eclipse) */}
+          <div className="rounded-2xl overflow-hidden flex items-center justify-center relative"
+               style={{ minHeight: 280 }}>
+            <img
+              src={accessories.background.img}
+              alt={accessories.background.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              draggable={false}
+              loading="lazy"
+            />
+            <div className="relative z-10">
+              <AvatarImage preset={selected} size={220} accessories={accessories} />
+            </div>
           </div>
 
-          {/* PANEL DER — Escenarios (mismo patrón) */}
-          <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2">
-            <div className="text-[8px] tracking-[0.25em] text-white/50 text-center leading-tight">ESCENA-<br/>RIOS</div>
-            {scenarioOrder.slice(0, 5).map((scId) => {
-              const sc = SCENARIOS.find((s) => s.id === scId)!;
-              const unlocked = unlockedScenarioIds.has(sc.id);
-              const active = sc.id === selectedScenarioId;
-              return (
-                <button key={sc.id}
-                  onClick={() => onSelectScenario(sc.id)}
-                  title={unlocked ? sc.name : "Bloqueado"}
-                  className={`relative h-14 w-14 rounded-lg border overflow-hidden transition ${
-                    active ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa]"
-                           : unlocked ? "border-white/20" : "border-white/10"
-                  }`}
-                  style={{ background: sc.css, filter: unlocked ? "none" : "grayscale(1) brightness(0.55)" }}>
-                  {!unlocked && (
-                    <span className="absolute inset-0 grid place-items-center bg-black/30 pointer-events-none">
-                      <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
-                        <Lock size={11} className="adn-fluor"/>
+          {/* PANEL DER — Escenarios */}
+          <div className="rounded-xl border border-white/10 bg-black/40 p-2 flex items-stretch gap-1">
+            <div className="flex-1 flex flex-col items-center gap-2">
+              {scenarioOrder.slice(0, 5).map((scId) => {
+                const sc = SCENARIOS.find((s) => s.id === scId)!;
+                const unlocked = unlockedScenarioIds.has(sc.id);
+                const active = sc.id === selectedScenarioId;
+                const idxInOrder = scenarioOrder.indexOf(sc.id);
+                const daysNeeded = Math.max(0, idxInOrder * 15 - attendanceDays);
+                return (
+                  <button key={sc.id}
+                    onClick={() => {
+                      if (unlocked) onSelectScenario(sc.id);
+                      else openZoom({
+                        img: sc.img,
+                        title: sc.name,
+                        subtitle: "Escenario bloqueado",
+                        locked: true,
+                        hint: `Asistí ${daysNeeded} día${daysNeeded === 1 ? "" : "s"} más para desbloquear este escenario.`,
+                        bg: "scene",
+                      });
+                    }}
+                    onDoubleClick={() => openZoom({
+                      img: sc.img,
+                      title: sc.name,
+                      locked: !unlocked,
+                      hint: unlocked ? "Escenario desbloqueado. Doble tap para verlo grande." : `Asistí ${daysNeeded} días más para desbloquearlo.`,
+                      bg: "scene",
+                    })}
+                    title={unlocked ? sc.name : "Bloqueado"}
+                    className={`relative h-14 w-14 rounded-lg border overflow-hidden transition active:scale-95 ${
+                      active ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa]"
+                             : unlocked ? "border-white/20" : "border-white/10"
+                    }`}>
+                    <img src={sc.img} alt={sc.name}
+                      className={`w-full h-full object-cover ${unlocked ? "" : "grayscale opacity-50"}`}
+                      draggable={false} loading="lazy"/>
+                    {!unlocked && (
+                      <span className="absolute inset-0 grid place-items-center bg-black/30 pointer-events-none">
+                        <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
+                          <Lock size={11} className="adn-fluor"/>
+                        </span>
                       </span>
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-center py-1">
+              <VerticalLabel text="ESCENARIOS" />
+            </div>
           </div>
         </div>
 
@@ -560,26 +652,41 @@ function AvatarStudio({
           {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{AVATAR_PRESETS.length} personajes · {attendanceDays} días asistidos
         </div>
         <div className="mt-1 text-center text-[9px] text-white/40">
-          Cada 15 días desbloqueás un escenario nuevo · Cada 4 semanas un personaje nuevo
+          Próximo escenario en {daysToNextScenario} día{daysToNextScenario === 1 ? "" : "s"} · Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
         </div>
       </div>
 
-      {/* Cambiar contraseña */}
-      <ChangePasswordCard />
-
-
       {/* Galería de personajes */}
       <div className="adn-card p-5">
-        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · 10 PERSONAJES</div>
+        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · {AVATAR_PRESETS.length} PERSONAJES</div>
         <div className="grid grid-cols-5 gap-2.5">
           {avatarOrder.map((id) => {
             const p = AVATAR_PRESETS.find((x) => x.id === id)!;
             const active = p.id === selectedId;
             const unlocked = unlockedAvatarIds.has(p.id);
+            const idxInOrder = avatarOrder.indexOf(p.id);
+            const daysNeeded = Math.max(0, idxInOrder * 28 - attendanceDays);
             return (
-              <button key={p.id} onClick={() => onSelect(p.id)}
-                style={{ background: "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)" }}
-                className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden ${
+              <button key={p.id}
+                onClick={() => {
+                  if (unlocked) onSelect(p.id);
+                  else openZoom({
+                    img: p.img,
+                    title: `Personaje ${p.label}`,
+                    subtitle: "Personaje bloqueado",
+                    locked: true,
+                    hint: `Asistí ${daysNeeded} día${daysNeeded === 1 ? "" : "s"} más para desbloquearlo.`,
+                    bg: "dark",
+                  });
+                }}
+                onDoubleClick={() => openZoom({
+                  img: p.img,
+                  title: `Personaje ${p.label}`,
+                  locked: !unlocked,
+                  hint: unlocked ? "Personaje desbloqueado." : `Asistí ${daysNeeded} días más.`,
+                  bg: "dark",
+                })}
+                className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden active:scale-95 ${
                   active ? "border-[var(--adn-fluor)]" : "border-white/10 hover:border-white/30"
                 }`}>
                 <AvatarImage preset={p} size={72} />
@@ -600,7 +707,7 @@ function AvatarStudio({
           })}
         </div>
         <div className="mt-3 text-[10px] text-white/40 text-center">
-          Iniciás con 1 personaje al azar. Los demás se desbloquean cada 4 semanas de asistencia.
+          Tocá cualquier personaje bloqueado para ver la imagen ampliada.
         </div>
       </div>
     </div>
@@ -628,7 +735,6 @@ function AvatarImage({
   return (
     <div className="relative mx-auto select-none" style={{ width: size, height: size }} aria-label={`avatar ${preset.id}`}>
       {wrist && (
-        /* Halo sutil del color de la pulsera (solo glow, sin cartel) */
         <div className="absolute inset-0 rounded-full pointer-events-none"
           style={{ boxShadow: `0 0 ${size * 0.14}px ${wrist.color}77` }} />
       )}
@@ -638,15 +744,15 @@ function AvatarImage({
   );
 }
 
-/* ─── Cambiar contraseña (familia / alumno) ─── */
-function ChangePasswordCard() {
+/* ─── Cambiar contraseña ─── */
+function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (pwd1.length < 6) { toast.error("Mínimo 6 caracteres."); return; }
+    if (pwd1.length < 4) { toast.error("Mínimo 4 caracteres."); return; }
     if (pwd1 !== pwd2) { toast.error("Las contraseñas no coinciden."); return; }
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pwd1 });
@@ -655,11 +761,40 @@ function ChangePasswordCard() {
     toast.success("Contraseña actualizada.");
     setPwd1(""); setPwd2(""); setOpen(false);
   }
+
+  if (compact) {
+    return (
+      <>
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-white/5 border border-white/15 text-white/80 hover:border-[var(--adn-fluor)]/60 hover:text-white transition"
+        >
+          <KeyRound size={13} className="adn-fluor"/> Cambiar contraseña
+        </button>
+        {open && (
+          <div className="fixed inset-0 z-40 grid place-items-center bg-black/80 backdrop-blur-sm p-6 animate-fade-in" onClick={() => setOpen(false)}>
+            <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="adn-card p-5 w-full max-w-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-bold flex items-center gap-2"><KeyRound size={16} className="adn-fluor"/> Cambiar contraseña</div>
+                <button type="button" onClick={() => setOpen(false)} className="text-white/50 hover:text-white"><X size={18}/></button>
+              </div>
+              <input className="adn-input" type="password" placeholder="nueva contraseña (mín. 4)" value={pwd1}
+                onChange={(e) => setPwd1(e.target.value)} minLength={4} required autoComplete="new-password" autoFocus />
+              <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
+                onChange={(e) => setPwd2(e.target.value)} minLength={4} required autoComplete="new-password" />
+              <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
+            </form>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="adn-card p-4">
       <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="adn-fluor text-sm">🔐</span>
+          <KeyRound size={14} className="adn-fluor"/>
           <span className="text-sm font-bold">Cambiar contraseña</span>
         </div>
         <span className="text-white/40 text-xs">{open ? "Cerrar" : "Abrir"}</span>
@@ -667,12 +802,81 @@ function ChangePasswordCard() {
       {open && (
         <form onSubmit={submit} className="mt-3 space-y-2">
           <input className="adn-input" type="password" placeholder="nueva contraseña" value={pwd1}
-            onChange={(e) => setPwd1(e.target.value)} minLength={6} required autoComplete="new-password" />
+            onChange={(e) => setPwd1(e.target.value)} minLength={4} required autoComplete="new-password" />
           <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
-            onChange={(e) => setPwd2(e.target.value)} minLength={6} required autoComplete="new-password" />
+            onChange={(e) => setPwd2(e.target.value)} minLength={4} required autoComplete="new-password" />
           <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
         </form>
       )}
+    </div>
+  );
+}
+
+/* ─── Zoom Modal — imagen ampliada con estado bloqueado/desbloqueado ─── */
+function ImageZoomModal({ item, onClose }: { item: ZoomItem; onClose: () => void }) {
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [onClose]);
+
+  const bgClass = item.bg === "scene"
+    ? "bg-gradient-to-b from-black/95 via-black/85 to-black/95"
+    : "bg-black/90";
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-5 backdrop-blur-md animate-fade-in ${bgClass}`}
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 h-10 w-10 rounded-full grid place-items-center bg-white/10 hover:bg-white/20 border border-white/20 text-white transition"
+        aria-label="Cerrar"
+      >
+        <X size={20}/>
+      </button>
+
+      <div
+        className="relative w-full max-w-md flex flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-white/15 bg-black/60 shadow-[0_0_40px_#000]">
+          <img
+            src={item.img}
+            alt={item.title}
+            className={`w-full h-full ${item.bg === "scene" ? "object-cover" : "object-contain"} ${item.locked ? "grayscale opacity-70" : ""}`}
+            draggable={false}
+          />
+          {item.locked && (
+            <div className="absolute inset-0 grid place-items-center pointer-events-none">
+              <span className="h-20 w-20 rounded-full bg-black/70 border-2 border-[var(--adn-fluor)]/70 grid place-items-center shadow-[0_0_30px_#39ff1466]">
+                <Lock size={40} className="adn-fluor"/>
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 text-center px-2">
+          <div className={`text-lg font-black ${item.locked ? "text-white/80" : "adn-fluor"}`}>{item.title}</div>
+          {item.subtitle && <div className="text-xs text-white/60 mt-0.5">{item.subtitle}</div>}
+          {item.hint && (
+            <div className={`mt-3 text-sm leading-snug ${item.locked ? "text-white/70" : "text-white/80"}`}>
+              {item.locked && <Lock size={14} className="inline mr-1 -mt-0.5 adn-fluor"/>}
+              {item.hint}
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-5 adn-btn-primary px-8 py-2.5 text-sm"
+        >
+          Cerrar
+        </button>
+      </div>
     </div>
   );
 }
