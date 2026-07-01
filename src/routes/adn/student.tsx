@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff } from "lucide-react";
+import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff, X, KeyRound } from "lucide-react";
 import { BELTS, beltFromXp, SKILLS, type SkillKey, type BeltKey } from "@/lib/adn-game";
 
 export const Route = createFileRoute("/adn/student")({
@@ -53,18 +53,26 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
 ];
 
-/* ─── Escenarios (9 fondos: 1 default + 8 desbloqueables) ─── */
-type Scenario = { id: string; name: string; css: string };
+/* ─── Escenarios: monumentos de La Plata (1 default + 7 desbloqueables) ─── */
+import scMuseo from "@/assets/scenarios/museo.jpg";
+import scPlaza from "@/assets/scenarios/plaza-moreno.jpg";
+import scCatedral from "@/assets/scenarios/catedral.jpg";
+import scCastillo from "@/assets/scenarios/castillo.jpg";
+import scLago from "@/assets/scenarios/lago.jpg";
+import scParlamento from "@/assets/scenarios/parlamento.jpg";
+import scRambla from "@/assets/scenarios/rambla.jpg";
+import scAerea from "@/assets/scenarios/aerea.jpg";
+
+type Scenario = { id: string; name: string; img: string };
 const SCENARIOS: Scenario[] = [
-  { id: "default", name: "Base",       css: "radial-gradient(circle at 50% 65%, #1b1b2e 0%, #050505 75%)" },
-  { id: "neon",    name: "Neón",       css: "radial-gradient(circle at 50% 60%, #39ff1455 0%, #0a0a25 70%)" },
-  { id: "fire",    name: "Fuego",      css: "radial-gradient(circle at 50% 65%, #ff4d00aa 0%, #df00ff55 45%, #100010 80%)" },
-  { id: "cosmos",  name: "Cosmos",     css: "radial-gradient(circle at 50% 50%, #df00ffaa 0%, #00ffaeaa 35%, #0a0a25 80%)" },
-  { id: "ice",     name: "Hielo",      css: "radial-gradient(circle at 50% 55%, #3aa0ffaa 0%, #00f7ff55 40%, #02061a 85%)" },
-  { id: "gold",    name: "Dorado",     css: "radial-gradient(circle at 50% 60%, #ffd700aa 0%, #ff8a00aa 45%, #1a0d00 85%)" },
-  { id: "stars",   name: "Estrellas",  css: "radial-gradient(circle at 30% 30%, #ffffff44 0%, transparent 6%), radial-gradient(circle at 70% 60%, #ffffff66 0%, transparent 5%), radial-gradient(circle at 50% 80%, #3aa0ff77 0%, #02021a 80%)" },
-  { id: "jungle",  name: "Jungla",     css: "radial-gradient(circle at 50% 60%, #00ffae77 0%, #0a3d0a 50%, #02100a 85%)" },
-  { id: "lava",    name: "Lava",       css: "radial-gradient(circle at 50% 80%, #ff2d55cc 0%, #ff8a00aa 35%, #1a0000 85%)" },
+  { id: "museo",      name: "Museo de La Plata",              img: scMuseo },
+  { id: "plaza",      name: "Plaza Moreno y Catedral",        img: scPlaza },
+  { id: "catedral",   name: "Escaleras de la Catedral",       img: scCatedral },
+  { id: "castillo",   name: "República de los Niños · Castillo",  img: scCastillo },
+  { id: "lago",       name: "República de los Niños · Lago",      img: scLago },
+  { id: "parlamento", name: "República de los Niños · Parlamento", img: scParlamento },
+  { id: "rambla",     name: "Rambla Av. 32 y 17",             img: scRambla },
+  { id: "aerea",      name: "Vista aérea de La Plata",        img: scAerea },
 ];
 
 /* ─── Obstáculos del Medallero ─── */
