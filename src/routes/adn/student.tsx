@@ -143,7 +143,7 @@ function StudentDashboard() {
   const [student, setStudent] = useState<Student | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
   const [avatarId, setAvatarId] = useState<string>("b1");
-  const [scenarioId, setScenarioId] = useState<string>("default");
+  const [scenarioId, setScenarioId] = useState<string>("museo");
   const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
@@ -238,8 +238,8 @@ function StudentDashboard() {
   );
   const scenarioOrder = useMemo(() => {
     if (!student) return SCENARIOS.map((s) => s.id);
-    const rest = SCENARIOS.filter((s) => s.id !== "default").map((s) => s.id);
-    return ["default", ...seededShuffle(rest, `${student.id}:scenarios`)];
+    const rest = SCENARIOS.filter((s) => s.id !== "museo").map((s) => s.id);
+    return ["museo", ...seededShuffle(rest, `${student.id}:scenarios`)];
   }, [student]);
 
   const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
