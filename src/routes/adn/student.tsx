@@ -631,15 +631,17 @@ function AvatarStudio({
                       active ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa]"
                              : unlocked ? "border-white/20" : "border-white/10"
                     }`}>
-                    <img src={sc.img} alt={sc.name}
-                      className={`w-full h-full object-cover ${unlocked ? "" : "grayscale opacity-50"}`}
-                      draggable={false} loading="lazy"/>
-                    {!unlocked && (
-                      <span className="absolute inset-0 grid place-items-center bg-black/30 pointer-events-none">
-                        <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
-                          <Lock size={11} className="adn-fluor"/>
+                    {unlocked ? (
+                      <img src={sc.img} alt={sc.name}
+                        className="w-full h-full object-cover"
+                        draggable={false} loading="lazy"/>
+                    ) : (
+                      // Bloqueado: se oculta la imagen para que no se sepa cuál es (sorpresa)
+                      <div className="w-full h-full grid place-items-center bg-gradient-to-br from-black/70 to-black/40">
+                        <span className="h-7 w-7 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
+                          <Lock size={13} className="adn-fluor"/>
                         </span>
-                      </span>
+                      </div>
                     )}
                   </button>
                 );
