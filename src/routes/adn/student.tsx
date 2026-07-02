@@ -605,25 +605,25 @@ function AvatarStudio({
                 const unlocked = unlockedScenarioIds.has(sc.id);
                 const active = sc.id === selectedScenarioId;
                 const idxInOrder = scenarioOrder.indexOf(sc.id);
-                const daysNeeded = Math.max(0, idxInOrder * 15 - attendanceDays);
+                void idxInOrder;
                 return (
                   <button key={sc.id}
                     onClick={() => {
                       if (unlocked) onSelectScenario(sc.id);
                       else openZoom({
                         img: sc.img,
-                        title: sc.name,
+                        title: "Escenario sorpresa",
                         subtitle: "Escenario bloqueado",
                         locked: true,
-                        hint: `Asistí ${daysNeeded} día${daysNeeded === 1 ? "" : "s"} más para desbloquear este escenario.`,
+                        hint: "Seguí entrenando para desbloquear este escenario.",
                         bg: "scene",
                       });
                     }}
                     onDoubleClick={() => openZoom({
                       img: sc.img,
-                      title: sc.name,
+                      title: unlocked ? sc.name : "Escenario sorpresa",
                       locked: !unlocked,
-                      hint: unlocked ? "Escenario desbloqueado. Doble tap para verlo grande." : `Asistí ${daysNeeded} días más para desbloquearlo.`,
+                      hint: unlocked ? "Escenario desbloqueado. Doble tap para verlo grande." : "Seguí entrenando para desbloquear este escenario.",
                       bg: "scene",
                     })}
                     title={unlocked ? sc.name : "Bloqueado"}
