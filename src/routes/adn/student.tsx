@@ -230,8 +230,8 @@ function StudentDashboard() {
   );
   const scenarioOrder = useMemo(() => {
     if (!student) return SCENARIOS.map((s) => s.id);
-    const rest = SCENARIOS.filter((s) => s.id !== "museo").map((s) => s.id);
-    return ["museo", ...seededShuffle(rest, `${student.id}:scenarios`)];
+    const rest = SCENARIOS.filter((s) => s.id !== DEFAULT_SCENARIO_ID).map((s) => s.id);
+    return [DEFAULT_SCENARIO_ID, ...seededShuffle(rest, `${student.id}:scenarios`)];
   }, [student]);
 
   const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
