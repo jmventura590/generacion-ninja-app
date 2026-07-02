@@ -574,9 +574,11 @@ function AvatarStudio({
             </div>
           </div>
 
-          {/* CENTRO — Avatar sobre escenario (sin eclipse) */}
-          <div className="rounded-2xl overflow-hidden flex items-center justify-center relative"
-               style={{ minHeight: 280 }}>
+          {/* CENTRO — Avatar sobre escenario (pies en el piso, escala ~1/4) */}
+          <div
+            className="rounded-2xl overflow-hidden relative bg-black/40"
+            style={{ aspectRatio: "3 / 4" }}
+          >
             <img
               src={accessories.background.img}
               alt={accessories.background.name}
@@ -584,9 +586,15 @@ function AvatarStudio({
               draggable={false}
               loading="lazy"
             />
-            <div className="relative z-10">
-              <AvatarImage preset={selected} size={220} accessories={accessories} />
-            </div>
+            {/* Avatar anclado al piso, alto = 32% del contenedor (~1/4 del edificio) */}
+            <img
+              src={selected.img}
+              alt={`avatar ${selected.id}`}
+              draggable={false}
+              loading="lazy"
+              className="absolute left-1/2 -translate-x-1/2 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)]"
+              style={{ bottom: "2%", height: "32%", width: "auto" }}
+            />
           </div>
 
           {/* PANEL DER — Escenarios */}
