@@ -139,7 +139,7 @@ function StudentDashboard() {
   const [student, setStudent] = useState<Student | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
   const [avatarId, setAvatarId] = useState<string>("b1");
-  const [scenarioId, setScenarioId] = useState<string>("museo");
+  const [scenarioId, setScenarioId] = useState<string>(DEFAULT_SCENARIO_ID);
   const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
