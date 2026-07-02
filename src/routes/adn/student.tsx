@@ -53,26 +53,21 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
 ];
 
-/* ─── Escenarios: monumentos de La Plata (1 default + 7 desbloqueables) ─── */
-import scMuseo from "@/assets/scenarios/museo.jpg";
-import scPlaza from "@/assets/scenarios/plaza-moreno.jpg";
-import scCatedral from "@/assets/scenarios/catedral.jpg";
+/* ─── Escenarios: República de los Niños de La Plata (1 default + 4 sorpresa) ─── */
+import scEntrada from "@/assets/scenarios/entrada.jpg";
 import scCastillo from "@/assets/scenarios/castillo.jpg";
-import scLago from "@/assets/scenarios/lago.jpg";
-import scParlamento from "@/assets/scenarios/parlamento.jpg";
-import scRambla from "@/assets/scenarios/rambla.jpg";
-import scAerea from "@/assets/scenarios/aerea.jpg";
+import scAldea from "@/assets/scenarios/aldea.jpg";
+import scPlaza from "@/assets/scenarios/plaza.jpg";
+import scTorre from "@/assets/scenarios/torre.jpg";
 
 type Scenario = { id: string; name: string; img: string };
+const DEFAULT_SCENARIO_ID = "entrada";
 const SCENARIOS: Scenario[] = [
-  { id: "museo",      name: "Museo de La Plata",                   img: scMuseo },
-  { id: "plaza",      name: "Plaza Moreno y Catedral",             img: scPlaza },
-  { id: "catedral",   name: "Escaleras de la Catedral",            img: scCatedral },
-  { id: "castillo",   name: "República de los Niños · Castillo",   img: scCastillo },
-  { id: "lago",       name: "República de los Niños · Lago",       img: scLago },
-  { id: "parlamento", name: "República de los Niños · Parlamento", img: scParlamento },
-  { id: "rambla",     name: "Rambla Av. 32 y 17",                  img: scRambla },
-  { id: "aerea",      name: "Vista aérea de La Plata",             img: scAerea },
+  { id: "entrada",  name: "República de los Niños · Entrada",   img: scEntrada  },
+  { id: "castillo", name: "República de los Niños · Castillo",  img: scCastillo },
+  { id: "aldea",    name: "República de los Niños · Aldea",     img: scAldea    },
+  { id: "plaza",    name: "República de los Niños · Plaza",     img: scPlaza    },
+  { id: "torre",    name: "República de los Niños · Torre",     img: scTorre    },
 ];
 
 /* ─── Obstáculos del Medallero ─── */
