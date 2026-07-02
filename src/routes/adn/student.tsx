@@ -657,7 +657,7 @@ function AvatarStudio({
           {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{AVATAR_PRESETS.length} personajes · {attendanceDays} días asistidos
         </div>
         <div className="mt-1 text-center text-[9px] text-white/40">
-          Próximo escenario en {daysToNextScenario} día{daysToNextScenario === 1 ? "" : "s"} · Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
+          Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
         </div>
       </div>
 
