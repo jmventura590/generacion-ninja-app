@@ -53,26 +53,21 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
 ];
 
-/* ─── Escenarios: monumentos de La Plata (1 default + 7 desbloqueables) ─── */
-import scMuseo from "@/assets/scenarios/museo.jpg";
-import scPlaza from "@/assets/scenarios/plaza-moreno.jpg";
-import scCatedral from "@/assets/scenarios/catedral.jpg";
+/* ─── Escenarios: República de los Niños de La Plata (1 default + 4 sorpresa) ─── */
+import scEntrada from "@/assets/scenarios/entrada.jpg";
 import scCastillo from "@/assets/scenarios/castillo.jpg";
-import scLago from "@/assets/scenarios/lago.jpg";
-import scParlamento from "@/assets/scenarios/parlamento.jpg";
-import scRambla from "@/assets/scenarios/rambla.jpg";
-import scAerea from "@/assets/scenarios/aerea.jpg";
+import scAldea from "@/assets/scenarios/aldea.jpg";
+import scPlaza from "@/assets/scenarios/plaza.jpg";
+import scTorre from "@/assets/scenarios/torre.jpg";
 
 type Scenario = { id: string; name: string; img: string };
+const DEFAULT_SCENARIO_ID = "entrada";
 const SCENARIOS: Scenario[] = [
-  { id: "museo",      name: "Museo de La Plata",                   img: scMuseo },
-  { id: "plaza",      name: "Plaza Moreno y Catedral",             img: scPlaza },
-  { id: "catedral",   name: "Escaleras de la Catedral",            img: scCatedral },
-  { id: "castillo",   name: "República de los Niños · Castillo",   img: scCastillo },
-  { id: "lago",       name: "República de los Niños · Lago",       img: scLago },
-  { id: "parlamento", name: "República de los Niños · Parlamento", img: scParlamento },
-  { id: "rambla",     name: "Rambla Av. 32 y 17",                  img: scRambla },
-  { id: "aerea",      name: "Vista aérea de La Plata",             img: scAerea },
+  { id: "entrada",  name: "República de los Niños · Entrada",   img: scEntrada  },
+  { id: "castillo", name: "República de los Niños · Castillo",  img: scCastillo },
+  { id: "aldea",    name: "República de los Niños · Aldea",     img: scAldea    },
+  { id: "plaza",    name: "República de los Niños · Plaza",     img: scPlaza    },
+  { id: "torre",    name: "República de los Niños · Torre",     img: scTorre    },
 ];
 
 /* ─── Obstáculos del Medallero ─── */
@@ -144,7 +139,7 @@ function StudentDashboard() {
   const [student, setStudent] = useState<Student | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
   const [avatarId, setAvatarId] = useState<string>("b1");
-  const [scenarioId, setScenarioId] = useState<string>("museo");
+  const [scenarioId, setScenarioId] = useState<string>(DEFAULT_SCENARIO_ID);
   const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
@@ -235,8 +230,8 @@ function StudentDashboard() {
   );
   const scenarioOrder = useMemo(() => {
     if (!student) return SCENARIOS.map((s) => s.id);
-    const rest = SCENARIOS.filter((s) => s.id !== "museo").map((s) => s.id);
-    return ["museo", ...seededShuffle(rest, `${student.id}:scenarios`)];
+    const rest = SCENARIOS.filter((s) => s.id !== DEFAULT_SCENARIO_ID).map((s) => s.id);
+    return [DEFAULT_SCENARIO_ID, ...seededShuffle(rest, `${student.id}:scenarios`)];
   }, [student]);
 
   const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
@@ -527,8 +522,7 @@ function AvatarStudio({
     { belt: BELTS.find((b) => b.key === "black")!, required: thresholds.black },
   ];
 
-  // Días restantes para próximo escenario / personaje
-  const daysToNextScenario = 15 - (attendanceDays % 15);
+  // Días restantes para próximo personaje (los escenarios son sorpresa: sin countdown)
   const daysToNextAvatar = 28 - (attendanceDays % 28);
 
   return (
@@ -579,9 +573,11 @@ function AvatarStudio({
             </div>
           </div>
 
-          {/* CENTRO — Avatar sobre escenario (sin eclipse) */}
-          <div className="rounded-2xl overflow-hidden flex items-center justify-center relative"
-               style={{ minHeight: 280 }}>
+          {/* CENTRO — Avatar sobre escenario (pies en el piso, escala ~1/4) */}
+          <div
+            className="rounded-2xl overflow-hidden relative bg-black/40"
+            style={{ aspectRatio: "3 / 4" }}
+          >
             <img
               src={accessories.background.img}
               alt={accessories.background.name}
@@ -589,9 +585,15 @@ function AvatarStudio({
               draggable={false}
               loading="lazy"
             />
-            <div className="relative z-10">
-              <AvatarImage preset={selected} size={220} accessories={accessories} />
-            </div>
+            {/* Avatar anclado al piso, alto = 32% del contenedor (~1/4 del edificio) */}
+            <img
+              src={selected.img}
+              alt={`avatar ${selected.id}`}
+              draggable={false}
+              loading="lazy"
+              className="absolute left-1/2 -translate-x-1/2 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)]"
+              style={{ bottom: "2%", height: "32%", width: "auto" }}
+            />
           </div>
 
           {/* PANEL DER — Escenarios */}
@@ -602,25 +604,25 @@ function AvatarStudio({
                 const unlocked = unlockedScenarioIds.has(sc.id);
                 const active = sc.id === selectedScenarioId;
                 const idxInOrder = scenarioOrder.indexOf(sc.id);
-                const daysNeeded = Math.max(0, idxInOrder * 15 - attendanceDays);
+                void idxInOrder;
                 return (
                   <button key={sc.id}
                     onClick={() => {
                       if (unlocked) onSelectScenario(sc.id);
                       else openZoom({
                         img: sc.img,
-                        title: sc.name,
+                        title: "Escenario sorpresa",
                         subtitle: "Escenario bloqueado",
                         locked: true,
-                        hint: `Asistí ${daysNeeded} día${daysNeeded === 1 ? "" : "s"} más para desbloquear este escenario.`,
+                        hint: "Seguí entrenando para desbloquear este escenario.",
                         bg: "scene",
                       });
                     }}
                     onDoubleClick={() => openZoom({
                       img: sc.img,
-                      title: sc.name,
+                      title: unlocked ? sc.name : "Escenario sorpresa",
                       locked: !unlocked,
-                      hint: unlocked ? "Escenario desbloqueado. Doble tap para verlo grande." : `Asistí ${daysNeeded} días más para desbloquearlo.`,
+                      hint: unlocked ? "Escenario desbloqueado. Doble tap para verlo grande." : "Seguí entrenando para desbloquear este escenario.",
                       bg: "scene",
                     })}
                     title={unlocked ? sc.name : "Bloqueado"}
@@ -628,15 +630,17 @@ function AvatarStudio({
                       active ? "border-[var(--adn-fluor)] shadow-[0_0_12px_#39ff14aa]"
                              : unlocked ? "border-white/20" : "border-white/10"
                     }`}>
-                    <img src={sc.img} alt={sc.name}
-                      className={`w-full h-full object-cover ${unlocked ? "" : "grayscale opacity-50"}`}
-                      draggable={false} loading="lazy"/>
-                    {!unlocked && (
-                      <span className="absolute inset-0 grid place-items-center bg-black/30 pointer-events-none">
-                        <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
-                          <Lock size={11} className="adn-fluor"/>
+                    {unlocked ? (
+                      <img src={sc.img} alt={sc.name}
+                        className="w-full h-full object-cover"
+                        draggable={false} loading="lazy"/>
+                    ) : (
+                      // Bloqueado: se oculta la imagen para que no se sepa cuál es (sorpresa)
+                      <div className="w-full h-full grid place-items-center bg-gradient-to-br from-black/70 to-black/40">
+                        <span className="h-7 w-7 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
+                          <Lock size={13} className="adn-fluor"/>
                         </span>
-                      </span>
+                      </div>
                     )}
                   </button>
                 );
@@ -652,7 +656,7 @@ function AvatarStudio({
           {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{AVATAR_PRESETS.length} personajes · {attendanceDays} días asistidos
         </div>
         <div className="mt-1 text-center text-[9px] text-white/40">
-          Próximo escenario en {daysToNextScenario} día{daysToNextScenario === 1 ? "" : "s"} · Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
+          Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
         </div>
       </div>
 
