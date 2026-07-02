@@ -522,8 +522,7 @@ function AvatarStudio({
     { belt: BELTS.find((b) => b.key === "black")!, required: thresholds.black },
   ];
 
-  // Días restantes para próximo escenario / personaje
-  const daysToNextScenario = 15 - (attendanceDays % 15);
+  // Días restantes para próximo personaje (los escenarios son sorpresa: sin countdown)
   const daysToNextAvatar = 28 - (attendanceDays % 28);
 
   return (
