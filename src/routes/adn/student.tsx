@@ -690,7 +690,7 @@ function AvatarStudio({
         </div>
 
         <div className="mt-3 text-center text-[10px] text-white/50">
-          {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{AVATAR_PRESETS.length} personajes · {attendanceDays} días asistidos
+          {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{avatarOrder.length} personajes · {attendanceDays} días asistidos
         </div>
         <div className="mt-1 text-center text-[9px] text-white/40">
           Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
