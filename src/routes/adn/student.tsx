@@ -253,9 +253,17 @@ function StudentDashboard() {
     })();
   }, [navigate]);
 
+  // Filtramos avatares por franja etaria: kids (6-9) vs teens (10+).
+  const availablePresets = useMemo(() => {
+    const band = bandForAge(student?.age);
+    return AVATAR_PRESETS.filter((p) => p.band === band);
+  }, [student?.age]);
+
   const avatarOrder = useMemo(
-    () => student ? seededShuffle(AVATAR_PRESETS.map((p) => p.id), `${student.id}:avatars`) : AVATAR_PRESETS.map((p) => p.id),
-    [student],
+    () => student
+      ? seededShuffle(availablePresets.map((p) => p.id), `${student.id}:avatars`)
+      : availablePresets.map((p) => p.id),
+    [student, availablePresets],
   );
   const scenarioOrder = useMemo(() => {
     if (!student) return SCENARIOS.map((s) => s.id);
@@ -263,7 +271,7 @@ function StudentDashboard() {
     return [DEFAULT_SCENARIO_ID, ...seededShuffle(rest, `${student.id}:scenarios`)];
   }, [student]);
 
-  const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
+  const avatarsUnlockedCount = Math.min(availablePresets.length, 1 + Math.floor(attendanceDays / 28));
   const scenariosUnlockedCount = Math.min(SCENARIOS.length, 1 + Math.floor(attendanceDays / 15));
   const unlockedAvatarIds = new Set(avatarOrder.slice(0, avatarsUnlockedCount));
   const unlockedScenarioIds = new Set(scenarioOrder.slice(0, scenariosUnlockedCount));
