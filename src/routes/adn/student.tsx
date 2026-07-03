@@ -48,20 +48,39 @@ const WRISTBAND_IMG: Record<BeltKey, string> = {
 };
 
 type Gender = "boy" | "girl";
-type AvatarPreset = { id: string; gender: Gender; img: string; label: string };
+type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
+type AvatarPreset = { id: string; gender: Gender; band: AgeBand; img: string; label: string };
 
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  img: avB1, label: "Saludo" },
-  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba" },
-  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados" },
-  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump" },
-  { id: "b5", gender: "boy",  img: avB5, label: "Confiado" },
-  { id: "g1", gender: "girl", img: avG1, label: "Peace" },
-  { id: "g2", gender: "girl", img: avG2, label: "OK" },
-  { id: "g3", gender: "girl", img: avG3, label: "Salto en V" },
-  { id: "g4", gender: "girl", img: avG4, label: "Trenzas" },
-  { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
+  // Kids (6-9): chibi cartoon
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Saludo" },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Pulgar arriba" },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Brazos cruzados" },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Fist pump" },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Confiado" },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Peace" },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "OK" },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Salto en V" },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Trenzas" },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Festejo" },
+  // Teens (10+): pre-teen proportions
+  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Saludo" },
+  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Pulgar arriba" },
+  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Brazos cruzados" },
+  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Fist pump" },
+  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Confiado" },
+  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Peace" },
+  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "OK" },
+  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Salto en V" },
+  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Trenzas" },
+  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Festejo" },
 ];
+
+function bandForAge(age: number | null | undefined): AgeBand {
+  if (age != null && age >= 10) return "teens";
+  return "kids";
+}
+
 
 /* ─── Escenarios: República de los Niños de La Plata (1 default + 4 sorpresa) ─── */
 import scEntrada from "@/assets/scenarios/entrada.jpg";
