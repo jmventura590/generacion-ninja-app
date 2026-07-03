@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdnIndexRouteImport } from './routes/adn/index'
 import { Route as AdnStudentRouteImport } from './routes/adn/student'
 import { Route as AdnSettingsRouteImport } from './routes/adn/settings'
+import { Route as AdnResetPasswordRouteImport } from './routes/adn/reset-password'
 import { Route as AdnCoachRouteImport } from './routes/adn/coach'
 import { Route as AdnAuthRouteImport } from './routes/adn/auth'
 
@@ -48,6 +49,11 @@ const AdnSettingsRoute = AdnSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdnRouteRoute,
 } as any)
+const AdnResetPasswordRoute = AdnResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AdnRouteRoute,
+} as any)
 const AdnCoachRoute = AdnCoachRouteImport.update({
   id: '/coach',
   path: '/coach',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
+  '/adn/reset-password': typeof AdnResetPasswordRoute
   '/adn/settings': typeof AdnSettingsRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn/': typeof AdnIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
+  '/adn/reset-password': typeof AdnResetPasswordRoute
   '/adn/settings': typeof AdnSettingsRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn': typeof AdnIndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/adn/auth': typeof AdnAuthRoute
   '/adn/coach': typeof AdnCoachRoute
+  '/adn/reset-password': typeof AdnResetPasswordRoute
   '/adn/settings': typeof AdnSettingsRoute
   '/adn/student': typeof AdnStudentRoute
   '/adn/': typeof AdnIndexRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/adn/auth'
     | '/adn/coach'
+    | '/adn/reset-password'
     | '/adn/settings'
     | '/adn/student'
     | '/adn/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/adn/auth'
     | '/adn/coach'
+    | '/adn/reset-password'
     | '/adn/settings'
     | '/adn/student'
     | '/adn'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/adn/auth'
     | '/adn/coach'
+    | '/adn/reset-password'
     | '/adn/settings'
     | '/adn/student'
     | '/adn/'
@@ -171,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdnSettingsRouteImport
       parentRoute: typeof AdnRouteRoute
     }
+    '/adn/reset-password': {
+      id: '/adn/reset-password'
+      path: '/reset-password'
+      fullPath: '/adn/reset-password'
+      preLoaderRoute: typeof AdnResetPasswordRouteImport
+      parentRoute: typeof AdnRouteRoute
+    }
     '/adn/coach': {
       id: '/adn/coach'
       path: '/coach'
@@ -191,6 +210,7 @@ declare module '@tanstack/react-router' {
 interface AdnRouteRouteChildren {
   AdnAuthRoute: typeof AdnAuthRoute
   AdnCoachRoute: typeof AdnCoachRoute
+  AdnResetPasswordRoute: typeof AdnResetPasswordRoute
   AdnSettingsRoute: typeof AdnSettingsRoute
   AdnStudentRoute: typeof AdnStudentRoute
   AdnIndexRoute: typeof AdnIndexRoute
@@ -199,6 +219,7 @@ interface AdnRouteRouteChildren {
 const AdnRouteRouteChildren: AdnRouteRouteChildren = {
   AdnAuthRoute: AdnAuthRoute,
   AdnCoachRoute: AdnCoachRoute,
+  AdnResetPasswordRoute: AdnResetPasswordRoute,
   AdnSettingsRoute: AdnSettingsRoute,
   AdnStudentRoute: AdnStudentRoute,
   AdnIndexRoute: AdnIndexRoute,
@@ -216,13 +237,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

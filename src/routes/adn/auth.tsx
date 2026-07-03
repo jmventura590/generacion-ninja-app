@@ -1,32 +1,54 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { seedAdnDemo } from "@/lib/adn-seed.functions";
-import { resolveLoginEmail } from "@/lib/adn-students.functions";
+import { resolveLoginEmail, listPilotStudents, resolveRecoveryEmail } from "@/lib/adn-students.functions";
 
 export const Route = createFileRoute("/adn/auth")({
   component: AuthPage,
 });
 
-// Solo cuentas piloto aparecen acá. Cuando se sume el flag `piloto` en la BD,
-// esta lista se cargará dinámicamente desde student_profiles.
-const MOCKS = [
-  { label: "Coach (PIN 1986)", email: "coach@adn.test", password: "Coach1986!" },
-  { label: "Benja (rojo)",     email: "benja@adn.test", password: "Ninja2026!" },
-];
+// Coach siempre fijo. El resto (alumnos piloto) se carga dinámicamente desde la BD.
+const COACH_MOCK = { label: "Coach (PIN 1986)", email: "coach@adn.test", password: "Coach1986!" };
+
+type PilotEntry = { label: string; username: string };
 
 function AuthPage() {
   const navigate = useNavigate();
   const seedFn = useServerFn(seedAdnDemo);
   const resolveFn = useServerFn(resolveLoginEmail);
+  const listPilotsFn = useServerFn(listPilotStudents);
+  const recoveryFn = useServerFn(resolveRecoveryEmail);
+
   const [mode, setMode] = useState<"user" | "coach">("user");
   const [username, setUsername] = useState("");
   const [pwd, setPwd] = useState("");
   const [coachEmail, setCoachEmail] = useState("");
   const [coachPwd, setCoachPwd] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pilots, setPilots] = useState<PilotEntry[]>([]);
+
+  // Recovery modal
+  const [recOpen, setRecOpen] = useState(false);
+  const [recUser, setRecUser] = useState("");
+  const [recBusy, setRecBusy] = useState(false);
+
+  useEffect(() => {
+    listPilotsFn({})
+      .then((r) => {
+        if (r.ok) {
+          setPilots(
+            r.students.map((s) => ({
+              label: `${s.student_name} (${s.current_belt_color})`,
+              username: s.username,
+            })),
+          );
+        }
+      })
+      .catch(() => {});
+  }, [listPilotsFn]);
 
   async function userLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -59,14 +81,30 @@ function AuthPage() {
     }
   }
 
-  async function fillAndSignIn(m: { email: string; password: string }) {
+  async function fillAndSignInPilot(entry: PilotEntry) {
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email: m.email, password: m.password });
+      const r = await resolveFn({ data: { username: entry.username } });
+      if (!r.ok) { toast.error(r.error); return; }
+      // Contraseña conocida solo si es semilla de demo; sino pedir manual.
+      const { error } = await supabase.auth.signInWithPassword({ email: r.email, password: "Ninja2026!" });
       if (error) {
-        toast.error("Primero corré 'Cargar demo'");
+        toast.error("Primero corré 'Cargar demo' o ingresá con la clave manual.");
+        setUsername(entry.username);
+        setPwd("");
         return;
       }
+      navigate({ to: "/adn" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function fillCoach() {
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: COACH_MOCK.email, password: COACH_MOCK.password });
+      if (error) { toast.error("Primero corré 'Cargar demo'"); return; }
       navigate({ to: "/adn" });
     } finally {
       setBusy(false);
@@ -78,10 +116,42 @@ function AuthPage() {
     try {
       const r = await seedFn({});
       toast.success(r.skipped ? "Demo ya estaba cargada." : "Demo cargada — usá las cuentas de abajo.");
+      // Refrescamos pilots después del seed
+      const list = await listPilotsFn({});
+      if (list.ok) {
+        setPilots(list.students.map((s) => ({
+          label: `${s.student_name} (${s.current_belt_color})`,
+          username: s.username,
+        })));
+      }
     } catch (e: any) {
       toast.error(e.message ?? "Error sembrando demo");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function submitRecovery(e: React.FormEvent) {
+    e.preventDefault();
+    setRecBusy(true);
+    try {
+      const u = recUser.trim().toLowerCase();
+      const r = await recoveryFn({ data: { username: u } });
+      if (!r.ok) { toast.error(r.error); return; }
+      const redirectTo = `${window.location.origin}/adn/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(r.email, { redirectTo });
+      if (error) { toast.error(error.message); return; }
+      toast.success(
+        r.kind === "family"
+          ? "Te mandamos un mail para recuperar tu contraseña."
+          : "Te mandamos el link de recuperación al email de tu familia.",
+      );
+      setRecOpen(false);
+      setRecUser("");
+    } catch (err: any) {
+      toast.error(err?.message ?? "No se pudo iniciar la recuperación.");
+    } finally {
+      setRecBusy(false);
     }
   }
 
@@ -109,7 +179,7 @@ function AuthPage() {
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar</button>
               <button
                 type="button"
-                onClick={() => toast.info("Recuperación por email — próximamente. Pedile al coach una clave nueva.")}
+                onClick={() => { setRecUser(username); setRecOpen(true); }}
                 className="w-full text-[11px] text-white/50 hover:text-[var(--adn-fluor)] underline underline-offset-2"
               >
                 ¿Olvidaste tu contraseña?
@@ -132,16 +202,45 @@ function AuthPage() {
           </div>
           <p className="text-xs text-white/50">Tocá una cuenta para entrar al toque (después de "Cargar demo"):</p>
           <div className="grid grid-cols-2 gap-2">
-            {MOCKS.map((m) => (
-              <button key={m.email} onClick={() => fillAndSignIn(m)} disabled={busy}
+            <button onClick={fillCoach} disabled={busy}
+              className="text-left text-xs rounded-lg border border-white/10 bg-black/40 hover:border-[var(--adn-fluor)] px-3 py-2">
+              <div className="font-bold text-white">{COACH_MOCK.label}</div>
+              <div className="text-white/40 truncate">{COACH_MOCK.email}</div>
+            </button>
+            {pilots.map((p) => (
+              <button key={p.username} onClick={() => fillAndSignInPilot(p)} disabled={busy}
                 className="text-left text-xs rounded-lg border border-white/10 bg-black/40 hover:border-[var(--adn-fluor)] px-3 py-2">
-                <div className="font-bold text-white">{m.label}</div>
-                <div className="text-white/40 truncate">{m.email}</div>
+                <div className="font-bold text-white">{p.label}</div>
+                <div className="text-white/40 truncate">@{p.username}</div>
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {recOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-5" onClick={() => setRecOpen(false)}>
+          <div className="w-full max-w-sm adn-card p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <div className="text-lg font-bold">Recuperar contraseña</div>
+              <p className="text-xs text-white/60 mt-1">
+                Ingresá tu usuario. Te mandamos un mail al contacto de la familia para elegir una nueva clave.
+              </p>
+            </div>
+            <form onSubmit={submitRecovery} className="space-y-3">
+              <input className="adn-input" placeholder="usuario" value={recUser}
+                onChange={(e) => setRecUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
+                autoCapitalize="off" autoCorrect="off" required minLength={3} autoFocus />
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setRecOpen(false)} className="adn-btn-secondary flex-1 py-2 text-sm">Cancelar</button>
+                <button disabled={recBusy} className="adn-btn-primary flex-1 py-2 text-sm">
+                  {recBusy ? "Enviando..." : "Enviar link"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

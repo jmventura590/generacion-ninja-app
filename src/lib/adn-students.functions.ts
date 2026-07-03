@@ -36,6 +36,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     family_username: string;
     family_email: string;
     group_id: string | null;
+    piloto?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const fail = (msg: string) => ({ ok: false as const, error: msg });
@@ -131,6 +132,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
         birth_date: birth,
         username,
         group_id: data.group_id,
+        piloto: !!data.piloto,
       })
       .select("id")
       .single();
@@ -184,3 +186,75 @@ export const resolveLoginEmail = createServerFn({ method: "POST" })
 
     return { ok: false as const, error: "Usuario no encontrado." };
   });
+
+/**
+ * Lista pública de alumnos marcados como piloto para la sección DEMO del login.
+ * Solo devuelve nombre y username — no PII sensible.
+ */
+export const listPilotStudents = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("student_profiles")
+      .select("student_name, username, current_belt_color")
+      .eq("piloto", true)
+      .not("username", "is", null)
+      .order("student_name");
+    if (error) return { ok: false as const, error: error.message };
+    return { ok: true as const, students: (data ?? []) as { student_name: string; username: string; current_belt_color: string }[] };
+  });
+
+/**
+ * Marca/desmarca un alumno como piloto (solo coach). Usado para gestionar la lista DEMO.
+ */
+export const setStudentPiloto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { student_id: string; piloto: boolean }) => d)
+  .handler(async ({ data, context }) => {
+    const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
+    const isCoach = (roles ?? []).some((r: any) => r.role === "coach");
+    if (!isCoach) return { ok: false as const, error: "Solo coaches." };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("student_profiles")
+      .update({ piloto: data.piloto })
+      .eq("id", data.student_id);
+    if (error) return { ok: false as const, error: error.message };
+    return { ok: true as const };
+  });
+
+/**
+ * Devuelve el email real de una cuenta (para recuperación de contraseña).
+ * Solo funciona para usernames de familia (los alumnos usan email interno sin buzón real).
+ * Público: llamado desde el flow de "¿Olvidaste tu contraseña?".
+ */
+export const resolveRecoveryEmail = createServerFn({ method: "POST" })
+  .inputValidator((d: { username: string }) => d)
+  .handler(async ({ data }) => {
+    const u = data.username.trim().toLowerCase();
+    if (!USERNAME_RE.test(u)) return { ok: false as const, error: "Usuario inválido." };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 1) ¿Es una familia?
+    const { data: fam } = await supabaseAdmin
+      .from("student_profiles")
+      .select("family_email")
+      .ilike("family_username", u)
+      .maybeSingle();
+    if (fam && (fam as any).family_email) {
+      return { ok: true as const, email: (fam as any).family_email as string, kind: "family" as const };
+    }
+
+    // 2) ¿Es un alumno? → devolvemos el email de su familia para que reciban el mail
+    const { data: stu } = await supabaseAdmin
+      .from("student_profiles")
+      .select("family_email")
+      .eq("username", u)
+      .maybeSingle();
+    if (stu && (stu as any).family_email) {
+      return { ok: true as const, email: (stu as any).family_email as string, kind: "student-via-family" as const };
+    }
+
+    return { ok: false as const, error: "No encontramos una cuenta con ese usuario." };
+  });
+

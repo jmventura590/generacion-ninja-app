@@ -24,6 +24,16 @@ import avG2 from "@/assets/avatars/g2.png";
 import avG3 from "@/assets/avatars/g3.png";
 import avG4 from "@/assets/avatars/g4.png";
 import avG5 from "@/assets/avatars/g5.png";
+import avT1 from "@/assets/avatars/t1.png";
+import avT2 from "@/assets/avatars/t2.png";
+import avT3 from "@/assets/avatars/t3.png";
+import avT4 from "@/assets/avatars/t4.png";
+import avT5 from "@/assets/avatars/t5.png";
+import avTg1 from "@/assets/avatars/tg1.png";
+import avTg2 from "@/assets/avatars/tg2.png";
+import avTg3 from "@/assets/avatars/tg3.png";
+import avTg4 from "@/assets/avatars/tg4.png";
+import avTg5 from "@/assets/avatars/tg5.png";
 
 /* ─── Pulseras (imágenes por color/rango) ─── */
 import wbNone from "@/assets/wristbands/none.png";
@@ -38,20 +48,39 @@ const WRISTBAND_IMG: Record<BeltKey, string> = {
 };
 
 type Gender = "boy" | "girl";
-type AvatarPreset = { id: string; gender: Gender; img: string; label: string };
+type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
+type AvatarPreset = { id: string; gender: Gender; band: AgeBand; img: string; label: string };
 
 const AVATAR_PRESETS: AvatarPreset[] = [
-  { id: "b1", gender: "boy",  img: avB1, label: "Saludo" },
-  { id: "b2", gender: "boy",  img: avB2, label: "Pulgar arriba" },
-  { id: "b3", gender: "boy",  img: avB3, label: "Brazos cruzados" },
-  { id: "b4", gender: "boy",  img: avB4, label: "Fist pump" },
-  { id: "b5", gender: "boy",  img: avB5, label: "Confiado" },
-  { id: "g1", gender: "girl", img: avG1, label: "Peace" },
-  { id: "g2", gender: "girl", img: avG2, label: "OK" },
-  { id: "g3", gender: "girl", img: avG3, label: "Salto en V" },
-  { id: "g4", gender: "girl", img: avG4, label: "Trenzas" },
-  { id: "g5", gender: "girl", img: avG5, label: "Festejo" },
+  // Kids (6-9): chibi cartoon
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Saludo" },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Pulgar arriba" },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Brazos cruzados" },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Fist pump" },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Confiado" },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Peace" },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "OK" },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Salto en V" },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Trenzas" },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Festejo" },
+  // Teens (10+): pre-teen proportions
+  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Saludo" },
+  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Pulgar arriba" },
+  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Brazos cruzados" },
+  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Fist pump" },
+  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Confiado" },
+  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Peace" },
+  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "OK" },
+  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Salto en V" },
+  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Trenzas" },
+  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Festejo" },
 ];
+
+function bandForAge(age: number | null | undefined): AgeBand {
+  if (age != null && age >= 10) return "teens";
+  return "kids";
+}
+
 
 /* ─── Escenarios: República de los Niños de La Plata (1 default + 4 sorpresa) ─── */
 import scEntrada from "@/assets/scenarios/entrada.jpg";
@@ -164,7 +193,8 @@ function StudentDashboard() {
       if (sk) setSkills(sk as any);
 
       const { data: av } = await supabase.from("avatars").select("hair, hair_color").eq("student_id", stu.id).maybeSingle();
-      if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair)) setAvatarId(av.hair);
+      const band = bandForAge(stu.age);
+      if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair && p.band === band)) setAvatarId(av.hair);
       if (av?.hair_color && SCENARIOS.some((sc) => sc.id === av.hair_color)) setScenarioId(av.hair_color);
 
       const { data: logs } = await supabase
@@ -224,9 +254,17 @@ function StudentDashboard() {
     })();
   }, [navigate]);
 
+  // Filtramos avatares por franja etaria: kids (6-9) vs teens (10+).
+  const availablePresets = useMemo(() => {
+    const band = bandForAge(student?.age);
+    return AVATAR_PRESETS.filter((p) => p.band === band);
+  }, [student?.age]);
+
   const avatarOrder = useMemo(
-    () => student ? seededShuffle(AVATAR_PRESETS.map((p) => p.id), `${student.id}:avatars`) : AVATAR_PRESETS.map((p) => p.id),
-    [student],
+    () => student
+      ? seededShuffle(availablePresets.map((p) => p.id), `${student.id}:avatars`)
+      : availablePresets.map((p) => p.id),
+    [student, availablePresets],
   );
   const scenarioOrder = useMemo(() => {
     if (!student) return SCENARIOS.map((s) => s.id);
@@ -234,10 +272,19 @@ function StudentDashboard() {
     return [DEFAULT_SCENARIO_ID, ...seededShuffle(rest, `${student.id}:scenarios`)];
   }, [student]);
 
-  const avatarsUnlockedCount = Math.min(AVATAR_PRESETS.length, 1 + Math.floor(attendanceDays / 28));
+  const avatarsUnlockedCount = Math.min(availablePresets.length, 1 + Math.floor(attendanceDays / 28));
   const scenariosUnlockedCount = Math.min(SCENARIOS.length, 1 + Math.floor(attendanceDays / 15));
   const unlockedAvatarIds = new Set(avatarOrder.slice(0, avatarsUnlockedCount));
   const unlockedScenarioIds = new Set(scenarioOrder.slice(0, scenariosUnlockedCount));
+
+  // Si el avatar seleccionado no pertenece a la franja etaria disponible, lo snapeamos al primero válido.
+  useEffect(() => {
+    if (!student) return;
+    if (!availablePresets.some((p) => p.id === avatarId) && availablePresets[0]) {
+      setAvatarId(availablePresets[0].id);
+    }
+  }, [student, availablePresets, avatarId]);
+
 
   async function selectAvatar(id: string) {
     if (!unlockedAvatarIds.has(id)) return; // click abre modal, no acción
@@ -653,7 +700,7 @@ function AvatarStudio({
         </div>
 
         <div className="mt-3 text-center text-[10px] text-white/50">
-          {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{AVATAR_PRESETS.length} personajes · {attendanceDays} días asistidos
+          {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{avatarOrder.length} personajes · {attendanceDays} días asistidos
         </div>
         <div className="mt-1 text-center text-[9px] text-white/40">
           Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
@@ -662,7 +709,7 @@ function AvatarStudio({
 
       {/* Galería de personajes */}
       <div className="adn-card p-5">
-        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · {AVATAR_PRESETS.length} PERSONAJES</div>
+        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · {avatarOrder.length} PERSONAJES</div>
         <div className="grid grid-cols-5 gap-2.5">
           {avatarOrder.map((id) => {
             const p = AVATAR_PRESETS.find((x) => x.id === id)!;

@@ -390,6 +390,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [familyUsername, setFamilyUsername] = useState("");
   const [familyEmail, setFamilyEmail] = useState("");
   const [groupId, setGroupId] = useState<string>("");
+  const [piloto, setPiloto] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
     student: { username: string; password: string };
@@ -409,10 +410,11 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
         family_username: familyUsername,
         family_email: familyEmail,
         group_id: groupId || null,
+        piloto,
       } });
       if (!r.ok) { toast.error(r.error); return; }
       setResult({ student: r.student, family: r.family });
-      setName(""); setBirth(""); setUsername(""); setFamilyUsername(""); setFamilyEmail("");
+      setName(""); setBirth(""); setUsername(""); setFamilyUsername(""); setFamilyEmail(""); setPiloto(false);
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
@@ -481,6 +483,12 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
               ))}
             </select>
           </div>
+          <label className="flex items-start gap-2 rounded-lg border border-white/10 bg-black/30 px-3 py-2 cursor-pointer">
+            <input type="checkbox" className="mt-0.5 accent-[var(--adn-fluor)]" checked={piloto} onChange={(e) => setPiloto(e.target.checked)} />
+            <span className="text-[11px] text-white/70">
+              <span className="font-bold text-white">Cuenta piloto (DEMO)</span> — Aparece en la sección DEMO del login para acceso rápido.
+            </span>
+          </label>
           <button disabled={busy} className="adn-btn-primary w-full py-3 text-sm">
             {busy ? "Creando..." : "Crear cuentas (alumno + familia)"}
           </button>
