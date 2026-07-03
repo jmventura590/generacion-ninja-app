@@ -233,6 +233,7 @@ export type Database = {
           family_username: string | null
           group_id: string | null
           id: string
+          piloto: boolean
           student_name: string
           total_xp: number
           user_id: string | null
@@ -248,6 +249,7 @@ export type Database = {
           family_username?: string | null
           group_id?: string | null
           id?: string
+          piloto?: boolean
           student_name: string
           total_xp?: number
           user_id?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           family_username?: string | null
           group_id?: string | null
           id?: string
+          piloto?: boolean
           student_name?: string
           total_xp?: number
           user_id?: string | null
