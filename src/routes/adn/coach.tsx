@@ -390,6 +390,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [familyUsername, setFamilyUsername] = useState("");
   const [familyEmail, setFamilyEmail] = useState("");
   const [groupId, setGroupId] = useState<string>("");
+  const [piloto, setPiloto] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
     student: { username: string; password: string };
