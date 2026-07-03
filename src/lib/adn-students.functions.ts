@@ -36,6 +36,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     family_username: string;
     family_email: string;
     group_id: string | null;
+    piloto?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
     const fail = (msg: string) => ({ ok: false as const, error: msg });
