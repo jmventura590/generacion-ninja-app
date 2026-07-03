@@ -132,6 +132,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
         birth_date: birth,
         username,
         group_id: data.group_id,
+        piloto: !!data.piloto,
       })
       .select("id")
       .single();
