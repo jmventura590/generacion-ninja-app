@@ -24,6 +24,16 @@ import avG2 from "@/assets/avatars/g2.png";
 import avG3 from "@/assets/avatars/g3.png";
 import avG4 from "@/assets/avatars/g4.png";
 import avG5 from "@/assets/avatars/g5.png";
+import avT1 from "@/assets/avatars/t1.png";
+import avT2 from "@/assets/avatars/t2.png";
+import avT3 from "@/assets/avatars/t3.png";
+import avT4 from "@/assets/avatars/t4.png";
+import avT5 from "@/assets/avatars/t5.png";
+import avTg1 from "@/assets/avatars/tg1.png";
+import avTg2 from "@/assets/avatars/tg2.png";
+import avTg3 from "@/assets/avatars/tg3.png";
+import avTg4 from "@/assets/avatars/tg4.png";
+import avTg5 from "@/assets/avatars/tg5.png";
 
 /* ─── Pulseras (imágenes por color/rango) ─── */
 import wbNone from "@/assets/wristbands/none.png";
