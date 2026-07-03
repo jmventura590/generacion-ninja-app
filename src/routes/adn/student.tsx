@@ -276,6 +276,15 @@ function StudentDashboard() {
   const unlockedAvatarIds = new Set(avatarOrder.slice(0, avatarsUnlockedCount));
   const unlockedScenarioIds = new Set(scenarioOrder.slice(0, scenariosUnlockedCount));
 
+  // Si el avatar seleccionado no pertenece a la franja etaria disponible, lo snapeamos al primero válido.
+  useEffect(() => {
+    if (!student) return;
+    if (!availablePresets.some((p) => p.id === avatarId) && availablePresets[0]) {
+      setAvatarId(availablePresets[0].id);
+    }
+  }, [student, availablePresets, avatarId]);
+
+
   async function selectAvatar(id: string) {
     if (!unlockedAvatarIds.has(id)) return; // click abre modal, no acción
     setAvatarId(id);
