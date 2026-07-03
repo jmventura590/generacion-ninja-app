@@ -193,7 +193,8 @@ function StudentDashboard() {
       if (sk) setSkills(sk as any);
 
       const { data: av } = await supabase.from("avatars").select("hair, hair_color").eq("student_id", stu.id).maybeSingle();
-      if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair)) setAvatarId(av.hair);
+      const band = bandForAge(stu.age);
+      if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair && p.band === band)) setAvatarId(av.hair);
       if (av?.hair_color && SCENARIOS.some((sc) => sc.id === av.hair_color)) setScenarioId(av.hair_color);
 
       const { data: logs } = await supabase
