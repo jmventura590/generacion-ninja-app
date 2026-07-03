@@ -699,7 +699,7 @@ function AvatarStudio({
 
       {/* Galería de personajes */}
       <div className="adn-card p-5">
-        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · {AVATAR_PRESETS.length} PERSONAJES</div>
+        <div className="text-[10px] tracking-[0.3em] text-white/50 mb-3">GALERÍA · {avatarOrder.length} PERSONAJES</div>
         <div className="grid grid-cols-5 gap-2.5">
           {avatarOrder.map((id) => {
             const p = AVATAR_PRESETS.find((x) => x.id === id)!;
