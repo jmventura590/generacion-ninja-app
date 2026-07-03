@@ -410,10 +410,11 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
         family_username: familyUsername,
         family_email: familyEmail,
         group_id: groupId || null,
+        piloto,
       } });
       if (!r.ok) { toast.error(r.error); return; }
       setResult({ student: r.student, family: r.family });
-      setName(""); setBirth(""); setUsername(""); setFamilyUsername(""); setFamilyEmail("");
+      setName(""); setBirth(""); setUsername(""); setFamilyUsername(""); setFamilyEmail(""); setPiloto(false);
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
