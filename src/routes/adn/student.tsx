@@ -720,26 +720,24 @@ function AvatarStudio({
             const p = AVATAR_PRESETS.find((x) => x.id === id)!;
             const active = p.id === selectedId;
             const unlocked = unlockedAvatarIds.has(p.id);
-            const idxInOrder = avatarOrder.indexOf(p.id);
-            const daysNeeded = Math.max(0, idxInOrder * 28 - attendanceDays);
             return (
               <button key={p.id}
                 onClick={() => {
                   if (unlocked) onSelect(p.id);
                   else openZoom({
                     img: p.img,
-                    title: `Personaje ${p.label}`,
+                    title: "Personaje sorpresa",
                     subtitle: "Personaje bloqueado",
                     locked: true,
-                    hint: `Asistí ${daysNeeded} día${daysNeeded === 1 ? "" : "s"} más para desbloquearlo.`,
+                    hint: "Seguí entrenando para desbloquearlo.",
                     bg: "dark",
                   });
                 }}
                 onDoubleClick={() => openZoom({
                   img: p.img,
-                  title: `Personaje ${p.label}`,
+                  title: unlocked ? `Personaje ${p.label}` : "Personaje sorpresa",
                   locked: !unlocked,
-                  hint: unlocked ? "Personaje desbloqueado." : `Asistí ${daysNeeded} días más.`,
+                  hint: unlocked ? "Personaje desbloqueado." : "Seguí entrenando para desbloquearlo.",
                   bg: "dark",
                 })}
                 className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden active:scale-95 ${
