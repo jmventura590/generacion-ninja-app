@@ -26,10 +26,27 @@ function ResetPasswordPage() {
     return () => { sub.subscription.unsubscribe(); };
   }, []);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  function clearError(f: string) {
+    setErrors((prev) => {
+      if (!prev[f]) return prev;
+      const { [f]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+  const inputCls = (f: string) => `adn-input ${errors[f] ? "border-red-500 focus:border-red-500" : ""}`;
+  const FieldError = ({ f }: { f: string }) =>
+    errors[f] ? <div className="mt-1 text-[11px] text-red-400 font-medium">{errors[f]}</div> : null;
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (pwd.length < 4) { toast.error("La contraseña debe tener al menos 4 caracteres."); return; }
-    if (pwd !== pwd2) { toast.error("Las contraseñas no coinciden."); return; }
+    const local: Record<string, string> = {};
+    if (!pwd) local.pwd = "La contraseña es obligatoria.";
+    else if (pwd.length < 4) local.pwd = "La contraseña debe tener al menos 4 caracteres.";
+    if (!pwd2) local.pwd2 = "Repetí la contraseña.";
+    else if (pwd && pwd !== pwd2) local.pwd2 = "Las contraseñas no coinciden.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: pwd });
@@ -38,7 +55,7 @@ function ResetPasswordPage() {
       await supabase.auth.signOut();
       navigate({ to: "/adn/auth" });
     } catch (err: any) {
-      toast.error(err?.message ?? "No se pudo actualizar la contraseña.");
+      setErrors({ form: err?.message ?? "No se pudo actualizar la contraseña." });
     } finally {
       setBusy(false);
     }
@@ -61,11 +78,18 @@ function ResetPasswordPage() {
               </div>
             </div>
           ) : (
-            <form onSubmit={submit} className="space-y-3">
-              <input className="adn-input" type="password" placeholder="nueva contraseña" value={pwd}
-                onChange={(e) => setPwd(e.target.value)} required minLength={4} autoFocus />
-              <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
-                onChange={(e) => setPwd2(e.target.value)} required minLength={4} />
+            <form onSubmit={submit} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls("pwd")} type="password" placeholder="nueva contraseña" value={pwd}
+                  onChange={(e) => { setPwd(e.target.value); clearError("pwd"); }} autoFocus />
+                <FieldError f="pwd" />
+              </div>
+              <div>
+                <input className={inputCls("pwd2")} type="password" placeholder="repetir contraseña" value={pwd2}
+                  onChange={(e) => { setPwd2(e.target.value); clearError("pwd2"); }} />
+                <FieldError f="pwd2" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-3">
                 {busy ? "Guardando..." : "Guardar contraseña"}
               </button>
