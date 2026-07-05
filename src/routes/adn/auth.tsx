@@ -210,16 +210,23 @@ function AuthPage() {
           </div>
 
           {mode === "user" ? (
-            <form onSubmit={userLogin} className="space-y-3">
-              <input className="adn-input" placeholder="usuario" value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
-                autoCapitalize="off" autoCorrect="off" required minLength={3} />
-              <input className="adn-input" type="password" placeholder="contraseña" value={pwd}
-                onChange={(e) => setPwd(e.target.value)} required minLength={4} />
+            <form onSubmit={userLogin} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls(errors, "username")} placeholder="usuario" value={username}
+                  onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, "")); clearError("username"); }}
+                  autoCapitalize="off" autoCorrect="off" />
+                <FieldError errs={errors} field="username" />
+              </div>
+              <div>
+                <input className={inputCls(errors, "pwd")} type="password" placeholder="contraseña" value={pwd}
+                  onChange={(e) => { setPwd(e.target.value); clearError("pwd"); }} />
+                <FieldError errs={errors} field="pwd" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar</button>
               <button
                 type="button"
-                onClick={() => { setRecUser(username); setRecOpen(true); }}
+                onClick={() => { setRecUser(username); setRecErrors({}); setRecOpen(true); }}
                 className="w-full text-[11px] text-white/50 hover:text-[var(--adn-fluor)] underline underline-offset-2"
               >
                 ¿Olvidaste tu contraseña?
@@ -227,9 +234,18 @@ function AuthPage() {
               <p className="text-[10px] text-white/40 text-center">El coach entrega usuario y contraseña a cada alumno y a su familia.</p>
             </form>
           ) : (
-            <form onSubmit={coachLogin} className="space-y-3">
-              <input className="adn-input" type="email" placeholder="email del coach" value={coachEmail} onChange={(e) => setCoachEmail(e.target.value)} required />
-              <input className="adn-input" type="password" placeholder="contraseña" value={coachPwd} onChange={(e) => setCoachPwd(e.target.value)} required minLength={4} />
+            <form onSubmit={coachLogin} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls(errors, "coachEmail")} type="email" placeholder="email del coach" value={coachEmail}
+                  onChange={(e) => { setCoachEmail(e.target.value); clearError("coachEmail"); }} />
+                <FieldError errs={errors} field="coachEmail" />
+              </div>
+              <div>
+                <input className={inputCls(errors, "coachPwd")} type="password" placeholder="contraseña" value={coachPwd}
+                  onChange={(e) => { setCoachPwd(e.target.value); clearError("coachPwd"); }} />
+                <FieldError errs={errors} field="coachPwd" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar como coach</button>
             </form>
           )}
