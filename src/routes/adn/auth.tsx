@@ -29,11 +29,33 @@ function AuthPage() {
   const [coachPwd, setCoachPwd] = useState("");
   const [busy, setBusy] = useState(false);
   const [pilots, setPilots] = useState<PilotEntry[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Recovery modal
   const [recOpen, setRecOpen] = useState(false);
   const [recUser, setRecUser] = useState("");
   const [recBusy, setRecBusy] = useState(false);
+  const [recErrors, setRecErrors] = useState<Record<string, string>>({});
+
+  function clearError(field: string) {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+  function clearRecError(field: string) {
+    setRecErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+
+  const inputCls = (errs: Record<string, string>, field: string) =>
+    `adn-input ${errs[field] ? "border-red-500 focus:border-red-500" : ""}`;
+  const FieldError = ({ errs, field }: { errs: Record<string, string>; field: string }) =>
+    errs[field] ? <div className="mt-1 text-[11px] text-red-400 font-medium">{errs[field]}</div> : null;
 
   useEffect(() => {
     listPilotsFn({})
@@ -52,16 +74,23 @@ function AuthPage() {
 
   async function userLogin(e: React.FormEvent) {
     e.preventDefault();
+    const local: Record<string, string> = {};
+    if (!username.trim()) local.username = "El usuario es obligatorio.";
+    else if (username.trim().length < 3) local.username = "Mínimo 3 caracteres.";
+    if (!pwd) local.pwd = "La contraseña es obligatoria.";
+    else if (pwd.length < 4) local.pwd = "La contraseña debe tener al menos 4 caracteres.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     try {
       const u = username.trim().toLowerCase();
       const r = await resolveFn({ data: { username: u } });
-      if (!r.ok) { toast.error(r.error); return; }
+      if (!r.ok) { setErrors({ username: "Usuario no encontrado." }); return; }
       const { error } = await supabase.auth.signInWithPassword({ email: r.email, password: pwd });
-      if (error) { toast.error("Usuario o contraseña incorrectos."); return; }
+      if (error) { setErrors({ pwd: "Usuario o contraseña incorrectos." }); return; }
       navigate({ to: "/adn" });
     } catch (err: any) {
-      toast.error(err?.message ?? "No se pudo ingresar.");
+      setErrors({ form: err?.message ?? "No se pudo ingresar." });
     } finally {
       setBusy(false);
     }
@@ -69,13 +98,20 @@ function AuthPage() {
 
   async function coachLogin(e: React.FormEvent) {
     e.preventDefault();
+    const local: Record<string, string> = {};
+    if (!coachEmail.trim()) local.coachEmail = "El email es obligatorio.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(coachEmail.trim())) local.coachEmail = "El email no tiene un formato válido.";
+    if (!coachPwd) local.coachPwd = "La contraseña es obligatoria.";
+    else if (coachPwd.length < 4) local.coachPwd = "Mínimo 4 caracteres.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: coachEmail, password: coachPwd });
-      if (error) throw error;
+      if (error) { setErrors({ coachPwd: "Email o contraseña incorrectos." }); return; }
       navigate({ to: "/adn" });
     } catch (err: any) {
-      toast.error(err.message ?? "Error");
+      setErrors({ form: err?.message ?? "Error" });
     } finally {
       setBusy(false);
     }
@@ -116,7 +152,6 @@ function AuthPage() {
     try {
       const r = await seedFn({});
       toast.success(r.skipped ? "Demo ya estaba cargada." : "Demo cargada — usá las cuentas de abajo.");
-      // Refrescamos pilots después del seed
       const list = await listPilotsFn({});
       if (list.ok) {
         setPilots(list.students.map((s) => ({
@@ -133,14 +168,19 @@ function AuthPage() {
 
   async function submitRecovery(e: React.FormEvent) {
     e.preventDefault();
+    const local: Record<string, string> = {};
+    if (!recUser.trim()) local.recUser = "Ingresá tu usuario.";
+    else if (recUser.trim().length < 3) local.recUser = "Mínimo 3 caracteres.";
+    if (Object.keys(local).length) { setRecErrors(local); return; }
+    setRecErrors({});
     setRecBusy(true);
     try {
       const u = recUser.trim().toLowerCase();
       const r = await recoveryFn({ data: { username: u } });
-      if (!r.ok) { toast.error(r.error); return; }
+      if (!r.ok) { setRecErrors({ recUser: r.error }); return; }
       const redirectTo = `${window.location.origin}/adn/reset-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(r.email, { redirectTo });
-      if (error) { toast.error(error.message); return; }
+      if (error) { setRecErrors({ form: error.message }); return; }
       toast.success(
         r.kind === "family"
           ? "Te mandamos un mail para recuperar tu contraseña."
@@ -149,7 +189,7 @@ function AuthPage() {
       setRecOpen(false);
       setRecUser("");
     } catch (err: any) {
-      toast.error(err?.message ?? "No se pudo iniciar la recuperación.");
+      setRecErrors({ form: err?.message ?? "No se pudo iniciar la recuperación." });
     } finally {
       setRecBusy(false);
     }
