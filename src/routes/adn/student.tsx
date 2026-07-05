@@ -682,12 +682,17 @@ function AvatarStudio({
                         className="w-full h-full object-cover"
                         draggable={false} loading="lazy"/>
                     ) : (
-                      // Bloqueado: se oculta la imagen para que no se sepa cuál es (sorpresa)
-                      <div className="w-full h-full grid place-items-center bg-gradient-to-br from-black/70 to-black/40">
-                        <span className="h-7 w-7 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
-                          <Lock size={13} className="adn-fluor"/>
+                      // Bloqueado: imagen atenuada + candado neón (mismo patrón que personajes/pulseras)
+                      <>
+                        <img src={sc.img} alt=""
+                          className="w-full h-full object-cover grayscale opacity-40"
+                          draggable={false} loading="lazy"/>
+                        <span className="absolute inset-0 grid place-items-center pointer-events-none bg-black/30">
+                          <span className="h-7 w-7 rounded-full bg-black/80 border border-[var(--adn-fluor)]/60 grid place-items-center shadow-[0_0_10px_#39ff14aa]">
+                            <Lock size={13} className="adn-fluor"/>
+                          </span>
                         </span>
-                      </div>
+                      </>
                     )}
                   </button>
                 );
