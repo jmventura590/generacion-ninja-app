@@ -594,7 +594,7 @@ function AvatarStudio({
                       title: belt.label,
                       subtitle: belt.subtitle,
                       locked: !unlocked,
-                      hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : `Necesitás llegar al Nivel ${required} para conseguir esta muñequera.`,
+                      hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : "Seguí entrenando para desbloquearla.",
                       bg: "dark",
                     })}
                     title={`${belt.label} · L${required}`}
