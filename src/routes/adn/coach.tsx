@@ -392,6 +392,7 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
   const [groupId, setGroupId] = useState<string>("");
   const [piloto, setPiloto] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{
     student: { username: string; password: string };
     family: { username: string; password: string };
@@ -400,8 +401,37 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
 
   useEffect(() => { if (open && !groupId && groups[0]) setGroupId(groups[0].id); }, [open, groups, groupId]);
 
+  function clearError(field: string) {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+
+  function validateLocal(): Record<string, string> {
+    const e: Record<string, string> = {};
+    if (!name.trim()) e.name = "El nombre es obligatorio.";
+    if (!birth) e.birth_date = "La fecha de nacimiento es obligatoria.";
+    if (!username.trim()) e.username = "El usuario del alumno es obligatorio.";
+    else if (username.length < 3) e.username = "Mínimo 3 caracteres.";
+    if (!familyUsername.trim()) e.family_username = "El usuario de familia es obligatorio.";
+    else if (familyUsername.length < 3) e.family_username = "Mínimo 3 caracteres.";
+    else if (familyUsername === username) e.family_username = "Debe ser distinto al del alumno.";
+    if (!familyEmail.trim()) e.family_email = "El email es obligatorio.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(familyEmail.trim())) e.family_email = "El email no tiene un formato válido.";
+    if (!groupId) e.group_id = "Elegí un grupo/horario.";
+    return e;
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const localErrors = validateLocal();
+    if (Object.keys(localErrors).length > 0) {
+      setErrors(localErrors);
+      return;
+    }
+    setErrors({});
     setBusy(true);
     try {
       const r = await createFn({ data: {
@@ -412,13 +442,20 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
         group_id: groupId || null,
         piloto,
       } });
-      if (!r.ok) { toast.error(r.error); return; }
+      if (!r.ok) {
+        const field = (r as any).field ?? "form";
+        setErrors({ [field]: r.error });
+        if (field === "form") toast.error(r.error);
+        return;
+      }
       setResult({ student: r.student, family: r.family });
       setName(""); setBirth(""); setUsername(""); setFamilyUsername(""); setFamilyEmail(""); setPiloto(false);
       toast.success("Alumno creado.");
       await onCreated();
     } catch (err: any) {
-      toast.error(err?.message ?? "No se pudo crear el alumno.");
+      const msg = err?.message ?? "No se pudo crear el alumno.";
+      setErrors({ form: msg });
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -433,6 +470,11 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
     catch { toast.error("No se pudo copiar."); }
   }
 
+  const inputCls = (field: string) =>
+    `adn-input ${errors[field] ? "border-red-500 focus:border-red-500" : ""}`;
+  const FieldError = ({ field }: { field: string }) =>
+    errors[field] ? <div className="mt-1 text-[11px] text-red-400 font-medium">{errors[field]}</div> : null;
+
   return (
     <div className="adn-card p-4">
       <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center justify-between">
@@ -444,44 +486,53 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
       </button>
 
       {open && (
-        <form onSubmit={submit} className="mt-4 space-y-3">
+        <form onSubmit={submit} noValidate className="mt-4 space-y-3">
           <div>
             <label className="text-[10px] tracking-widest text-white/50">NOMBRE (sin apellido)</label>
-            <input className="adn-input" value={name} onChange={(e) => setName(e.target.value)} required maxLength={40} />
+            <input className={inputCls("name")} value={name}
+              onChange={(e) => { setName(e.target.value); clearError("name"); }} maxLength={40} />
+            <FieldError field="name" />
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">FECHA DE NACIMIENTO</label>
-            <input type="date" className="adn-input" value={birth} onChange={(e) => setBirth(e.target.value)} required />
+            <input type="date" className={inputCls("birth_date")} value={birth}
+              onChange={(e) => { setBirth(e.target.value); clearError("birth_date"); }} />
+            <FieldError field="birth_date" />
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">USUARIO DEL ALUMNO</label>
-            <input className="adn-input" value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
-              required minLength={3} maxLength={24} placeholder="ej: benja08" />
+            <input className={inputCls("username")} value={username}
+              onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, "")); clearError("username"); }}
+              minLength={3} maxLength={24} placeholder="ej: benja08" />
+            <FieldError field="username" />
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">USUARIO DE LA FAMILIA (SOLO LECTURA)</label>
-            <input className="adn-input" value={familyUsername}
-              onChange={(e) => setFamilyUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
-              required minLength={3} maxLength={24} placeholder="ej: mama.benja08" />
+            <input className={inputCls("family_username")} value={familyUsername}
+              onChange={(e) => { setFamilyUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, "")); clearError("family_username"); }}
+              minLength={3} maxLength={24} placeholder="ej: mama.benja08" />
+            <FieldError field="family_username" />
             <div className="text-[10px] text-white/40 mt-1">Distinto al del alumno. Le da acceso de solo lectura a Evolución, Medallero y Avatar.</div>
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">EMAIL DE CONTACTO (FAMILIA)</label>
-            <input className="adn-input" type="email" value={familyEmail}
-              onChange={(e) => setFamilyEmail(e.target.value.trim())}
-              required maxLength={120} placeholder="ej: mama.benja@gmail.com" />
+            <input className={inputCls("family_email")} type="email" value={familyEmail}
+              onChange={(e) => { setFamilyEmail(e.target.value.trim()); clearError("family_email"); }}
+              maxLength={120} placeholder="ej: mama.benja@gmail.com" />
+            <FieldError field="family_email" />
             <div className="text-[10px] text-white/40 mt-1">Se usa para recuperar la contraseña.</div>
           </div>
           <div>
             <label className="text-[10px] tracking-widest text-white/50">GRUPO / HORARIO</label>
-            <select className="adn-input" value={groupId} onChange={(e) => setGroupId(e.target.value)} required>
+            <select className={inputCls("group_id")} value={groupId}
+              onChange={(e) => { setGroupId(e.target.value); clearError("group_id"); }}>
               {groups.map((g) => (
                 <option key={g.id} value={g.id} className="bg-black">
                   {g.code} — {g.days_label} {g.starts_at.slice(0,5)}-{g.ends_at.slice(0,5)}
                 </option>
               ))}
             </select>
+            <FieldError field="group_id" />
           </div>
           <label className="flex items-start gap-2 rounded-lg border border-white/10 bg-black/30 px-3 py-2 cursor-pointer">
             <input type="checkbox" className="mt-0.5 accent-[var(--adn-fluor)]" checked={piloto} onChange={(e) => setPiloto(e.target.checked)} />
@@ -489,6 +540,11 @@ function AddStudentCard({ groups, onCreated }: { groups: Group[]; onCreated: () 
               <span className="font-bold text-white">Cuenta piloto (DEMO)</span> — Aparece en la sección DEMO del login para acceso rápido.
             </span>
           </label>
+          {errors.form && (
+            <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">
+              {errors.form}
+            </div>
+          )}
           <button disabled={busy} className="adn-btn-primary w-full py-3 text-sm">
             {busy ? "Creando..." : "Crear cuentas (alumno + familia)"}
           </button>
