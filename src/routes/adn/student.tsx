@@ -52,28 +52,28 @@ type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
 type AvatarPreset = { id: string; gender: Gender; band: AgeBand; img: string; label: string };
 
 const AVATAR_PRESETS: AvatarPreset[] = [
-  // Kids (6-9): chibi cartoon
-  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Saludo" },
-  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Pulgar arriba" },
-  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Brazos cruzados" },
-  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Fist pump" },
-  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Confiado" },
-  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Peace" },
-  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "OK" },
-  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Salto en V" },
-  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Trenzas" },
-  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Festejo" },
-  // Teens (10+): pre-teen proportions
-  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Saludo" },
-  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Pulgar arriba" },
-  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Brazos cruzados" },
-  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Fist pump" },
-  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Confiado" },
-  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Peace" },
-  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "OK" },
-  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Salto en V" },
-  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Trenzas" },
-  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Festejo" },
+  // Kids (6-9): chibi cartoon — nombres de guerreros
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael" },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu" },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen" },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro" },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak" },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra" },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara" },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira" },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova" },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya" },
+  // Teens (10+): pre-teen proportions — nombres de guerreros
+  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn" },
+  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren" },
+  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro" },
+  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex" },
+  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen" },
+  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn" },
+  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela" },
+  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira" },
+  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika" },
+  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx" },
 ];
 
 function bandForAge(age: number | null | undefined): AgeBand {
