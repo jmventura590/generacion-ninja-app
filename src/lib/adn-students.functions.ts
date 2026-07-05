@@ -39,27 +39,28 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     piloto?: boolean;
   }) => d)
   .handler(async ({ data, context }) => {
-    const fail = (msg: string) => ({ ok: false as const, error: msg });
+    type Field = "name" | "birth_date" | "username" | "family_username" | "family_email" | "group_id" | "form";
+    const fail = (field: Field, error: string) => ({ ok: false as const, field, error });
 
     const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
     const isCoach = (roles ?? []).some((r: any) => r.role === "coach");
-    if (!isCoach) return fail("Solo coaches pueden dar de alta alumnos.");
+    if (!isCoach) return fail("form", "Solo coaches pueden dar de alta alumnos.");
 
     const username = data.username.trim().toLowerCase();
     const familyUsername = data.family_username.trim().toLowerCase();
-    if (!USERNAME_RE.test(username)) return fail("Usuario del alumno inválido (3-24 letras/números/._-).");
-    if (!USERNAME_RE.test(familyUsername)) return fail("Usuario de familia inválido (3-24 letras/números/._-).");
-    if (username === familyUsername) return fail("El usuario de familia debe ser distinto al del alumno.");
+    if (!USERNAME_RE.test(username)) return fail("username", "Usá 3 a 24 caracteres: letras, números, punto, guion o guion bajo.");
+    if (!USERNAME_RE.test(familyUsername)) return fail("family_username", "Usá 3 a 24 caracteres: letras, números, punto, guion o guion bajo.");
+    if (username === familyUsername) return fail("family_username", "El usuario de familia debe ser distinto al del alumno.");
 
     const familyEmailInput = (data.family_email ?? "").trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(familyEmailInput)) return fail("Email de contacto inválido.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(familyEmailInput)) return fail("family_email", "El email no tiene un formato válido.");
 
     const name = data.name.trim();
-    if (!name) return fail("Nombre requerido.");
+    if (!name) return fail("name", "El nombre es obligatorio.");
     const birth = data.birth_date;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return fail("Fecha de nacimiento inválida.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birth)) return fail("birth_date", "Fecha inválida.");
     const age = ageFromBirth(birth);
-    if (age < 3 || age > 99) return fail("Edad fuera de rango. Verificá la fecha de nacimiento.");
+    if (age < 3 || age > 99) return fail("birth_date", "La edad calculada está fuera de rango. Revisá la fecha.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -68,14 +69,14 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       .select("id")
       .eq("username", username)
       .maybeSingle();
-    if (dupStu) return fail("Ese usuario de alumno ya está en uso.");
+    if (dupStu) return fail("username", "Ese usuario de alumno ya existe.");
 
     const { data: dupFam } = await supabaseAdmin
       .from("student_profiles")
       .select("id")
       .ilike("family_username", familyUsername)
       .maybeSingle();
-    if (dupFam) return fail("Ese usuario de familia ya está en uso.");
+    if (dupFam) return fail("family_username", "Ese usuario de familia ya existe.");
 
     // Email duplicado (otra familia ya usa este contacto)
     const { data: dupEmail } = await supabaseAdmin
@@ -83,7 +84,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       .select("id")
       .ilike("family_email", familyEmailInput)
       .maybeSingle();
-    if (dupEmail) return fail("Ese email de contacto ya está registrado en otra familia.");
+    if (dupEmail) return fail("family_email", "Ese email ya está registrado en otra familia.");
 
     const studentPwd = genPassword(6);
     const familyPwd = genPassword(6);
@@ -98,9 +99,9 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: { display_name: name },
     });
-    if (cErr) throw cErr;
+    if (cErr) return fail("form", cErr.message);
     const studentUserId = createdStu.user?.id;
-    if (!studentUserId) throw new Error("No se pudo crear la cuenta del alumno.");
+    if (!studentUserId) return fail("form", "No se pudo crear la cuenta del alumno.");
 
     // 2) Cuenta de la familia (solo lectura) — usa email real
     const { data: createdFam, error: fErr } = await supabaseAdmin.auth.admin.createUser({
@@ -111,12 +112,12 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     });
     if (fErr) {
       await supabaseAdmin.auth.admin.deleteUser(studentUserId).catch(() => {});
-      throw fErr;
+      return fail("family_email", fErr.message);
     }
     const familyUserId = createdFam.user?.id;
     if (!familyUserId) {
       await supabaseAdmin.auth.admin.deleteUser(studentUserId).catch(() => {});
-      throw new Error("No se pudo crear la cuenta de familia.");
+      return fail("form", "No se pudo crear la cuenta de familia.");
     }
 
     // 3) student_profile vincula ambos
@@ -139,7 +140,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     if (spErr) {
       await supabaseAdmin.auth.admin.deleteUser(studentUserId).catch(() => {});
       await supabaseAdmin.auth.admin.deleteUser(familyUserId).catch(() => {});
-      throw spErr;
+      return fail("form", spErr.message);
     }
 
     await supabaseAdmin.from("skill_bars").upsert({ student_id: sp.id }, { onConflict: "student_id" });

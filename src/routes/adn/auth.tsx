@@ -29,11 +29,33 @@ function AuthPage() {
   const [coachPwd, setCoachPwd] = useState("");
   const [busy, setBusy] = useState(false);
   const [pilots, setPilots] = useState<PilotEntry[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Recovery modal
   const [recOpen, setRecOpen] = useState(false);
   const [recUser, setRecUser] = useState("");
   const [recBusy, setRecBusy] = useState(false);
+  const [recErrors, setRecErrors] = useState<Record<string, string>>({});
+
+  function clearError(field: string) {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+  function clearRecError(field: string) {
+    setRecErrors((prev) => {
+      if (!prev[field]) return prev;
+      const { [field]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+
+  const inputCls = (errs: Record<string, string>, field: string) =>
+    `adn-input ${errs[field] ? "border-red-500 focus:border-red-500" : ""}`;
+  const FieldError = ({ errs, field }: { errs: Record<string, string>; field: string }) =>
+    errs[field] ? <div className="mt-1 text-[11px] text-red-400 font-medium">{errs[field]}</div> : null;
 
   useEffect(() => {
     listPilotsFn({})
@@ -52,16 +74,23 @@ function AuthPage() {
 
   async function userLogin(e: React.FormEvent) {
     e.preventDefault();
+    const local: Record<string, string> = {};
+    if (!username.trim()) local.username = "El usuario es obligatorio.";
+    else if (username.trim().length < 3) local.username = "Mínimo 3 caracteres.";
+    if (!pwd) local.pwd = "La contraseña es obligatoria.";
+    else if (pwd.length < 4) local.pwd = "La contraseña debe tener al menos 4 caracteres.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     try {
       const u = username.trim().toLowerCase();
       const r = await resolveFn({ data: { username: u } });
-      if (!r.ok) { toast.error(r.error); return; }
+      if (!r.ok) { setErrors({ username: "Usuario no encontrado." }); return; }
       const { error } = await supabase.auth.signInWithPassword({ email: r.email, password: pwd });
-      if (error) { toast.error("Usuario o contraseña incorrectos."); return; }
+      if (error) { setErrors({ pwd: "Usuario o contraseña incorrectos." }); return; }
       navigate({ to: "/adn" });
     } catch (err: any) {
-      toast.error(err?.message ?? "No se pudo ingresar.");
+      setErrors({ form: err?.message ?? "No se pudo ingresar." });
     } finally {
       setBusy(false);
     }
@@ -69,13 +98,20 @@ function AuthPage() {
 
   async function coachLogin(e: React.FormEvent) {
     e.preventDefault();
+    const local: Record<string, string> = {};
+    if (!coachEmail.trim()) local.coachEmail = "El email es obligatorio.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(coachEmail.trim())) local.coachEmail = "El email no tiene un formato válido.";
+    if (!coachPwd) local.coachPwd = "La contraseña es obligatoria.";
+    else if (coachPwd.length < 4) local.coachPwd = "Mínimo 4 caracteres.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: coachEmail, password: coachPwd });
-      if (error) throw error;
+      if (error) { setErrors({ coachPwd: "Email o contraseña incorrectos." }); return; }
       navigate({ to: "/adn" });
     } catch (err: any) {
-      toast.error(err.message ?? "Error");
+      setErrors({ form: err?.message ?? "Error" });
     } finally {
       setBusy(false);
     }
@@ -116,7 +152,6 @@ function AuthPage() {
     try {
       const r = await seedFn({});
       toast.success(r.skipped ? "Demo ya estaba cargada." : "Demo cargada — usá las cuentas de abajo.");
-      // Refrescamos pilots después del seed
       const list = await listPilotsFn({});
       if (list.ok) {
         setPilots(list.students.map((s) => ({
@@ -133,14 +168,19 @@ function AuthPage() {
 
   async function submitRecovery(e: React.FormEvent) {
     e.preventDefault();
+    const local: Record<string, string> = {};
+    if (!recUser.trim()) local.recUser = "Ingresá tu usuario.";
+    else if (recUser.trim().length < 3) local.recUser = "Mínimo 3 caracteres.";
+    if (Object.keys(local).length) { setRecErrors(local); return; }
+    setRecErrors({});
     setRecBusy(true);
     try {
       const u = recUser.trim().toLowerCase();
       const r = await recoveryFn({ data: { username: u } });
-      if (!r.ok) { toast.error(r.error); return; }
+      if (!r.ok) { setRecErrors({ recUser: r.error }); return; }
       const redirectTo = `${window.location.origin}/adn/reset-password`;
       const { error } = await supabase.auth.resetPasswordForEmail(r.email, { redirectTo });
-      if (error) { toast.error(error.message); return; }
+      if (error) { setRecErrors({ form: error.message }); return; }
       toast.success(
         r.kind === "family"
           ? "Te mandamos un mail para recuperar tu contraseña."
@@ -149,7 +189,7 @@ function AuthPage() {
       setRecOpen(false);
       setRecUser("");
     } catch (err: any) {
-      toast.error(err?.message ?? "No se pudo iniciar la recuperación.");
+      setRecErrors({ form: err?.message ?? "No se pudo iniciar la recuperación." });
     } finally {
       setRecBusy(false);
     }
@@ -170,16 +210,23 @@ function AuthPage() {
           </div>
 
           {mode === "user" ? (
-            <form onSubmit={userLogin} className="space-y-3">
-              <input className="adn-input" placeholder="usuario" value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
-                autoCapitalize="off" autoCorrect="off" required minLength={3} />
-              <input className="adn-input" type="password" placeholder="contraseña" value={pwd}
-                onChange={(e) => setPwd(e.target.value)} required minLength={4} />
+            <form onSubmit={userLogin} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls(errors, "username")} placeholder="usuario" value={username}
+                  onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, "")); clearError("username"); }}
+                  autoCapitalize="off" autoCorrect="off" />
+                <FieldError errs={errors} field="username" />
+              </div>
+              <div>
+                <input className={inputCls(errors, "pwd")} type="password" placeholder="contraseña" value={pwd}
+                  onChange={(e) => { setPwd(e.target.value); clearError("pwd"); }} />
+                <FieldError errs={errors} field="pwd" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar</button>
               <button
                 type="button"
-                onClick={() => { setRecUser(username); setRecOpen(true); }}
+                onClick={() => { setRecUser(username); setRecErrors({}); setRecOpen(true); }}
                 className="w-full text-[11px] text-white/50 hover:text-[var(--adn-fluor)] underline underline-offset-2"
               >
                 ¿Olvidaste tu contraseña?
@@ -187,9 +234,18 @@ function AuthPage() {
               <p className="text-[10px] text-white/40 text-center">El coach entrega usuario y contraseña a cada alumno y a su familia.</p>
             </form>
           ) : (
-            <form onSubmit={coachLogin} className="space-y-3">
-              <input className="adn-input" type="email" placeholder="email del coach" value={coachEmail} onChange={(e) => setCoachEmail(e.target.value)} required />
-              <input className="adn-input" type="password" placeholder="contraseña" value={coachPwd} onChange={(e) => setCoachPwd(e.target.value)} required minLength={4} />
+            <form onSubmit={coachLogin} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls(errors, "coachEmail")} type="email" placeholder="email del coach" value={coachEmail}
+                  onChange={(e) => { setCoachEmail(e.target.value); clearError("coachEmail"); }} />
+                <FieldError errs={errors} field="coachEmail" />
+              </div>
+              <div>
+                <input className={inputCls(errors, "coachPwd")} type="password" placeholder="contraseña" value={coachPwd}
+                  onChange={(e) => { setCoachPwd(e.target.value); clearError("coachPwd"); }} />
+                <FieldError errs={errors} field="coachPwd" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-3">Ingresar como coach</button>
             </form>
           )}
@@ -227,10 +283,14 @@ function AuthPage() {
                 Ingresá tu usuario. Te mandamos un mail al contacto de la familia para elegir una nueva clave.
               </p>
             </div>
-            <form onSubmit={submitRecovery} className="space-y-3">
-              <input className="adn-input" placeholder="usuario" value={recUser}
-                onChange={(e) => setRecUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
-                autoCapitalize="off" autoCorrect="off" required minLength={3} autoFocus />
+            <form onSubmit={submitRecovery} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls(recErrors, "recUser")} placeholder="usuario" value={recUser}
+                  onChange={(e) => { setRecUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, "")); clearRecError("recUser"); }}
+                  autoCapitalize="off" autoCorrect="off" autoFocus />
+                <FieldError errs={recErrors} field="recUser" />
+              </div>
+              {recErrors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{recErrors.form}</div>}
               <div className="flex gap-2">
                 <button type="button" onClick={() => setRecOpen(false)} className="adn-btn-secondary flex-1 py-2 text-sm">Cancelar</button>
                 <button disabled={recBusy} className="adn-btn-primary flex-1 py-2 text-sm">

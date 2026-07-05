@@ -52,28 +52,28 @@ type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
 type AvatarPreset = { id: string; gender: Gender; band: AgeBand; img: string; label: string };
 
 const AVATAR_PRESETS: AvatarPreset[] = [
-  // Kids (6-9): chibi cartoon
-  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Saludo" },
-  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Pulgar arriba" },
-  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Brazos cruzados" },
-  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Fist pump" },
-  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Confiado" },
-  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Peace" },
-  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "OK" },
-  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Salto en V" },
-  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Trenzas" },
-  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Festejo" },
-  // Teens (10+): pre-teen proportions
-  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Saludo" },
-  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Pulgar arriba" },
-  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Brazos cruzados" },
-  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Fist pump" },
-  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Confiado" },
-  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Peace" },
-  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "OK" },
-  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Salto en V" },
-  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Trenzas" },
-  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Festejo" },
+  // Kids (6-9): chibi cartoon — nombres de guerreros
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael" },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu" },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen" },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro" },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak" },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra" },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara" },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira" },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova" },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya" },
+  // Teens (10+): pre-teen proportions — nombres de guerreros
+  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn" },
+  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren" },
+  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro" },
+  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex" },
+  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen" },
+  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn" },
+  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela" },
+  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira" },
+  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika" },
+  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx" },
 ];
 
 function bandForAge(age: number | null | undefined): AgeBand {
@@ -569,8 +569,7 @@ function AvatarStudio({
     { belt: BELTS.find((b) => b.key === "black")!, required: thresholds.black },
   ];
 
-  // Días restantes para próximo personaje (los escenarios son sorpresa: sin countdown)
-  const daysToNextAvatar = 28 - (attendanceDays % 28);
+  // Los escenarios y personajes se desbloquean de forma sorpresa; no se muestra countdown.
 
   return (
     <div className="space-y-5">
@@ -594,7 +593,7 @@ function AvatarStudio({
                       title: belt.label,
                       subtitle: belt.subtitle,
                       locked: !unlocked,
-                      hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : `Necesitás llegar al Nivel ${required} para conseguir esta muñequera.`,
+                      hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : "Seguí entrenando para desbloquearla.",
                       bg: "dark",
                     })}
                     title={`${belt.label} · L${required}`}
@@ -682,12 +681,17 @@ function AvatarStudio({
                         className="w-full h-full object-cover"
                         draggable={false} loading="lazy"/>
                     ) : (
-                      // Bloqueado: se oculta la imagen para que no se sepa cuál es (sorpresa)
-                      <div className="w-full h-full grid place-items-center bg-gradient-to-br from-black/70 to-black/40">
-                        <span className="h-7 w-7 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
-                          <Lock size={13} className="adn-fluor"/>
+                      // Bloqueado: imagen atenuada + candado neón (mismo patrón que personajes/pulseras)
+                      <>
+                        <img src={sc.img} alt=""
+                          className="w-full h-full object-cover grayscale opacity-40"
+                          draggable={false} loading="lazy"/>
+                        <span className="absolute inset-0 grid place-items-center pointer-events-none bg-black/30">
+                          <span className="h-7 w-7 rounded-full bg-black/80 border border-[var(--adn-fluor)]/60 grid place-items-center shadow-[0_0_10px_#39ff14aa]">
+                            <Lock size={13} className="adn-fluor"/>
+                          </span>
                         </span>
-                      </div>
+                      </>
                     )}
                   </button>
                 );
@@ -703,7 +707,7 @@ function AvatarStudio({
           {scenariosUnlockedCount}/{SCENARIOS.length} escenarios · {avatarsUnlockedCount}/{avatarOrder.length} personajes · {attendanceDays} días asistidos
         </div>
         <div className="mt-1 text-center text-[9px] text-white/40">
-          Próximo personaje en {daysToNextAvatar} día{daysToNextAvatar === 1 ? "" : "s"}
+          Seguí entrenando para desbloquear nuevos personajes y escenarios.
         </div>
       </div>
 
@@ -715,26 +719,24 @@ function AvatarStudio({
             const p = AVATAR_PRESETS.find((x) => x.id === id)!;
             const active = p.id === selectedId;
             const unlocked = unlockedAvatarIds.has(p.id);
-            const idxInOrder = avatarOrder.indexOf(p.id);
-            const daysNeeded = Math.max(0, idxInOrder * 28 - attendanceDays);
             return (
               <button key={p.id}
                 onClick={() => {
                   if (unlocked) onSelect(p.id);
                   else openZoom({
                     img: p.img,
-                    title: `Personaje ${p.label}`,
+                    title: "Personaje sorpresa",
                     subtitle: "Personaje bloqueado",
                     locked: true,
-                    hint: `Asistí ${daysNeeded} día${daysNeeded === 1 ? "" : "s"} más para desbloquearlo.`,
+                    hint: "Seguí entrenando para desbloquearlo.",
                     bg: "dark",
                   });
                 }}
                 onDoubleClick={() => openZoom({
                   img: p.img,
-                  title: `Personaje ${p.label}`,
+                  title: unlocked ? `Personaje ${p.label}` : "Personaje sorpresa",
                   locked: !unlocked,
-                  hint: unlocked ? "Personaje desbloqueado." : `Asistí ${daysNeeded} días más.`,
+                  hint: unlocked ? "Personaje desbloqueado." : "Seguí entrenando para desbloquearlo.",
                   bg: "dark",
                 })}
                 className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden active:scale-95 ${
@@ -801,14 +803,32 @@ function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function clearError(f: string) {
+    setErrors((prev) => {
+      if (!prev[f]) return prev;
+      const { [f]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+  const inputCls = (f: string) => `adn-input ${errors[f] ? "border-red-500 focus:border-red-500" : ""}`;
+  const FieldError = ({ f }: { f: string }) =>
+    errors[f] ? <div className="mt-1 text-[11px] text-red-400 font-medium">{errors[f]}</div> : null;
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (pwd1.length < 4) { toast.error("Mínimo 4 caracteres."); return; }
-    if (pwd1 !== pwd2) { toast.error("Las contraseñas no coinciden."); return; }
+    const local: Record<string, string> = {};
+    if (!pwd1) local.pwd1 = "La contraseña es obligatoria.";
+    else if (pwd1.length < 4) local.pwd1 = "La contraseña debe tener al menos 4 caracteres.";
+    if (!pwd2) local.pwd2 = "Repetí la contraseña.";
+    else if (pwd1 && pwd1 !== pwd2) local.pwd2 = "Las contraseñas no coinciden.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pwd1 });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { setErrors({ form: error.message }); return; }
     toast.success("Contraseña actualizada.");
     setPwd1(""); setPwd2(""); setOpen(false);
   }
@@ -824,15 +844,22 @@ function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
         </button>
         {open && (
           <div className="fixed inset-0 z-40 grid place-items-center bg-black/80 backdrop-blur-sm p-6 animate-fade-in" onClick={() => setOpen(false)}>
-            <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="adn-card p-5 w-full max-w-sm space-y-3">
+            <form onSubmit={submit} noValidate onClick={(e) => e.stopPropagation()} className="adn-card p-5 w-full max-w-sm space-y-3">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-bold flex items-center gap-2"><KeyRound size={16} className="adn-fluor"/> Cambiar contraseña</div>
                 <button type="button" onClick={() => setOpen(false)} className="text-white/50 hover:text-white"><X size={18}/></button>
               </div>
-              <input className="adn-input" type="password" placeholder="nueva contraseña (mín. 4)" value={pwd1}
-                onChange={(e) => setPwd1(e.target.value)} minLength={4} required autoComplete="new-password" autoFocus />
-              <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
-                onChange={(e) => setPwd2(e.target.value)} minLength={4} required autoComplete="new-password" />
+              <div>
+                <input className={inputCls("pwd1")} type="password" placeholder="nueva contraseña (mín. 4)" value={pwd1}
+                  onChange={(e) => { setPwd1(e.target.value); clearError("pwd1"); }} autoComplete="new-password" autoFocus />
+                <FieldError f="pwd1" />
+              </div>
+              <div>
+                <input className={inputCls("pwd2")} type="password" placeholder="repetir contraseña" value={pwd2}
+                  onChange={(e) => { setPwd2(e.target.value); clearError("pwd2"); }} autoComplete="new-password" />
+                <FieldError f="pwd2" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
             </form>
           </div>
@@ -851,11 +878,18 @@ function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
         <span className="text-white/40 text-xs">{open ? "Cerrar" : "Abrir"}</span>
       </button>
       {open && (
-        <form onSubmit={submit} className="mt-3 space-y-2">
-          <input className="adn-input" type="password" placeholder="nueva contraseña" value={pwd1}
-            onChange={(e) => setPwd1(e.target.value)} minLength={4} required autoComplete="new-password" />
-          <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
-            onChange={(e) => setPwd2(e.target.value)} minLength={4} required autoComplete="new-password" />
+        <form onSubmit={submit} noValidate className="mt-3 space-y-2">
+          <div>
+            <input className={inputCls("pwd1")} type="password" placeholder="nueva contraseña" value={pwd1}
+              onChange={(e) => { setPwd1(e.target.value); clearError("pwd1"); }} autoComplete="new-password" />
+            <FieldError f="pwd1" />
+          </div>
+          <div>
+            <input className={inputCls("pwd2")} type="password" placeholder="repetir contraseña" value={pwd2}
+              onChange={(e) => { setPwd2(e.target.value); clearError("pwd2"); }} autoComplete="new-password" />
+            <FieldError f="pwd2" />
+          </div>
+          {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
           <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
         </form>
       )}
