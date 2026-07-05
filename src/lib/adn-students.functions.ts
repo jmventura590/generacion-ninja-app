@@ -112,12 +112,12 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     });
     if (fErr) {
       await supabaseAdmin.auth.admin.deleteUser(studentUserId).catch(() => {});
-      throw fErr;
+      return fail("family_email", fErr.message);
     }
     const familyUserId = createdFam.user?.id;
     if (!familyUserId) {
       await supabaseAdmin.auth.admin.deleteUser(studentUserId).catch(() => {});
-      throw new Error("No se pudo crear la cuenta de familia.");
+      return fail("form", "No se pudo crear la cuenta de familia.");
     }
 
     // 3) student_profile vincula ambos
@@ -140,7 +140,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
     if (spErr) {
       await supabaseAdmin.auth.admin.deleteUser(studentUserId).catch(() => {});
       await supabaseAdmin.auth.admin.deleteUser(familyUserId).catch(() => {});
-      throw spErr;
+      return fail("form", spErr.message);
     }
 
     await supabaseAdmin.from("skill_bars").upsert({ student_id: sp.id }, { onConflict: "student_id" });
