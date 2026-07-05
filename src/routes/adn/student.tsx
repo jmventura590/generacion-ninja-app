@@ -803,14 +803,32 @@ function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function clearError(f: string) {
+    setErrors((prev) => {
+      if (!prev[f]) return prev;
+      const { [f]: _drop, ...rest } = prev;
+      return rest;
+    });
+  }
+  const inputCls = (f: string) => `adn-input ${errors[f] ? "border-red-500 focus:border-red-500" : ""}`;
+  const FieldError = ({ f }: { f: string }) =>
+    errors[f] ? <div className="mt-1 text-[11px] text-red-400 font-medium">{errors[f]}</div> : null;
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (pwd1.length < 4) { toast.error("Mínimo 4 caracteres."); return; }
-    if (pwd1 !== pwd2) { toast.error("Las contraseñas no coinciden."); return; }
+    const local: Record<string, string> = {};
+    if (!pwd1) local.pwd1 = "La contraseña es obligatoria.";
+    else if (pwd1.length < 4) local.pwd1 = "La contraseña debe tener al menos 4 caracteres.";
+    if (!pwd2) local.pwd2 = "Repetí la contraseña.";
+    else if (pwd1 && pwd1 !== pwd2) local.pwd2 = "Las contraseñas no coinciden.";
+    if (Object.keys(local).length) { setErrors(local); return; }
+    setErrors({});
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pwd1 });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { setErrors({ form: error.message }); return; }
     toast.success("Contraseña actualizada.");
     setPwd1(""); setPwd2(""); setOpen(false);
   }
@@ -826,15 +844,22 @@ function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
         </button>
         {open && (
           <div className="fixed inset-0 z-40 grid place-items-center bg-black/80 backdrop-blur-sm p-6 animate-fade-in" onClick={() => setOpen(false)}>
-            <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="adn-card p-5 w-full max-w-sm space-y-3">
+            <form onSubmit={submit} noValidate onClick={(e) => e.stopPropagation()} className="adn-card p-5 w-full max-w-sm space-y-3">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-bold flex items-center gap-2"><KeyRound size={16} className="adn-fluor"/> Cambiar contraseña</div>
                 <button type="button" onClick={() => setOpen(false)} className="text-white/50 hover:text-white"><X size={18}/></button>
               </div>
-              <input className="adn-input" type="password" placeholder="nueva contraseña (mín. 4)" value={pwd1}
-                onChange={(e) => setPwd1(e.target.value)} minLength={4} required autoComplete="new-password" autoFocus />
-              <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
-                onChange={(e) => setPwd2(e.target.value)} minLength={4} required autoComplete="new-password" />
+              <div>
+                <input className={inputCls("pwd1")} type="password" placeholder="nueva contraseña (mín. 4)" value={pwd1}
+                  onChange={(e) => { setPwd1(e.target.value); clearError("pwd1"); }} autoComplete="new-password" autoFocus />
+                <FieldError f="pwd1" />
+              </div>
+              <div>
+                <input className={inputCls("pwd2")} type="password" placeholder="repetir contraseña" value={pwd2}
+                  onChange={(e) => { setPwd2(e.target.value); clearError("pwd2"); }} autoComplete="new-password" />
+                <FieldError f="pwd2" />
+              </div>
+              {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
               <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
             </form>
           </div>
@@ -853,11 +878,18 @@ function ChangePasswordCard({ compact = false }: { compact?: boolean }) {
         <span className="text-white/40 text-xs">{open ? "Cerrar" : "Abrir"}</span>
       </button>
       {open && (
-        <form onSubmit={submit} className="mt-3 space-y-2">
-          <input className="adn-input" type="password" placeholder="nueva contraseña" value={pwd1}
-            onChange={(e) => setPwd1(e.target.value)} minLength={4} required autoComplete="new-password" />
-          <input className="adn-input" type="password" placeholder="repetir contraseña" value={pwd2}
-            onChange={(e) => setPwd2(e.target.value)} minLength={4} required autoComplete="new-password" />
+        <form onSubmit={submit} noValidate className="mt-3 space-y-2">
+          <div>
+            <input className={inputCls("pwd1")} type="password" placeholder="nueva contraseña" value={pwd1}
+              onChange={(e) => { setPwd1(e.target.value); clearError("pwd1"); }} autoComplete="new-password" />
+            <FieldError f="pwd1" />
+          </div>
+          <div>
+            <input className={inputCls("pwd2")} type="password" placeholder="repetir contraseña" value={pwd2}
+              onChange={(e) => { setPwd2(e.target.value); clearError("pwd2"); }} autoComplete="new-password" />
+            <FieldError f="pwd2" />
+          </div>
+          {errors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{errors.form}</div>}
           <button disabled={busy} className="adn-btn-primary w-full py-2.5 text-sm">{busy ? "Guardando..." : "Guardar"}</button>
         </form>
       )}
