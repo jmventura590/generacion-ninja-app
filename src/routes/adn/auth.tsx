@@ -283,10 +283,14 @@ function AuthPage() {
                 Ingresá tu usuario. Te mandamos un mail al contacto de la familia para elegir una nueva clave.
               </p>
             </div>
-            <form onSubmit={submitRecovery} className="space-y-3">
-              <input className="adn-input" placeholder="usuario" value={recUser}
-                onChange={(e) => setRecUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ""))}
-                autoCapitalize="off" autoCorrect="off" required minLength={3} autoFocus />
+            <form onSubmit={submitRecovery} noValidate className="space-y-3">
+              <div>
+                <input className={inputCls(recErrors, "recUser")} placeholder="usuario" value={recUser}
+                  onChange={(e) => { setRecUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, "")); clearRecError("recUser"); }}
+                  autoCapitalize="off" autoCorrect="off" autoFocus />
+                <FieldError errs={recErrors} field="recUser" />
+              </div>
+              {recErrors.form && <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-2 text-[12px] text-red-300">{recErrors.form}</div>}
               <div className="flex gap-2">
                 <button type="button" onClick={() => setRecOpen(false)} className="adn-btn-secondary flex-1 py-2 text-sm">Cancelar</button>
                 <button disabled={recBusy} className="adn-btn-primary flex-1 py-2 text-sm">
