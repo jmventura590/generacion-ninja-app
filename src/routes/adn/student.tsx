@@ -42,6 +42,7 @@ import wbGreen from "@/assets/wristbands/green.png";
 import wbBlue from "@/assets/wristbands/blue.png";
 import wbRed from "@/assets/wristbands/red.png";
 import wbBlack from "@/assets/wristbands/black.png";
+import adnLogoMark from "@/assets/adn-logo-mark.png";
 
 const WRISTBAND_IMG: Record<BeltKey, string> = {
   none: wbNone, white: wbWhite, green: wbGreen, blue: wbBlue, red: wbRed, black: wbBlack,
