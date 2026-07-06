@@ -771,9 +771,28 @@ function AvatarStudio({
 /* ─── Brazo + muñequera (PNG) para Evolución ─── */
 function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: number }) {
   return (
-    <img src={WRISTBAND_IMG[beltKey]} alt="muñequera" width={size} height={size}
-      loading="lazy" draggable={false}
-      style={{ width: size, height: size, objectFit: "contain" }} />
+    <div className="relative inline-block" style={{ width: size, height: size }}>
+      <img src={WRISTBAND_IMG[beltKey]} alt="muñequera" width={size} height={size}
+        loading="lazy" draggable={false}
+        style={{ width: size, height: size, objectFit: "contain" }} />
+      {beltKey !== "none" && (
+        <img
+          src={adnLogoMark}
+          alt=""
+          aria-hidden
+          draggable={false}
+          className="absolute pointer-events-none"
+          style={{
+            width: size * 0.34, height: size * 0.34,
+            left: "50%", top: "50%",
+            transform: "translate(-50%, -50%)",
+            objectFit: "contain",
+            filter: "drop-shadow(0 0 2px rgba(0,0,0,.6)) invert(1)",
+            opacity: 0.92,
+          }}
+        />
+      )}
+    </div>
   );
 }
 
@@ -794,6 +813,22 @@ function AvatarImage({
       )}
       <img src={preset.img} alt="" width={size} height={size} loading="lazy" draggable={false}
         className="absolute inset-0 w-full h-full object-contain" />
+      {/* Logo ADN sobre la remera del personaje */}
+      <img
+        src={adnLogoMark}
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="absolute pointer-events-none"
+        style={{
+          width: size * 0.22, height: size * 0.22,
+          left: "50%", top: "48%",
+          transform: "translate(-50%, -50%)",
+          objectFit: "contain",
+          filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.55)) invert(1)",
+          opacity: 0.85,
+        }}
+      />
     </div>
   );
 }
