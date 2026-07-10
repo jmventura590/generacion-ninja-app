@@ -785,25 +785,18 @@ function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: num
       <img src={WRISTBAND_IMG[beltKey]} alt="muñequera" width={size} height={size}
         loading="lazy" draggable={false}
         style={{ width: size, height: size, objectFit: "contain" }} />
-      {beltKey !== "none" && (
-        <img
-          src={adnLogoMark}
-          alt=""
-          aria-hidden
-          draggable={false}
-          className="absolute pointer-events-none"
-          style={{
-            width: size * 0.34, height: size * 0.34,
-            left: "50%", top: "50%",
-            transform: "translate(-50%, -50%)",
-            objectFit: "contain",
-            filter: "drop-shadow(0 0 2px rgba(0,0,0,.6)) invert(1)",
-            opacity: 0.92,
-          }}
-        />
-      )}
+      {beltKey !== "none" && <LogoOverlay variant="wristband" />}
     </div>
   );
+}
+
+function LogoOverlay({ variant }: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
+  const styleByVariant: Record<typeof variant, React.CSSProperties> = {
+    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.75))", opacity: 0.95 },
+    wristband: { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.9))", opacity: 0.95 },
+    "wristband-thumb": { width: "32%", height: "32%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.9))", opacity: 0.95 },
+  };
+  return <img src={adnLogoMark} alt="" aria-hidden draggable={false} className="absolute pointer-events-none" style={styleByVariant[variant]} />;
 }
 
 /* ─── Avatar Image (transparente, sin recuadro, sin cartel ADN) ─── */
@@ -824,21 +817,18 @@ function AvatarImage({
       <img src={preset.img} alt="" width={size} height={size} loading="lazy" draggable={false}
         className="absolute inset-0 w-full h-full object-contain" />
       {/* Logo ADN sobre la remera del personaje */}
-      <img
-        src={adnLogoMark}
-        alt=""
-        aria-hidden
-        draggable={false}
-        className="absolute pointer-events-none"
+      <span
+        className="absolute pointer-events-none block"
         style={{
-          width: size * 0.22, height: size * 0.22,
-          left: "50%", top: "48%",
+          width: preset.chest.width,
+          aspectRatio: "1.58 / 1",
+          left: preset.chest.left,
+          top: preset.chest.top,
           transform: "translate(-50%, -50%)",
-          objectFit: "contain",
-          filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.55)) invert(1)",
-          opacity: 0.85,
         }}
-      />
+      >
+        <LogoOverlay variant="shirt" />
+      </span>
     </div>
   );
 }
