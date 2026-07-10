@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -50,31 +50,38 @@ const WRISTBAND_IMG: Record<BeltKey, string> = {
 
 type Gender = "boy" | "girl";
 type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
-type AvatarPreset = { id: string; gender: Gender; band: AgeBand; img: string; label: string };
+type AvatarPreset = {
+  id: string;
+  gender: Gender;
+  band: AgeBand;
+  img: string;
+  label: string;
+  chest: { top: string; left: string; width: string };
+};
 
 const AVATAR_PRESETS: AvatarPreset[] = [
   // Kids (6-9): chibi cartoon — nombres de guerreros
-  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael" },
-  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu" },
-  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen" },
-  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro" },
-  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak" },
-  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra" },
-  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara" },
-  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira" },
-  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova" },
-  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya" },
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael", chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen", chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro", chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak", chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra", chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira", chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova", chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya", chest: { top: "44%", left: "50%", width: "18%" } },
   // Teens (10+): pre-teen proportions — nombres de guerreros
-  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn" },
-  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren" },
-  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro" },
-  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex" },
-  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen" },
-  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn" },
-  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela" },
-  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira" },
-  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika" },
-  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx" },
+  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn", chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro", chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex", chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen", chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn", chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira", chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika", chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx", chest: { top: "44%", left: "50%", width: "18%" } },
 ];
 
 function bandForAge(age: number | null | undefined): AgeBand {
@@ -161,6 +168,7 @@ type ZoomItem = {
   locked: boolean;
   hint?: string;
   bg?: "dark" | "scene";
+  logoOverlay?: "wristband";
 };
 
 function StudentDashboard() {
@@ -596,6 +604,7 @@ function AvatarStudio({
                       locked: !unlocked,
                       hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : "Seguí entrenando para desbloquearla.",
                       bg: "dark",
+                      logoOverlay: "wristband",
                     })}
                     title={`${belt.label} · L${required}`}
                     className={`relative h-14 w-14 rounded-lg border overflow-hidden flex items-center justify-center transition active:scale-95 ${
@@ -606,6 +615,7 @@ function AvatarStudio({
                     <img src={WRISTBAND_IMG[belt.key]} alt={belt.label}
                       className={`w-full h-full object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
                       draggable={false} loading="lazy"/>
+                    <LogoOverlay variant="wristband-thumb" />
                     {!unlocked && (
                       <span className="absolute inset-0 grid place-items-center pointer-events-none">
                         <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
@@ -775,25 +785,18 @@ function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: num
       <img src={WRISTBAND_IMG[beltKey]} alt="muñequera" width={size} height={size}
         loading="lazy" draggable={false}
         style={{ width: size, height: size, objectFit: "contain" }} />
-      {beltKey !== "none" && (
-        <img
-          src={adnLogoMark}
-          alt=""
-          aria-hidden
-          draggable={false}
-          className="absolute pointer-events-none"
-          style={{
-            width: size * 0.34, height: size * 0.34,
-            left: "50%", top: "50%",
-            transform: "translate(-50%, -50%)",
-            objectFit: "contain",
-            filter: "drop-shadow(0 0 2px rgba(0,0,0,.6)) invert(1)",
-            opacity: 0.92,
-          }}
-        />
-      )}
+      {beltKey !== "none" && <LogoOverlay variant="wristband" />}
     </div>
   );
+}
+
+function LogoOverlay({ variant }: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
+  const styleByVariant: Record<"shirt" | "wristband" | "wristband-thumb", CSSProperties> = {
+    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.75))", opacity: 0.95 },
+    wristband: { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.9))", opacity: 0.95 },
+    "wristband-thumb": { width: "32%", height: "32%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.9))", opacity: 0.95 },
+  };
+  return <img src={adnLogoMark} alt="" aria-hidden draggable={false} className="absolute pointer-events-none" style={styleByVariant[variant]} />;
 }
 
 /* ─── Avatar Image (transparente, sin recuadro, sin cartel ADN) ─── */
@@ -814,21 +817,18 @@ function AvatarImage({
       <img src={preset.img} alt="" width={size} height={size} loading="lazy" draggable={false}
         className="absolute inset-0 w-full h-full object-contain" />
       {/* Logo ADN sobre la remera del personaje */}
-      <img
-        src={adnLogoMark}
-        alt=""
-        aria-hidden
-        draggable={false}
-        className="absolute pointer-events-none"
+      <span
+        className="absolute pointer-events-none block"
         style={{
-          width: size * 0.22, height: size * 0.22,
-          left: "50%", top: "48%",
+          width: preset.chest.width,
+          aspectRatio: "1.58 / 1",
+          left: preset.chest.left,
+          top: preset.chest.top,
           transform: "translate(-50%, -50%)",
-          objectFit: "contain",
-          filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.55)) invert(1)",
-          opacity: 0.85,
         }}
-      />
+      >
+        <LogoOverlay variant="shirt" />
+      </span>
     </div>
   );
 }
@@ -970,6 +970,7 @@ function ImageZoomModal({ item, onClose }: { item: ZoomItem; onClose: () => void
             className={`w-full h-full ${item.bg === "scene" ? "object-cover" : "object-contain"} ${item.locked ? "grayscale opacity-70" : ""}`}
             draggable={false}
           />
+          {item.logoOverlay === "wristband" && <LogoOverlay variant="wristband" />}
           {item.locked && (
             <div className="absolute inset-0 grid place-items-center pointer-events-none">
               <span className="h-20 w-20 rounded-full bg-black/70 border-2 border-[var(--adn-fluor)]/70 grid place-items-center shadow-[0_0_30px_#39ff1466]">
