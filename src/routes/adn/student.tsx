@@ -50,31 +50,38 @@ const WRISTBAND_IMG: Record<BeltKey, string> = {
 
 type Gender = "boy" | "girl";
 type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
-type AvatarPreset = { id: string; gender: Gender; band: AgeBand; img: string; label: string };
+type AvatarPreset = {
+  id: string;
+  gender: Gender;
+  band: AgeBand;
+  img: string;
+  label: string;
+  chest: { top: string; left: string; width: string };
+};
 
 const AVATAR_PRESETS: AvatarPreset[] = [
   // Kids (6-9): chibi cartoon — nombres de guerreros
-  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael" },
-  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu" },
-  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen" },
-  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro" },
-  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak" },
-  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra" },
-  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara" },
-  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira" },
-  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova" },
-  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya" },
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael", chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen", chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro", chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak", chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra", chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira", chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova", chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya", chest: { top: "44%", left: "50%", width: "18%" } },
   // Teens (10+): pre-teen proportions — nombres de guerreros
-  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn" },
-  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren" },
-  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro" },
-  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex" },
-  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen" },
-  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn" },
-  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela" },
-  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira" },
-  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika" },
-  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx" },
+  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn", chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro", chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex", chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen", chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn", chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira", chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika", chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx", chest: { top: "44%", left: "50%", width: "18%" } },
 ];
 
 function bandForAge(age: number | null | undefined): AgeBand {
@@ -161,6 +168,7 @@ type ZoomItem = {
   locked: boolean;
   hint?: string;
   bg?: "dark" | "scene";
+  logoOverlay?: "wristband";
 };
 
 function StudentDashboard() {
