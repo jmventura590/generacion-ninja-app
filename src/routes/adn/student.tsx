@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -791,7 +791,7 @@ function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: num
 }
 
 function LogoOverlay({ variant }: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
-  const styleByVariant: Record<typeof variant, React.CSSProperties> = {
+  const styleByVariant: Record<"shirt" | "wristband" | "wristband-thumb", CSSProperties> = {
     shirt: { width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.75))", opacity: 0.95 },
     wristband: { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.9))", opacity: 0.95 },
     "wristband-thumb": { width: "32%", height: "32%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.9))", opacity: 0.95 },
@@ -970,6 +970,7 @@ function ImageZoomModal({ item, onClose }: { item: ZoomItem; onClose: () => void
             className={`w-full h-full ${item.bg === "scene" ? "object-cover" : "object-contain"} ${item.locked ? "grayscale opacity-70" : ""}`}
             draggable={false}
           />
+          {item.logoOverlay === "wristband" && <LogoOverlay variant="wristband" />}
           {item.locked && (
             <div className="absolute inset-0 grid place-items-center pointer-events-none">
               <span className="h-20 w-20 rounded-full bg-black/70 border-2 border-[var(--adn-fluor)]/70 grid place-items-center shadow-[0_0_30px_#39ff1466]">
