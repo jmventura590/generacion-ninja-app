@@ -604,6 +604,7 @@ function AvatarStudio({
                       locked: !unlocked,
                       hint: unlocked ? `Rango alcanzado (Nivel ${required}).` : "Seguí entrenando para desbloquearla.",
                       bg: "dark",
+                      logoOverlay: "wristband",
                     })}
                     title={`${belt.label} · L${required}`}
                     className={`relative h-14 w-14 rounded-lg border overflow-hidden flex items-center justify-center transition active:scale-95 ${
@@ -614,6 +615,7 @@ function AvatarStudio({
                     <img src={WRISTBAND_IMG[belt.key]} alt={belt.label}
                       className={`w-full h-full object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
                       draggable={false} loading="lazy"/>
+                    <LogoOverlay variant="wristband-thumb" />
                     {!unlocked && (
                       <span className="absolute inset-0 grid place-items-center pointer-events-none">
                         <span className="h-6 w-6 rounded-full bg-black/70 border border-white/20 grid place-items-center shadow-[0_0_8px_#39ff1455]">
