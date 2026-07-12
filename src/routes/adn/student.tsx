@@ -10,10 +10,10 @@ export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
 });
 
-type Student = { id: string; student_name: string; age: number | null; total_xp: number; current_belt_color: string; birth_date: string | null };
+type Student = { id: string; student_name: string; age: number | null; total_xp: number; current_belt_color: string; birth_date: string | null; group_id: string | null; avatar_id: string | null };
 type Skills = Record<SkillKey, number>;
 
-/* ─── Avatares (10 personajes base) ─── */
+/* ─── Avatares (30 personajes) ─── */
 import avB1 from "@/assets/avatars/b1.png";
 import avB2 from "@/assets/avatars/b2.png";
 import avB3 from "@/assets/avatars/b3.png";
@@ -34,6 +34,16 @@ import avTg2 from "@/assets/avatars/tg2.png";
 import avTg3 from "@/assets/avatars/tg3.png";
 import avTg4 from "@/assets/avatars/tg4.png";
 import avTg5 from "@/assets/avatars/tg5.png";
+import avN1 from "@/assets/avatars/n1.png";
+import avN2 from "@/assets/avatars/n2.png";
+import avN3 from "@/assets/avatars/n3.png";
+import avN4 from "@/assets/avatars/n4.png";
+import avN5 from "@/assets/avatars/n5.png";
+import avNg1 from "@/assets/avatars/ng1.png";
+import avNg2 from "@/assets/avatars/ng2.png";
+import avNg3 from "@/assets/avatars/ng3.png";
+import avNg4 from "@/assets/avatars/ng4.png";
+import avNg5 from "@/assets/avatars/ng5.png";
 
 /* ─── Pulseras (imágenes por color/rango) ─── */
 import wbNone from "@/assets/wristbands/none.png";
@@ -80,20 +90,20 @@ const AVATAR_PRESETS: AvatarPreset[] = [
   { id: "t5", gender: "boy",  band: "mid", img: avT5, label: "Mateo",     quote: "Entreno hoy para sorprenderme mañana.",            chest: { top: "44%", left: "50%", width: "18%" } },
   { id: "tg1", gender: "girl", band: "mid", img: avTg1, label: "Catalina", quote: "No busco ser perfecta, busco mejorar.",           chest: { top: "46%", left: "48%", width: "18%" } },
   { id: "tg2", gender: "girl", band: "mid", img: avTg2, label: "Renata",   quote: "Mi evolución se ve en cada pulsera nueva.",       chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "tg3", gender: "girl", band: "mid", img: avTg3, label: "Emilia",   quote: "Hoy le gano al obstáculo. Mañana me supero a mí.",chest: { top: "44%", left: "45%", width: "18%" } },
-  { id: "tg4", gender: "girl", band: "mid", img: avTg4, label: "Valentina",quote: "Cada nivel que subo, lo gané entrenando.",        chest: { top: "42%", left: "48%", width: "18%" } },
-  { id: "tg5", gender: "girl", band: "mid", img: avTg5, label: "Julieta",  quote: "Mi esfuerzo de hoy es mi próxima medalla.",       chest: { top: "44%", left: "50%", width: "18%" } },
-  // Teens (10+): NUEVOS — look adolescente. Imágenes provisionales hasta regeneración.
-  { id: "n1", gender: "boy",  band: "teens", img: avT1, label: "Tomás",    quote: "La disciplina es la que abre camino, no la suerte.", chest: { top: "48%", left: "50%", width: "18%" } },
-  { id: "n2", gender: "boy",  band: "teens", img: avT2, label: "Facundo",  quote: "Cada pulsera cuenta una historia de esfuerzo.",      chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "n3", gender: "boy",  band: "teens", img: avT3, label: "Franco",   quote: "Entreno mi cuerpo, pero también mi cabeza.",         chest: { top: "56%", left: "50%", width: "13%" } },
-  { id: "n4", gender: "boy",  band: "teens", img: avT4, label: "Nicolás",  quote: "Cuando parece imposible, ahí es donde más aprendo.", chest: { top: "48%", left: "45%", width: "18%" } },
-  { id: "n5", gender: "boy",  band: "teens", img: avT5, label: "Ramiro",   quote: "No se trata de ser el mejor, sino de dar lo mejor.", chest: { top: "44%", left: "50%", width: "18%" } },
-  { id: "ng1", gender: "girl", band: "teens", img: avTg1, label: "Agustina",quote: "No compito contra otros, compito contra mi ayer.", chest: { top: "46%", left: "48%", width: "18%" } },
-  { id: "ng2", gender: "girl", band: "teens", img: avTg2, label: "Milagros",quote: "El límite lo pongo yo, y lo sigo corriendo.",       chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "ng3", gender: "girl", band: "teens", img: avTg3, label: "Camila",  quote: "La evolución no se pide, se entrena.",              chest: { top: "44%", left: "45%", width: "18%" } },
-  { id: "ng4", gender: "girl", band: "teens", img: avTg4, label: "Abril",   quote: "No paro cuando estoy cansada, paro cuando terminé.",chest: { top: "42%", left: "48%", width: "18%" } },
-  { id: "ng5", gender: "girl", band: "teens", img: avTg5, label: "Lucía",   quote: "Mi fuerza no se ve, se entrena en silencio.",       chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "tg3", gender: "girl", band: "mid", img: avTg3, label: "Emilia",   quote: "Hoy le gano al obstáculo. Mañana me supero a mí.", chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "tg4", gender: "girl", band: "mid", img: avTg4, label: "Valentina",quote: "Cada nivel que subo, lo gané entrenando.",         chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "tg5", gender: "girl", band: "mid", img: avTg5, label: "Julieta",  quote: "Mi esfuerzo de hoy es mi próxima medalla.",        chest: { top: "44%", left: "50%", width: "18%" } },
+  // Teens (10+): look adolescente real
+  { id: "n1", gender: "boy",  band: "teens", img: avN1,  label: "Tomás",     quote: "La disciplina es la que abre camino, no la suerte.",  chest: { top: "48%", left: "50%", width: "20%" } },
+  { id: "n2", gender: "boy",  band: "teens", img: avN2,  label: "Facundo",   quote: "Cada pulsera cuenta una historia de esfuerzo.",       chest: { top: "47%", left: "49%", width: "20%" } },
+  { id: "n3", gender: "boy",  band: "teens", img: avN3,  label: "Franco",    quote: "Entreno mi cuerpo, pero también mi cabeza.",          chest: { top: "47%", left: "50%", width: "20%" } },
+  { id: "n4", gender: "boy",  band: "teens", img: avN4,  label: "Nicolás",   quote: "Cuando parece imposible, ahí es donde más aprendo.",  chest: { top: "47%", left: "50%", width: "20%" } },
+  { id: "n5", gender: "boy",  band: "teens", img: avN5,  label: "Ramiro",    quote: "No se trata de ser el mejor, sino de dar lo mejor.",  chest: { top: "47%", left: "50%", width: "20%" } },
+  { id: "ng1", gender: "girl", band: "teens", img: avNg1, label: "Agustina", quote: "No compito contra otros, compito contra mi ayer.",   chest: { top: "47%", left: "50%", width: "18%" } },
+  { id: "ng2", gender: "girl", band: "teens", img: avNg2, label: "Milagros", quote: "El límite lo pongo yo, y lo sigo corriendo.",        chest: { top: "47%", left: "50%", width: "18%" } },
+  { id: "ng3", gender: "girl", band: "teens", img: avNg3, label: "Camila",   quote: "La evolución no se pide, se entrena.",               chest: { top: "47%", left: "50%", width: "18%" } },
+  { id: "ng4", gender: "girl", band: "teens", img: avNg4, label: "Abril",    quote: "No paro cuando estoy cansada, paro cuando terminé.", chest: { top: "47%", left: "50%", width: "18%" } },
+  { id: "ng5", gender: "girl", band: "teens", img: avNg5, label: "Lucía",    quote: "Mi fuerza no se ve, se entrena en silencio.",        chest: { top: "47%", left: "50%", width: "18%" } },
 ];
 
 export function bandForAge(age: number | null | undefined): AgeBand {
@@ -189,6 +199,7 @@ function StudentDashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>("medals");
   const [student, setStudent] = useState<Student | null>(null);
+  const [studentBand, setStudentBand] = useState<AgeBand | null>(null);
   const [skills, setSkills] = useState<Skills | null>(null);
   const [avatarId, setAvatarId] = useState<string>("b1");
   const [scenarioId, setScenarioId] = useState<string>(DEFAULT_SCENARIO_ID);
@@ -212,12 +223,20 @@ function StudentDashboard() {
       const stu = s as Student;
       setStudent(stu);
 
+      let band: AgeBand = bandForAge(stu.age);
+      if (stu.group_id) {
+        const { data: group } = await supabase.from("class_groups").select("age_band").eq("id", stu.group_id).maybeSingle();
+        const groupBand = (group as { age_band?: AgeBand | null } | null)?.age_band;
+        if (groupBand === "kids" || groupBand === "mid" || groupBand === "teens") band = groupBand;
+      }
+      setStudentBand(band);
+
       const { data: sk } = await supabase.from("skill_bars").select("*").eq("student_id", stu.id).maybeSingle();
       if (sk) setSkills(sk as any);
 
       const { data: av } = await supabase.from("avatars").select("hair, hair_color").eq("student_id", stu.id).maybeSingle();
-      const band = bandForAge(stu.age);
-      if (av?.hair && AVATAR_PRESETS.some((p) => p.id === av.hair && p.band === band)) setAvatarId(av.hair);
+      const preferredAvatar = av?.hair ?? stu.avatar_id;
+      if (preferredAvatar && AVATAR_PRESETS.some((p) => p.id === preferredAvatar && p.band === band)) setAvatarId(preferredAvatar);
       if (av?.hair_color && SCENARIOS.some((sc) => sc.id === av.hair_color)) setScenarioId(av.hair_color);
 
       const { data: logs } = await supabase
@@ -277,11 +296,11 @@ function StudentDashboard() {
     })();
   }, [navigate]);
 
-  // Filtramos avatares por franja etaria: kids (6-9) vs teens (10+).
+  // Filtramos avatares por franja del grupo/horario; si no existe, caemos a la edad.
+  const activeBand = studentBand ?? bandForAge(student?.age);
   const availablePresets = useMemo(() => {
-    const band = bandForAge(student?.age);
-    return AVATAR_PRESETS.filter((p) => p.band === band);
-  }, [student?.age]);
+    return AVATAR_PRESETS.filter((p) => p.band === activeBand);
+  }, [activeBand]);
 
   const avatarOrder = useMemo(
     () => student
@@ -656,15 +675,40 @@ function AvatarStudio({
               draggable={false}
               loading="lazy"
             />
-            {/* Avatar anclado al piso, alto = 32% del contenedor (~1/4 del edificio) */}
-            <img
-              src={selected.img}
-              alt={`avatar ${selected.id}`}
-              draggable={false}
-              loading="lazy"
-              className="absolute left-1/2 -translate-x-1/2 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)]"
-              style={{ bottom: "2%", height: "32%", width: "auto" }}
-            />
+            <button
+              type="button"
+              onClick={() => openZoom({
+                img: selected.img,
+                title: selected.label,
+                subtitle: "Personaje desbloqueado",
+                locked: false,
+                hint: `\"${selected.quote}\"`,
+                bg: "dark",
+              })}
+              className="absolute left-1/2 -translate-x-1/2 block"
+              style={{ bottom: "2%", height: "32%", width: "34%" }}
+              aria-label={`Abrir personaje ${selected.label}`}
+            >
+              <img
+                src={selected.img}
+                alt={`avatar ${selected.id}`}
+                draggable={false}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)]"
+              />
+              <span
+                className="absolute pointer-events-none block"
+                style={{
+                  width: selected.chest.width,
+                  aspectRatio: "1.58 / 1",
+                  left: selected.chest.left,
+                  top: selected.chest.top,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <LogoOverlay variant="shirt" />
+              </span>
+            </button>
           </div>
 
           {/* PANEL DER — Escenarios */}
@@ -807,9 +851,9 @@ function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: num
 
 function LogoOverlay({ variant }: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
   const styleByVariant: Record<"shirt" | "wristband" | "wristband-thumb", CSSProperties> = {
-    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.75))", opacity: 0.95 },
-    wristband: { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.9))", opacity: 0.95 },
-    "wristband-thumb": { width: "32%", height: "32%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.9))", opacity: 0.95 },
+    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.85))", opacity: 0.98 },
+    wristband: { width: "36%", height: "36%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.9))", opacity: 0.98 },
+    "wristband-thumb": { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.9))", opacity: 0.98 },
   };
   return <img src={adnLogoMark} alt="" aria-hidden draggable={false} className="absolute pointer-events-none" style={styleByVariant[variant]} />;
 }
