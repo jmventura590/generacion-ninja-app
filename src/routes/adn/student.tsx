@@ -49,43 +49,57 @@ const WRISTBAND_IMG: Record<BeltKey, string> = {
 };
 
 type Gender = "boy" | "girl";
-type AgeBand = "kids" | "teens"; // kids: 6-9, teens: 10+
+type AgeBand = "kids" | "mid" | "teens"; // kids: 6-7, mid: 8-9, teens: 10+
 type AvatarPreset = {
   id: string;
   gender: Gender;
   band: AgeBand;
   img: string;
-  label: string;
+  label: string;   // nombre visible del personaje
+  quote: string;   // frase inspiradora
   chest: { top: string; left: string; width: string };
 };
 
 const AVATAR_PRESETS: AvatarPreset[] = [
-  // Kids (6-9): chibi cartoon — nombres de guerreros
-  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Kael", chest: { top: "48%", left: "50%", width: "18%" } },
-  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Ryuu", chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Zhen", chest: { top: "56%", left: "50%", width: "13%" } },
-  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Taro", chest: { top: "48%", left: "45%", width: "18%" } },
-  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Drak", chest: { top: "44%", left: "50%", width: "18%" } },
-  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Lyra", chest: { top: "46%", left: "48%", width: "18%" } },
-  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Zara", chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Kira", chest: { top: "44%", left: "45%", width: "18%" } },
-  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Nova", chest: { top: "42%", left: "48%", width: "18%" } },
-  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Saya", chest: { top: "44%", left: "50%", width: "18%" } },
-  // Teens (10+): pre-teen proportions — nombres de guerreros
-  { id: "t1", gender: "boy",  band: "teens", img: avT1, label: "Oryn", chest: { top: "48%", left: "50%", width: "18%" } },
-  { id: "t2", gender: "boy",  band: "teens", img: avT2, label: "Bren", chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "t3", gender: "boy",  band: "teens", img: avT3, label: "Kiro", chest: { top: "56%", left: "50%", width: "13%" } },
-  { id: "t4", gender: "boy",  band: "teens", img: avT4, label: "Vex", chest: { top: "48%", left: "45%", width: "18%" } },
-  { id: "t5", gender: "boy",  band: "teens", img: avT5, label: "Shen", chest: { top: "44%", left: "50%", width: "18%" } },
-  { id: "tg1", gender: "girl", band: "teens", img: avTg1, label: "Ryn", chest: { top: "46%", left: "48%", width: "18%" } },
-  { id: "tg2", gender: "girl", band: "teens", img: avTg2, label: "Vela", chest: { top: "46%", left: "47%", width: "18%" } },
-  { id: "tg3", gender: "girl", band: "teens", img: avTg3, label: "Mira", chest: { top: "44%", left: "45%", width: "18%" } },
-  { id: "tg4", gender: "girl", band: "teens", img: avTg4, label: "Aika", chest: { top: "42%", left: "48%", width: "18%" } },
-  { id: "tg5", gender: "girl", band: "teens", img: avTg5, label: "Nyx", chest: { top: "44%", left: "50%", width: "18%" } },
+  // Kids (6-7): look infantil chibi
+  { id: "b1", gender: "boy",  band: "kids", img: avB1, label: "Bautista", quote: "¡Cada obstáculo es un juego nuevo para ganar!", chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "b2", gender: "boy",  band: "kids", img: avB2, label: "Thiago",   quote: "Hoy aprendí algo nuevo. ¡Mañana aprendo más!",       chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "b3", gender: "boy",  band: "kids", img: avB3, label: "Benicio",  quote: "No hay obstáculo que le gane a mis ganas.",         chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "b4", gender: "boy",  band: "kids", img: avB4, label: "Santino",  quote: "Un salto a la vez, ¡así se llega lejos!",           chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "b5", gender: "boy",  band: "kids", img: avB5, label: "Pedro",    quote: "Cada intento me acerca un poco más.",               chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "g1", gender: "girl", band: "kids", img: avG1, label: "Martina",   quote: "Me caigo, me río y sigo saltando.",                chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "g2", gender: "girl", band: "kids", img: avG2, label: "Delfina",   quote: "Mi pulsera crece cuando yo me animo.",             chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "g3", gender: "girl", band: "kids", img: avG3, label: "Sofía",     quote: "Practicar es mi superpoder secreto.",              chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "g4", gender: "girl", band: "kids", img: avG4, label: "Guadalupe", quote: "Me gusta intentarlo, aunque sea difícil.",         chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "g5", gender: "girl", band: "kids", img: avG5, label: "Antonella", quote: "Jugando también se aprende a ser fuerte.",         chest: { top: "44%", left: "50%", width: "18%" } },
+  // Mid (8-9): proporciones intermedias (antes "teens")
+  { id: "t1", gender: "boy",  band: "mid", img: avT1, label: "Lautaro",   quote: "Cada entrenamiento me hace un poco más fuerte.",   chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "t2", gender: "boy",  band: "mid", img: avT2, label: "Joaquín",   quote: "Los desafíos me gustan más cuando son difíciles.", chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "t3", gender: "boy",  band: "mid", img: avT3, label: "Bruno",     quote: "Caerse también es parte de entrenar.",             chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "t4", gender: "boy",  band: "mid", img: avT4, label: "Ignacio",   quote: "La constancia es mi mejor técnica.",               chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "t5", gender: "boy",  band: "mid", img: avT5, label: "Mateo",     quote: "Entreno hoy para sorprenderme mañana.",            chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "tg1", gender: "girl", band: "mid", img: avTg1, label: "Catalina", quote: "No busco ser perfecta, busco mejorar.",           chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "tg2", gender: "girl", band: "mid", img: avTg2, label: "Renata",   quote: "Mi evolución se ve en cada pulsera nueva.",       chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "tg3", gender: "girl", band: "mid", img: avTg3, label: "Emilia",   quote: "Hoy le gano al obstáculo. Mañana me supero a mí.",chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "tg4", gender: "girl", band: "mid", img: avTg4, label: "Valentina",quote: "Cada nivel que subo, lo gané entrenando.",        chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "tg5", gender: "girl", band: "mid", img: avTg5, label: "Julieta",  quote: "Mi esfuerzo de hoy es mi próxima medalla.",       chest: { top: "44%", left: "50%", width: "18%" } },
+  // Teens (10+): NUEVOS — look adolescente. Imágenes provisionales hasta regeneración.
+  { id: "n1", gender: "boy",  band: "teens", img: avT1, label: "Tomás",    quote: "La disciplina es la que abre camino, no la suerte.", chest: { top: "48%", left: "50%", width: "18%" } },
+  { id: "n2", gender: "boy",  band: "teens", img: avT2, label: "Facundo",  quote: "Cada pulsera cuenta una historia de esfuerzo.",      chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "n3", gender: "boy",  band: "teens", img: avT3, label: "Franco",   quote: "Entreno mi cuerpo, pero también mi cabeza.",         chest: { top: "56%", left: "50%", width: "13%" } },
+  { id: "n4", gender: "boy",  band: "teens", img: avT4, label: "Nicolás",  quote: "Cuando parece imposible, ahí es donde más aprendo.", chest: { top: "48%", left: "45%", width: "18%" } },
+  { id: "n5", gender: "boy",  band: "teens", img: avT5, label: "Ramiro",   quote: "No se trata de ser el mejor, sino de dar lo mejor.", chest: { top: "44%", left: "50%", width: "18%" } },
+  { id: "ng1", gender: "girl", band: "teens", img: avTg1, label: "Agustina",quote: "No compito contra otros, compito contra mi ayer.", chest: { top: "46%", left: "48%", width: "18%" } },
+  { id: "ng2", gender: "girl", band: "teens", img: avTg2, label: "Milagros",quote: "El límite lo pongo yo, y lo sigo corriendo.",       chest: { top: "46%", left: "47%", width: "18%" } },
+  { id: "ng3", gender: "girl", band: "teens", img: avTg3, label: "Camila",  quote: "La evolución no se pide, se entrena.",              chest: { top: "44%", left: "45%", width: "18%" } },
+  { id: "ng4", gender: "girl", band: "teens", img: avTg4, label: "Abril",   quote: "No paro cuando estoy cansada, paro cuando terminé.",chest: { top: "42%", left: "48%", width: "18%" } },
+  { id: "ng5", gender: "girl", band: "teens", img: avTg5, label: "Lucía",   quote: "Mi fuerza no se ve, se entrena en silencio.",       chest: { top: "44%", left: "50%", width: "18%" } },
 ];
 
-function bandForAge(age: number | null | undefined): AgeBand {
-  if (age != null && age >= 10) return "teens";
+export function bandForAge(age: number | null | undefined): AgeBand {
+  if (age == null) return "kids";
+  if (age >= 10) return "teens";
+  if (age >= 8) return "mid";
   return "kids";
 }
 
@@ -745,9 +759,10 @@ function AvatarStudio({
                 }}
                 onDoubleClick={() => openZoom({
                   img: p.img,
-                  title: unlocked ? `Personaje ${p.label}` : "Personaje sorpresa",
+                  title: unlocked ? p.label : "Personaje sorpresa",
+                  subtitle: unlocked ? "Personaje desbloqueado" : "Personaje bloqueado",
                   locked: !unlocked,
-                  hint: unlocked ? "Personaje desbloqueado." : "Seguí entrenando para desbloquearlo.",
+                  hint: unlocked ? `"${p.quote}"` : "Seguí entrenando para desbloquearlo.",
                   bg: "dark",
                 })}
                 className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden active:scale-95 ${

@@ -1,104 +1,76 @@
+# Plan: sistema de avatares ADN — 6 correcciones
 
-# Generación ADN — Plan
+Alcance grande: ~30 operaciones de imagen + cambios de esquema + código. Antes de ejecutar quiero que apruebes el orden y confirmes el gasto de créditos de imagen.
 
-A new multi-role gamified PWA layered onto the current ADN Ninja Warrior project. Reuses the existing dark/neon aesthetic but introduces the new palette (#1e1e24 / #000 / #39ff14 / #df00ff / #fff), Supabase-backed data, a PIN-gated Coach Dashboard, and a Student/Parent Dashboard with avatar studio, skill bars, obstacle map and shop.
+## Resumen de decisiones ya tomadas
+- **Franjas**: 6-7 = `kids`, 8-9 = `mid` (el set actual `teens` se renombra a `mid`), 10+ = `teens` (nuevo set de 10 avatares).
+- **Auto-asignación**: por `class_group` del alta (se agrega columna `age_band` en `class_groups`).
+- Coach puede overridear el avatar después.
 
-## Scope decisions to confirm
-
-Before I build, two things I want to confirm so I don't waste your credits:
-
-1. **Coexistence with current app**: keep the existing "Mi Camino Ninja" + "Reporte Mensual" tabs as-is and add Generación ADN as a separate top-level area (new routes `/adn/*`), OR fully replace the current app with Generación ADN. My plan assumes **add alongside** (safer, preserves yesterday's work).
-2. **Auth model**: the spec says `users.password_hash` + role. The simplest production-safe option in Lovable Cloud is Supabase email/password auth + a `profiles` table with role, plus a separate hardcoded coach PIN gate (`1986`) as an extra in-app lock for the coach screen. I will NOT roll a custom password_hash table — that's an anti-pattern. Confirm OK.
-
-If either of those is wrong, tell me and I'll revise before building.
-
-## Architecture
-
-- **Backend**: Enable Lovable Cloud (Supabase). All tables in `public` with RLS + GRANTs.
-- **Roles**: stored in `user_roles` table with `app_role` enum (`coach`, `student_parent`) + `has_role()` security definer fn. Never on profile.
-- **XP/belt logic**: SQL trigger on `attendance_logs` insert → distributes XP into `skill_bars`, recomputes `total_xp` and `current_belt_color` on `student_profiles`. Duplicate (student_id, date, class_type_id) blocked by unique index.
-- **Frontend**: TanStack Start routes under `src/routes/adn/`. Mobile-first. Framer-motion-free; use CSS transitions for skill bars.
-- **PWA**: manifest-only (installable + icons + theme color). No service worker unless you explicitly want offline.
-
-## Database (migration)
-
-```text
-app_role            enum('coach','student_parent')
-profiles            id(uuid=auth.users.id), display_name, created_at
-user_roles          (user_id, role) unique
-student_profiles    id, user_id→auth.users, student_name, age,
-                    total_xp int default 0,
-                    current_belt_color text default 'white'
-skill_bars          student_id PK→student_profiles,
-                    jump_xp, grip_xp, coordination_xp, agility_xp, strength_xp
-class_types         id, name, xp_matrix jsonb   -- seeded with 3 classes
-attendance_logs     id, student_id, class_type_id, date,
-                    coach_id, xp_awarded int,
-                    UNIQUE(student_id, date, class_type_id)
-unlocked_items      id, student_id, item_type('pin'|'belt'),
-                    item_name, purchased_status bool default false,
-                    UNIQUE(student_id, item_type, item_name)
-avatars             student_id PK, hair, skin, accessory jsonb
-```
-
-GRANTs on every table. RLS:
-- `student_profiles`, `skill_bars`, `unlocked_items`, `avatars`: parent sees own; coach sees all (`has_role(auth.uid(),'coach')`).
-- `attendance_logs`: insert only by coach; select own student or coach.
-- `class_types`: read for authenticated.
-
-Seed: 3 class_types + 5 mock students (Benja, Cata, Morena, Bauti, Fran) with varied XP so belts span White→Red on first load.
-
-## Routes
+## Cambios de esquema (1 migración)
 
 ```
-/adn/                       -> role-aware landing (redirects to /adn/student or /adn/coach)
-/adn/auth                   -> sign in / sign up (email + password)
-/adn/coach                  -> _authenticated; PIN overlay (1986) before content
-  ├ shift selector  (6-9 / 10-14)
-  ├ class dropdown  (3 classes)
-  ├ student roster checklist
-  └ sticky "REGISTRAR ASISTENCIA DE CLASE"
-/adn/student                -> _authenticated; tabs:
-  ├ Avatar Studio
-  ├ Evolution (belt + 5 skill bars)
-  ├ Obstacle Map (3 cards w/ lock + unlock CTA)
-  └ ADN Shop (read-only showcase)
+ALTER TABLE class_groups ADD COLUMN age_band text
+  CHECK (age_band IN ('kids','mid','teens'));
+ALTER TABLE student_profiles ADD COLUMN avatar_id text;
 ```
 
-Coach PIN: stored in `sessionStorage` for that tab session; gate overlay component blocks `/adn/coach/*` until matched.
+Backfill: infiero `age_band` de cada `class_group` existente por su nombre (6-7, 8-9, 10+). Si algún grupo no matchea, queda `null` y el coach lo edita.
 
-## Game logic
+## Cambios de código
 
-- XP matrix lives in `class_types.xp_matrix` (e.g. `{"jump":50,"strength":50}`) → trigger reads it.
-- Belt recompute on `student_profiles` via trigger: white<400, green<1000, blue<2000, red<4000, black≥4000.
-- Obstacle unlocks computed client-side from `skill_bars` (≥150 in matched skill).
-- On unlock, insert into `unlocked_items` (idempotent via UNIQUE).
+1. **AVATAR_PRESETS** (`src/routes/adn/student.tsx`)
+   - Renombrar `band: "teens"` → `band: "mid"` en los 10 avatares actuales `t1–t5`, `tg1–tg5`.
+   - Agregar 10 nuevos presets `n1–n5` (varón), `ng1–ng5` (mujer) con `band: "teens"`.
+   - Agregar campos `name` y `quote` a cada preset (los 30 nombres/frases exactos que mandaste).
+   - Al abrir el avatar mostrar `name` + `quote` (mismo modal "Personaje sorpresa").
 
-## UI components
+2. **`createStudentAccount`** (`adn-students.functions.ts`)
+   - Leer `age_band` del `class_group` elegido.
+   - Elegir un `avatar_id` aleatorio del set correspondiente y guardarlo en `student_profiles.avatar_id`.
 
-- New tokens in `src/styles.css` added under an `.adn-theme` scope (so the existing app keeps its current palette). Fluor green `#39ff14`, violet `#df00ff`, charcoal `#1e1e24`, ink black `#000`, white text.
-- Skill bar = animated gradient (green→violet glow), recharts not needed.
-- Avatar studio = flat SVG built from layered `<svg>` parts (no AI image gen — keeps it fast, free, and consistent). Boy/girl base + hair/skin pickers + fixed ADN green tee w/ violet trim.
-- Obstacle cards = 3 newly-generated kid-friendly flat illustrations (boy on Muro Curvado, girl on Pasamanos, boy on Puente Colgante), greyscale when locked.
+3. **Vista de coach** (`adn/coach.tsx`)
+   - Al crear alumno mostrar la franja detectada.
+   - Selector de avatar override.
 
-## PWA
+4. **`LogoOverlay`** (`student.tsx`)
+   - Aumentar tamaño/opacidad del logo en remera para tapar el "ADN" pintado en el PNG hasta que se regeneren.
+   - Agregar overlay de logo también en la muñequera (ya está en `wristband` y `wristband-thumb`, verifico tamaño).
 
-Add `public/manifest.webmanifest` + 192/512 icons + head links in `__root.tsx`. No service worker.
+## Operaciones de imagen (créditos ⚠️)
 
-## Testability
+**Edición de 20 avatares existentes** (`b1-b5`, `g1-g5`, `t1-t5`, `tg1-tg5`) — para cada uno vía `imagegen--edit_image`:
+- Borrar el texto "LA PLATA GOBIERRO" y los pequeños escudos de la pared turquesa (dejarla lisa).
+- Borrar todos los destellos/chispas/líneas/cotillón alrededor del personaje.
+- Borrar el texto "ADN" de la remera (queda remera negra lisa; el logo se pinta encima por CSS con `LogoOverlay`).
 
-- After migration runs, you can log in with any of the 5 mock parent accounts (creds shown in `/adn/auth`) to see different belts & unlocks immediately.
-- Coach login: one seeded coach (`coach@adn.test`) + PIN 1986.
+**Generación de 10 avatares nuevos** (`n1-n5` varón, `ng1-ng5` mujer) para franja 10+ (`teens`):
+- Estilo cartoon consistente con los sets existentes.
+- Look adolescente (proporciones más grandes, más "teen"), remera negra lisa, escenario limpio sin texto, sin efectos, cuerpo entero, pies apoyados.
 
-## Out of scope (will not build unless you ask)
+**Total: ~30 llamadas de imagegen.**
 
-- Real payments / shop checkout.
-- Push notifications.
-- Offline service worker.
-- Photo upload for avatars.
+## Orden de ejecución
 
----
+1. Migración (`age_band` + `avatar_id`) + backfill de grupos existentes.
+2. Refactor de `AVATAR_PRESETS`: rename band, agregar `name`/`quote`, agregar 10 slots teens con placeholders temporales.
+3. Auto-asignación por franja en `createStudentAccount`.
+4. UI: modal con nombre + frase, selector de override en coach.
+5. Edición imagen: 20 avatares existentes (limpieza pared + efectos + texto ADN).
+6. Generación imagen: 10 avatares teens 10+.
+7. QA con Playwright loggeado con cuenta coach y student, capturas y verifico:
+   - Logo visible y centrado en remera y muñequera de las 3 franjas.
+   - Pared turquesa lisa, sin texto.
+   - Sin destellos alrededor.
+   - Modal muestra nombre + frase correcta.
+   - Alta de alumno auto-elige avatar según franja del grupo.
 
-**Reply with:**
-- "go" (or "dale") to build with the two assumptions above (add alongside; Supabase auth + PIN gate).
-- Otherwise tell me what to change.
+## Riesgos / notas honestas
+
+- **Créditos**: 30 operaciones imagegen es lo más caro que hicimos hasta ahora en este proyecto. Si algún avatar sale mal y hay que reintentar, sube más.
+- **Consistencia visual**: al editar 20 PNGs distintos con un mismo prompt, el modelo puede alterar detalles del personaje. Reviso cada uno y reintento solo los que rompan al personaje (no barrido total).
+- **Backfill grupos**: si tenés grupos con nombres raros que no coincidan con 6-7 / 8-9 / 10+, los dejo en `null` y te paso la lista para que los completes desde coach.
+
+## ¿Confirmás?
+
+Si aprobás, arranco por el orden 1-4 (cambios baratos), y antes de disparar los 30 image ops (pasos 5-6) te aviso para dar OK final al gasto.

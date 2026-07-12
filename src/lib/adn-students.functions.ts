@@ -120,6 +120,26 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       return fail("form", "No se pudo crear la cuenta de familia.");
     }
 
+    // 2.5) Determinar franja etaria (age_band) y auto-asignar avatar.
+    // Preferimos el age_band del class_group; si no está, caemos a la edad del alumno.
+    let ageBand: "kids" | "mid" | "teens" = age >= 10 ? "teens" : age >= 8 ? "mid" : "kids";
+    if (data.group_id) {
+      const { data: cg } = await supabaseAdmin
+        .from("class_groups")
+        .select("age_band")
+        .eq("id", data.group_id)
+        .maybeSingle();
+      if (cg && (cg as any).age_band) ageBand = (cg as any).age_band;
+    }
+    // IDs de avatares por franja (deben coincidir con AVATAR_PRESETS en student.tsx).
+    const AVATARS_BY_BAND: Record<"kids" | "mid" | "teens", string[]> = {
+      kids:  ["b1","b2","b3","b4","b5","g1","g2","g3","g4","g5"],
+      mid:   ["t1","t2","t3","t4","t5","tg1","tg2","tg3","tg4","tg5"],
+      teens: ["n1","n2","n3","n4","n5","ng1","ng2","ng3","ng4","ng5"],
+    };
+    const pool = AVATARS_BY_BAND[ageBand];
+    const avatarId = pool[Math.floor(Math.random() * pool.length)];
+
     // 3) student_profile vincula ambos
     const { data: sp, error: spErr } = await supabaseAdmin
       .from("student_profiles")
@@ -134,6 +154,7 @@ export const createStudentAccount = createServerFn({ method: "POST" })
         username,
         group_id: data.group_id,
         piloto: !!data.piloto,
+        avatar_id: avatarId,
       })
       .select("id")
       .single();
@@ -142,6 +163,12 @@ export const createStudentAccount = createServerFn({ method: "POST" })
       await supabaseAdmin.auth.admin.deleteUser(familyUserId).catch(() => {});
       return fail("form", spErr.message);
     }
+
+    // Guardar avatar preseleccionado en tabla avatars (para que aparezca al iniciar sesión).
+    await supabaseAdmin.from("avatars").upsert(
+      { student_id: sp.id, hair: avatarId, gender: pool.some((x) => x.startsWith("g") || x.startsWith("tg") || x.startsWith("ng")) && (avatarId.startsWith("g") || avatarId.startsWith("tg") || avatarId.startsWith("ng")) ? "girl" : "boy", skin: "#000", hair_color: "entrada" },
+      { onConflict: "student_id" },
+    );
 
     await supabaseAdmin.from("skill_bars").upsert({ student_id: sp.id }, { onConflict: "student_id" });
 
