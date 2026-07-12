@@ -120,6 +120,7 @@ export type Database = {
       }
       class_groups: {
         Row: {
+          age_band: Database["public"]["Enums"]["age_band"] | null
           code: string
           days_label: string
           ends_at: string
@@ -128,6 +129,7 @@ export type Database = {
           starts_at: string
         }
         Insert: {
+          age_band?: Database["public"]["Enums"]["age_band"] | null
           code: string
           days_label: string
           ends_at: string
@@ -136,6 +138,7 @@ export type Database = {
           starts_at: string
         }
         Update: {
+          age_band?: Database["public"]["Enums"]["age_band"] | null
           code?: string
           days_label?: string
           ends_at?: string
@@ -225,6 +228,7 @@ export type Database = {
       student_profiles: {
         Row: {
           age: number
+          avatar_id: string | null
           birth_date: string | null
           created_at: string
           current_belt_color: string
@@ -241,6 +245,7 @@ export type Database = {
         }
         Insert: {
           age: number
+          avatar_id?: string | null
           birth_date?: string | null
           created_at?: string
           current_belt_color?: string
@@ -257,6 +262,7 @@ export type Database = {
         }
         Update: {
           age?: number
+          avatar_id?: string | null
           birth_date?: string | null
           created_at?: string
           current_belt_color?: string
@@ -371,6 +377,7 @@ export type Database = {
       xp_required_for_level: { Args: { level_n: number }; Returns: number }
     }
     Enums: {
+      age_band: "kids" | "mid" | "teens"
       app_role: "coach" | "student_parent"
     }
     CompositeTypes: {
@@ -499,6 +506,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      age_band: ["kids", "mid", "teens"],
       app_role: ["coach", "student_parent"],
     },
   },
