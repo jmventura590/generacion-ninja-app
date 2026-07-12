@@ -759,9 +759,10 @@ function AvatarStudio({
                 }}
                 onDoubleClick={() => openZoom({
                   img: p.img,
-                  title: unlocked ? `Personaje ${p.label}` : "Personaje sorpresa",
+                  title: unlocked ? p.label : "Personaje sorpresa",
+                  subtitle: unlocked ? "Personaje desbloqueado" : "Personaje bloqueado",
                   locked: !unlocked,
-                  hint: unlocked ? "Personaje desbloqueado." : "Seguí entrenando para desbloquearlo.",
+                  hint: unlocked ? `"${p.quote}"` : "Seguí entrenando para desbloquearlo.",
                   bg: "dark",
                 })}
                 className={`relative aspect-square rounded-xl border-2 p-1 transition overflow-hidden active:scale-95 ${
