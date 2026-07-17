@@ -525,7 +525,7 @@ function Medallero({
                 title: o.name,
                 subtitle: `Habilidad: ${o.skillLabel}`,
                 locked: !unlocked,
-                hint: unlocked ? "¡Desbloqueado! Retirá tu Pin en recepción." : `Completá al 100% la barra de ${o.skillLabel} para desbloquear.`,
+                hint: unlocked ? "¡Desbloqueado! Retirá tu Pin en recepción." : "Seguí entrenando para desbloquearlo.",
                 bg: "dark",
               })}
               className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden transition active:scale-[0.97] ${
