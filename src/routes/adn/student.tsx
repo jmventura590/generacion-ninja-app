@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff, X, KeyRound } from "lucide-react";
 import { BELTS, beltFromXp, SKILLS, type SkillKey, type BeltKey } from "@/lib/adn-game";
+import { UnlockAnimation, type UnlockVariant } from "@/components/UnlockAnimation";
 
 export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
