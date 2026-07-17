@@ -271,16 +271,9 @@ function StudentDashboard() {
       const { data: streakData } = await supabase.rpc("attendance_streak_weeks", { _student_id: stu.id });
       setStreak(typeof streakData === "number" ? streakData : 0);
 
-      const storageKey = `adn:lastBelt:${stu.id}`;
-      const lastSeen = localStorage.getItem(storageKey);
-      prevBeltRef.current = lastSeen;
-      if (lastSeen && lastSeen !== stu.current_belt_color) {
-        const belt = BELTS.find((b) => b.key === stu.current_belt_color);
-        if (belt && BELTS.findIndex((b) => b.key === stu.current_belt_color) > BELTS.findIndex((b) => b.key === (lastSeen as any))) {
-          setCelebrate({ beltKey: belt.key, beltLabel: belt.label });
-        }
-      }
-      localStorage.setItem(storageKey, stu.current_belt_color);
+      // Detección de desbloqueos: la comparación completa (obstáculos, avatares,
+      // escenarios, pulsera) corre en un useEffect separado, con los datos ya cargados.
+
 
       if (stu.birth_date) {
         const today = new Date();
