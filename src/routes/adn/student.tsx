@@ -207,7 +207,7 @@ function StudentDashboard() {
   const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
-  const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
+  const [unlockQueue, setUnlockQueue] = useState<Array<{ variant: UnlockVariant; title: string; subtitle?: string; image: string }>>([]);
   const [birthday, setBirthday] = useState<null | { seed: string }>(null);
   const [streak, setStreak] = useState<number>(0);
   const [zoom, setZoom] = useState<ZoomItem | null>(null);
