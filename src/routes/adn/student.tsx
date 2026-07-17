@@ -1121,38 +1121,9 @@ function ImageZoomModal({ item, onClose }: { item: ZoomItem; onClose: () => void
   );
 }
 
-/* ─── Celebración de subida de nivel ─── */
-function LevelUpCelebration({
-  preset, accessories, beltLabel, onClose,
-}: {
-  preset: AvatarPreset;
-  accessories: Accessories;
-  beltLabel: string;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    const colors = ["#39ff14", "#df00ff", "#ffffff", "#00ffae"];
-    const end = Date.now() + 2500;
-    const tick = () => {
-      confetti({ particleCount: 5, angle: 60,  spread: 70, startVelocity: 55, origin: { x: 0,   y: 0.8 }, colors });
-      confetti({ particleCount: 5, angle: 120, spread: 70, startVelocity: 55, origin: { x: 1,   y: 0.8 }, colors });
-      confetti({ particleCount: 3, spread: 360, startVelocity: 25, origin: { x: 0.5, y: 0.4 }, colors, scalar: 0.9 });
-      if (Date.now() < end) requestAnimationFrame(tick);
-    };
-    tick();
-  }, []);
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 animate-fade-in">
-      <div className="text-[11px] tracking-[0.5em] text-white/60">SUBISTE DE NIVEL</div>
-      <h2 className="mt-2 text-3xl font-black text-center adn-fluor" style={{ fontFamily: "Orbitron, sans-serif" }}>¡{beltLabel}!</h2>
-      <div className="relative mt-6 animate-bounce">
-        <AvatarImage preset={preset} size={260} accessories={accessories} />
-      </div>
-      <p className="mt-6 text-sm text-white/70 text-center max-w-xs">Tu constancia rinde frutos. ¡Seguí entrenando, ninja!</p>
-      <button onClick={onClose} className="adn-btn-primary mt-6 px-8 py-3 text-sm">SEGUIR</button>
-    </div>
-  );
-}
+// LevelUpCelebration fue reemplazado por UnlockAnimation (variant "belt").
+
+
 
 /* ─── Evolución ─── */
 function Evolution({ student, skills, belt, beltDb }: { student: Student; skills: Skills; belt: ReturnType<typeof beltFromXp>; beltDb: Belt }) {
