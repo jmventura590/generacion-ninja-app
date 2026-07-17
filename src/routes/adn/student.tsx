@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LogOut, User, BarChart3, Check, Lock, ArrowLeft, Flame, CalendarOff, X, KeyRound } from "lucide-react";
 import { BELTS, beltFromXp, SKILLS, type SkillKey, type BeltKey } from "@/lib/adn-game";
+import { UnlockAnimation, type UnlockVariant } from "@/components/UnlockAnimation";
 
 export const Route = createFileRoute("/adn/student")({
   component: StudentDashboard,
@@ -206,11 +207,11 @@ function StudentDashboard() {
   const [attendanceDays, setAttendanceDays] = useState<number>(0);
   const [obstacleCounts, setObstacleCounts] = useState<Record<string, number>>({});
   const [thresholds, setThresholds] = useState<BeltThresholds>(DEFAULT_THRESHOLDS);
-  const [celebrate, setCelebrate] = useState<null | { beltKey: string; beltLabel: string }>(null);
+  const [unlockQueue, setUnlockQueue] = useState<Array<{ variant: UnlockVariant; title: string; subtitle?: string; image: string }>>([]);
   const [birthday, setBirthday] = useState<null | { seed: string }>(null);
   const [streak, setStreak] = useState<number>(0);
   const [zoom, setZoom] = useState<ZoomItem | null>(null);
-  const prevBeltRef = useRef<string | null>(null);
+  
 
   useEffect(() => {
     (async () => {
@@ -270,16 +271,9 @@ function StudentDashboard() {
       const { data: streakData } = await supabase.rpc("attendance_streak_weeks", { _student_id: stu.id });
       setStreak(typeof streakData === "number" ? streakData : 0);
 
-      const storageKey = `adn:lastBelt:${stu.id}`;
-      const lastSeen = localStorage.getItem(storageKey);
-      prevBeltRef.current = lastSeen;
-      if (lastSeen && lastSeen !== stu.current_belt_color) {
-        const belt = BELTS.find((b) => b.key === stu.current_belt_color);
-        if (belt && BELTS.findIndex((b) => b.key === stu.current_belt_color) > BELTS.findIndex((b) => b.key === (lastSeen as any))) {
-          setCelebrate({ beltKey: belt.key, beltLabel: belt.label });
-        }
-      }
-      localStorage.setItem(storageKey, stu.current_belt_color);
+      // Detección de desbloqueos: la comparación completa (obstáculos, avatares,
+      // escenarios, pulsera) corre en un useEffect separado, con los datos ya cargados.
+
 
       if (stu.birth_date) {
         const today = new Date();
@@ -326,6 +320,70 @@ function StudentDashboard() {
       setAvatarId(availablePresets[0].id);
     }
   }, [student, availablePresets, avatarId]);
+
+  // Detección de desbloqueos: compara snapshot anterior (localStorage) con el actual
+  // y encola una animación por cada tipo que haya cambiado (obstáculo, avatar, escenario, pulsera).
+  useEffect(() => {
+    if (!student || !skills) return;
+    const snapKey = `adn:unlockSnapshot:${student.id}`;
+    const currentObstacles = OBSTACLES.filter((o) => o.unlock(skills)).map((o) => o.name);
+    const currentAvatars = Array.from(unlockedAvatarIds);
+    const currentScenarios = Array.from(unlockedScenarioIds);
+    const currentBelt = student.current_belt_color;
+
+    let prev: { obstacles: string[]; avatars: string[]; scenarios: string[]; belt: string } | null = null;
+    try {
+      const raw = localStorage.getItem(snapKey);
+      if (raw) prev = JSON.parse(raw);
+    } catch { /* ignora */ }
+
+    const snapshot = { obstacles: currentObstacles, avatars: currentAvatars, scenarios: currentScenarios, belt: currentBelt };
+
+    if (!prev) {
+      // Primera vez: solo guardamos snapshot, no disparamos animaciones.
+      localStorage.setItem(snapKey, JSON.stringify(snapshot));
+      return;
+    }
+
+    const queue: Array<{ variant: UnlockVariant; title: string; subtitle?: string; image: string }> = [];
+
+    // 1) Obstáculos nuevos
+    const newObstacles = currentObstacles.filter((n) => !prev!.obstacles.includes(n));
+    for (const name of newObstacles) {
+      const ob = OBSTACLES.find((o) => o.name === name);
+      if (ob) queue.push({ variant: "obstacle", title: name, subtitle: `Habilidad: ${ob.skillLabel}`, image: ob.img });
+    }
+
+    // 2) Avatares nuevos
+    const newAvatars = currentAvatars.filter((id) => !prev!.avatars.includes(id));
+    for (const id of newAvatars) {
+      const p = AVATAR_PRESETS.find((x) => x.id === id);
+      if (p) queue.push({ variant: "avatar", title: p.label, subtitle: "Personaje desbloqueado", image: p.img });
+    }
+
+    // 3) Escenarios nuevos
+    const newScenarios = currentScenarios.filter((id) => !prev!.scenarios.includes(id));
+    for (const id of newScenarios) {
+      const s = SCENARIOS.find((x) => x.id === id);
+      if (s) queue.push({ variant: "scenario", title: s.name, subtitle: "Nuevo escenario desbloqueado", image: s.img });
+    }
+
+    // 4) Pulsera nueva (solo si subió, no si bajó)
+    if (prev.belt !== currentBelt) {
+      const prevIdx = BELTS.findIndex((b) => b.key === (prev!.belt as any));
+      const nextIdx = BELTS.findIndex((b) => b.key === currentBelt);
+      if (nextIdx > prevIdx) {
+        const belt = BELTS.find((b) => b.key === currentBelt);
+        if (belt) queue.push({ variant: "belt", title: belt.label, subtitle: belt.subtitle, image: WRISTBAND_IMG[belt.key] });
+      }
+    }
+
+    if (queue.length > 0) setUnlockQueue((q) => [...q, ...queue]);
+    localStorage.setItem(snapKey, JSON.stringify(snapshot));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student?.id, skills, attendanceDays, avatarsUnlockedCount, scenariosUnlockedCount, student?.current_belt_color]);
+
+
 
 
   async function selectAvatar(id: string) {
@@ -422,12 +480,13 @@ function StudentDashboard() {
         )}
       </main>
 
-      {celebrate && (
-        <LevelUpCelebration
-          preset={preset}
-          accessories={accessories}
-          beltLabel={celebrate.beltLabel}
-          onClose={() => setCelebrate(null)}
+      {unlockQueue.length > 0 && (
+        <UnlockAnimation
+          variant={unlockQueue[0].variant}
+          title={unlockQueue[0].title}
+          subtitle={unlockQueue[0].subtitle}
+          image={unlockQueue[0].image}
+          onClose={() => setUnlockQueue((q) => q.slice(1))}
         />
       )}
 
@@ -525,7 +584,7 @@ function Medallero({
                 title: o.name,
                 subtitle: `Habilidad: ${o.skillLabel}`,
                 locked: !unlocked,
-                hint: unlocked ? "¡Desbloqueado! Retirá tu Pin en recepción." : `Completá al 100% la barra de ${o.skillLabel} para desbloquear.`,
+                hint: unlocked ? "¡Desbloqueado! Retirá tu Pin en recepción." : "Seguí entrenando para desbloquearlo.",
                 bg: "dark",
               })}
               className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden transition active:scale-[0.97] ${
@@ -1062,38 +1121,9 @@ function ImageZoomModal({ item, onClose }: { item: ZoomItem; onClose: () => void
   );
 }
 
-/* ─── Celebración de subida de nivel ─── */
-function LevelUpCelebration({
-  preset, accessories, beltLabel, onClose,
-}: {
-  preset: AvatarPreset;
-  accessories: Accessories;
-  beltLabel: string;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    const colors = ["#39ff14", "#df00ff", "#ffffff", "#00ffae"];
-    const end = Date.now() + 2500;
-    const tick = () => {
-      confetti({ particleCount: 5, angle: 60,  spread: 70, startVelocity: 55, origin: { x: 0,   y: 0.8 }, colors });
-      confetti({ particleCount: 5, angle: 120, spread: 70, startVelocity: 55, origin: { x: 1,   y: 0.8 }, colors });
-      confetti({ particleCount: 3, spread: 360, startVelocity: 25, origin: { x: 0.5, y: 0.4 }, colors, scalar: 0.9 });
-      if (Date.now() < end) requestAnimationFrame(tick);
-    };
-    tick();
-  }, []);
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm p-6 animate-fade-in">
-      <div className="text-[11px] tracking-[0.5em] text-white/60">SUBISTE DE NIVEL</div>
-      <h2 className="mt-2 text-3xl font-black text-center adn-fluor" style={{ fontFamily: "Orbitron, sans-serif" }}>¡{beltLabel}!</h2>
-      <div className="relative mt-6 animate-bounce">
-        <AvatarImage preset={preset} size={260} accessories={accessories} />
-      </div>
-      <p className="mt-6 text-sm text-white/70 text-center max-w-xs">Tu constancia rinde frutos. ¡Seguí entrenando, ninja!</p>
-      <button onClick={onClose} className="adn-btn-primary mt-6 px-8 py-3 text-sm">SEGUIR</button>
-    </div>
-  );
-}
+// LevelUpCelebration fue reemplazado por UnlockAnimation (variant "belt").
+
+
 
 /* ─── Evolución ─── */
 function Evolution({ student, skills, belt, beltDb }: { student: Student; skills: Skills; belt: ReturnType<typeof beltFromXp>; beltDb: Belt }) {
