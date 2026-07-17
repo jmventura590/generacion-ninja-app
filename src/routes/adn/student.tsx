@@ -416,12 +416,13 @@ function StudentDashboard() {
         )}
       </main>
 
-      {celebrate && (
-        <LevelUpCelebration
-          preset={preset}
-          accessories={accessories}
-          beltLabel={celebrate.beltLabel}
-          onClose={() => setCelebrate(null)}
+      {unlockQueue.length > 0 && (
+        <UnlockAnimation
+          variant={unlockQueue[0].variant}
+          title={unlockQueue[0].title}
+          subtitle={unlockQueue[0].subtitle}
+          image={unlockQueue[0].image}
+          onClose={() => setUnlockQueue((q) => q.slice(1))}
         />
       )}
 
