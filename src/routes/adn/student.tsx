@@ -211,7 +211,7 @@ function StudentDashboard() {
   const [birthday, setBirthday] = useState<null | { seed: string }>(null);
   const [streak, setStreak] = useState<number>(0);
   const [zoom, setZoom] = useState<ZoomItem | null>(null);
-  const prevBeltRef = useRef<string | null>(null);
+  
 
   useEffect(() => {
     (async () => {
