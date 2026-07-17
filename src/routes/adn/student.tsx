@@ -321,6 +321,70 @@ function StudentDashboard() {
     }
   }, [student, availablePresets, avatarId]);
 
+  // Detección de desbloqueos: compara snapshot anterior (localStorage) con el actual
+  // y encola una animación por cada tipo que haya cambiado (obstáculo, avatar, escenario, pulsera).
+  useEffect(() => {
+    if (!student || !skills) return;
+    const snapKey = `adn:unlockSnapshot:${student.id}`;
+    const currentObstacles = OBSTACLES.filter((o) => o.unlock(skills)).map((o) => o.name);
+    const currentAvatars = Array.from(unlockedAvatarIds);
+    const currentScenarios = Array.from(unlockedScenarioIds);
+    const currentBelt = student.current_belt_color;
+
+    let prev: { obstacles: string[]; avatars: string[]; scenarios: string[]; belt: string } | null = null;
+    try {
+      const raw = localStorage.getItem(snapKey);
+      if (raw) prev = JSON.parse(raw);
+    } catch { /* ignora */ }
+
+    const snapshot = { obstacles: currentObstacles, avatars: currentAvatars, scenarios: currentScenarios, belt: currentBelt };
+
+    if (!prev) {
+      // Primera vez: solo guardamos snapshot, no disparamos animaciones.
+      localStorage.setItem(snapKey, JSON.stringify(snapshot));
+      return;
+    }
+
+    const queue: Array<{ variant: UnlockVariant; title: string; subtitle?: string; image: string }> = [];
+
+    // 1) Obstáculos nuevos
+    const newObstacles = currentObstacles.filter((n) => !prev!.obstacles.includes(n));
+    for (const name of newObstacles) {
+      const ob = OBSTACLES.find((o) => o.name === name);
+      if (ob) queue.push({ variant: "obstacle", title: name, subtitle: `Habilidad: ${ob.skillLabel}`, image: ob.img });
+    }
+
+    // 2) Avatares nuevos
+    const newAvatars = currentAvatars.filter((id) => !prev!.avatars.includes(id));
+    for (const id of newAvatars) {
+      const p = AVATAR_PRESETS.find((x) => x.id === id);
+      if (p) queue.push({ variant: "avatar", title: p.label, subtitle: "Personaje desbloqueado", image: p.img });
+    }
+
+    // 3) Escenarios nuevos
+    const newScenarios = currentScenarios.filter((id) => !prev!.scenarios.includes(id));
+    for (const id of newScenarios) {
+      const s = SCENARIOS.find((x) => x.id === id);
+      if (s) queue.push({ variant: "scenario", title: s.name, subtitle: "Nuevo escenario desbloqueado", image: s.img });
+    }
+
+    // 4) Pulsera nueva (solo si subió, no si bajó)
+    if (prev.belt !== currentBelt) {
+      const prevIdx = BELTS.findIndex((b) => b.key === (prev!.belt as any));
+      const nextIdx = BELTS.findIndex((b) => b.key === currentBelt);
+      if (nextIdx > prevIdx) {
+        const belt = BELTS.find((b) => b.key === currentBelt);
+        if (belt) queue.push({ variant: "belt", title: belt.label, subtitle: belt.subtitle, image: WRISTBAND_IMG[belt.key] });
+      }
+    }
+
+    if (queue.length > 0) setUnlockQueue((q) => [...q, ...queue]);
+    localStorage.setItem(snapKey, JSON.stringify(snapshot));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student?.id, skills, attendanceDays, avatarsUnlockedCount, scenariosUnlockedCount, student?.current_belt_color]);
+
+
+
 
   async function selectAvatar(id: string) {
     if (!unlockedAvatarIds.has(id)) return; // click abre modal, no acción
