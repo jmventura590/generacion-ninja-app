@@ -909,10 +909,14 @@ function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: num
 }
 
 function LogoOverlay({ variant }: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
+  // Logo forzado a BLANCO para contrastar contra la remera negra de los avatares.
+  // `brightness(0) invert(1)` convierte cualquier píxel opaco del PNG a blanco puro,
+  // manteniendo la transparencia. Se agrega drop-shadow oscuro para separarlo del fondo.
+  const whiteLogo = "brightness(0) invert(1) drop-shadow(0 0 2px rgba(0,0,0,.9))";
   const styleByVariant: Record<"shirt" | "wristband" | "wristband-thumb", CSSProperties> = {
-    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.85))", opacity: 0.98 },
-    wristband: { width: "36%", height: "36%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 2px rgba(0,0,0,.9))", opacity: 0.98 },
-    "wristband-thumb": { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: "drop-shadow(0 0 1.5px rgba(0,0,0,.9))", opacity: 0.98 },
+    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: whiteLogo, opacity: 1 },
+    wristband: { width: "36%", height: "36%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: whiteLogo, opacity: 1 },
+    "wristband-thumb": { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: whiteLogo, opacity: 1 },
   };
   return <img src={adnLogoMark} alt="" aria-hidden draggable={false} className="absolute pointer-events-none" style={styleByVariant[variant]} />;
 }
