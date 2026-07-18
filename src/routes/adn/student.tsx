@@ -908,18 +908,12 @@ function ForearmWristband({ beltKey, size = 96 }: { beltKey: BeltKey; size?: num
   );
 }
 
-function LogoOverlay({ variant }: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
-  // Logo forzado a BLANCO para contrastar contra la remera negra de los avatares.
-  // `brightness(0) invert(1)` convierte cualquier píxel opaco del PNG a blanco puro,
-  // manteniendo la transparencia. Se agrega drop-shadow oscuro para separarlo del fondo.
-  const whiteLogo = "brightness(0) invert(1) drop-shadow(0 0 2px rgba(0,0,0,.9))";
-  const styleByVariant: Record<"shirt" | "wristband" | "wristband-thumb", CSSProperties> = {
-    shirt: { width: "100%", height: "100%", objectFit: "contain", filter: whiteLogo, opacity: 1 },
-    wristband: { width: "36%", height: "36%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: whiteLogo, opacity: 1 },
-    "wristband-thumb": { width: "34%", height: "34%", left: "50%", top: "50%", transform: "translate(-50%, -50%)", objectFit: "contain", filter: whiteLogo, opacity: 1 },
-  };
-  return <img src={adnLogoMark} alt="" aria-hidden draggable={false} className="absolute pointer-events-none" style={styleByVariant[variant]} />;
+function LogoOverlay(_props: { variant: "shirt" | "wristband" | "wristband-thumb" }) {
+  // Overlay eliminado a pedido: dejamos el logo/texto tal como viene dibujado
+  // dentro del PNG original (avatares y pulseras). Sin capas CSS superpuestas.
+  return null;
 }
+
 
 /* ─── Avatar Image (transparente, sin recuadro, sin cartel ADN) ─── */
 function AvatarImage({
