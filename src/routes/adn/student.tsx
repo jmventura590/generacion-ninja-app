@@ -141,20 +141,27 @@ import obPalestra from "@/assets/obstacles/palestra.png";
 import obPegboard from "@/assets/obstacles/pegboard.png";
 import obPelotas from "@/assets/obstacles/pelotas.png";
 import obTronco from "@/assets/obstacles/tronco.png";
-import obPuente from "@/assets/obstacles/puente.png";
+import obArana from "@/assets/obstacles/arana.png";
 import { BirthdayCelebration } from "@/components/BirthdayCelebration";
 
-/** Lista en orden (1..9) — unlock mapping abajo se basa en este orden. */
-const OBSTACLES: { name: string; img: string; skillLabel: string; unlock: (s: Skills) => boolean }[] = [
-  { name: "Muro Curvado",       img: obMuro,      skillLabel: "Salto",                       unlock: (s) => skillFull(s.jump_xp) },
-  { name: "Pasamanos",          img: obPasamanos, skillLabel: "Agarre + Resistencia",        unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  { name: "Escalera Invertida", img: obEscalera,  skillLabel: "Agarre + Resistencia",        unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  { name: "5 Escalones",        img: obEscalones, skillLabel: "Salto",                       unlock: (s) => skillFull(s.jump_xp) },
-  { name: "Palestra",           img: obPalestra,  skillLabel: "Fuerza",                      unlock: (s) => skillFull(s.strength_xp) },
-  { name: "Pegboard",           img: obPegboard,  skillLabel: "Fuerza",                      unlock: (s) => skillFull(s.strength_xp) },
-  { name: "Pelotas Colgantes",  img: obPelotas,   skillLabel: "Velocidad",                   unlock: (s) => skillFull(s.speed_xp) },
-  { name: "Tronco Giratorio",   img: obTronco,    skillLabel: "Equilibrio + Coordinación",   unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
-  { name: "Puente Colgante",    img: obPuente,    skillLabel: "Equilibrio + Coordinación",   unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+/** Lista en orden (1..9) — unlock mapping abajo se basa en este orden.
+ *  Cada obstáculo tiene una imagen por banda etaria (kids/mid/teens).
+ *  Hasta que existan los assets propios de mid/teens usamos los de kids como fallback. */
+const OBSTACLES: {
+  name: string;
+  imgs: Record<AgeBand, string>;
+  skillLabel: string;
+  unlock: (s: Skills) => boolean;
+}[] = [
+  { name: "Muro Curvado",       imgs: { kids: obMuro,      mid: obMuro,      teens: obMuro      }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Pasamanos",          imgs: { kids: obPasamanos, mid: obPasamanos, teens: obPasamanos }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "Escalera Invertida", imgs: { kids: obEscalera,  mid: obEscalera,  teens: obEscalera  }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "5 Escalones",        imgs: { kids: obEscalones, mid: obEscalones, teens: obEscalones }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Palestra",           imgs: { kids: obPalestra,  mid: obPalestra,  teens: obPalestra  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pegboard",           imgs: { kids: obPegboard,  mid: obPegboard,  teens: obPegboard  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pelotas Colgantes",  imgs: { kids: obPelotas,   mid: obPelotas,   teens: obPelotas   }, skillLabel: "Velocidad",                 unlock: (s) => skillFull(s.speed_xp) },
+  { name: "Tronco Giratorio",   imgs: { kids: obTronco,    mid: obTronco,    teens: obTronco    }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+  { name: "Salto de la Araña",  imgs: { kids: obArana,     mid: obArana,     teens: obArana     }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
 ];
 
 const SKILL_MAX = 500; // 100% de la barra
