@@ -358,7 +358,7 @@ function StudentDashboard() {
     const newObstacles = currentObstacles.filter((n) => !prev!.obstacles.includes(n));
     for (const name of newObstacles) {
       const ob = OBSTACLES.find((o) => o.name === name);
-      if (ob) queue.push({ variant: "obstacle", title: name, subtitle: `Habilidad: ${ob.skillLabel}`, image: ob.img });
+      if (ob) queue.push({ variant: "obstacle", title: name, subtitle: `Habilidad: ${ob.skillLabel}`, image: ob.imgs[activeBand] });
     }
 
     // 2) Avatares nuevos
