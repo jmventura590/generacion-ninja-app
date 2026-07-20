@@ -141,20 +141,44 @@ import obPalestra from "@/assets/obstacles/palestra.png";
 import obPegboard from "@/assets/obstacles/pegboard.png";
 import obPelotas from "@/assets/obstacles/pelotas.png";
 import obTronco from "@/assets/obstacles/tronco.png";
-import obPuente from "@/assets/obstacles/puente.png";
+import obArana from "@/assets/obstacles/arana.png";
+import obMuroMid from "@/assets/obstacles/mid/muro.png";
+import obPasamanosMid from "@/assets/obstacles/mid/pasamanos.png";
+import obEscaleraMid from "@/assets/obstacles/mid/escalera.png";
+import obEscalonesMid from "@/assets/obstacles/mid/escalones.png";
+import obPalestraMid from "@/assets/obstacles/mid/palestra.png";
+import obPegboardMid from "@/assets/obstacles/mid/pegboard.png";
+import obPelotasMid from "@/assets/obstacles/mid/pelotas.png";
+import obTroncoMid from "@/assets/obstacles/mid/tronco.png";
+import obAranaMid from "@/assets/obstacles/mid/arana.png";
+import obMuroTeens from "@/assets/obstacles/teens/muro.png";
+import obPasamanosTeens from "@/assets/obstacles/teens/pasamanos.png";
+import obEscaleraTeens from "@/assets/obstacles/teens/escalera.png";
+import obEscalonesTeens from "@/assets/obstacles/teens/escalones.png";
+import obPalestraTeens from "@/assets/obstacles/teens/palestra.png";
+import obPegboardTeens from "@/assets/obstacles/teens/pegboard.png";
+import obPelotasTeens from "@/assets/obstacles/teens/pelotas.png";
+import obTroncoTeens from "@/assets/obstacles/teens/tronco.png";
+import obAranaTeens from "@/assets/obstacles/teens/arana.png";
 import { BirthdayCelebration } from "@/components/BirthdayCelebration";
 
-/** Lista en orden (1..9) — unlock mapping abajo se basa en este orden. */
-const OBSTACLES: { name: string; img: string; skillLabel: string; unlock: (s: Skills) => boolean }[] = [
-  { name: "Muro Curvado",       img: obMuro,      skillLabel: "Salto",                       unlock: (s) => skillFull(s.jump_xp) },
-  { name: "Pasamanos",          img: obPasamanos, skillLabel: "Agarre + Resistencia",        unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  { name: "Escalera Invertida", img: obEscalera,  skillLabel: "Agarre + Resistencia",        unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  { name: "5 Escalones",        img: obEscalones, skillLabel: "Salto",                       unlock: (s) => skillFull(s.jump_xp) },
-  { name: "Palestra",           img: obPalestra,  skillLabel: "Fuerza",                      unlock: (s) => skillFull(s.strength_xp) },
-  { name: "Pegboard",           img: obPegboard,  skillLabel: "Fuerza",                      unlock: (s) => skillFull(s.strength_xp) },
-  { name: "Pelotas Colgantes",  img: obPelotas,   skillLabel: "Velocidad",                   unlock: (s) => skillFull(s.speed_xp) },
-  { name: "Tronco Giratorio",   img: obTronco,    skillLabel: "Equilibrio + Coordinación",   unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
-  { name: "Puente Colgante",    img: obPuente,    skillLabel: "Equilibrio + Coordinación",   unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+/** Lista en orden (1..9) — unlock mapping abajo se basa en este orden.
+ *  Cada obstáculo tiene una imagen por banda etaria (kids/mid/teens). */
+const OBSTACLES: {
+  name: string;
+  imgs: Record<AgeBand, string>;
+  skillLabel: string;
+  unlock: (s: Skills) => boolean;
+}[] = [
+  { name: "Muro Curvado",       imgs: { kids: obMuro,      mid: obMuroMid,      teens: obMuroTeens      }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Pasamanos",          imgs: { kids: obPasamanos, mid: obPasamanosMid, teens: obPasamanosTeens }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "Escalera Invertida", imgs: { kids: obEscalera,  mid: obEscaleraMid,  teens: obEscaleraTeens  }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "5 Escalones",        imgs: { kids: obEscalones, mid: obEscalonesMid, teens: obEscalonesTeens }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Palestra",           imgs: { kids: obPalestra,  mid: obPalestraMid,  teens: obPalestraTeens  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pegboard",           imgs: { kids: obPegboard,  mid: obPegboardMid,  teens: obPegboardTeens  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pelotas Colgantes",  imgs: { kids: obPelotas,   mid: obPelotasMid,   teens: obPelotasTeens   }, skillLabel: "Velocidad",                 unlock: (s) => skillFull(s.speed_xp) },
+  { name: "Tronco Giratorio",   imgs: { kids: obTronco,    mid: obTroncoMid,    teens: obTroncoTeens    }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+  { name: "Salto de la Araña",  imgs: { kids: obArana,     mid: obAranaMid,     teens: obAranaTeens     }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
 ];
 
 const SKILL_MAX = 500; // 100% de la barra
@@ -351,7 +375,7 @@ function StudentDashboard() {
     const newObstacles = currentObstacles.filter((n) => !prev!.obstacles.includes(n));
     for (const name of newObstacles) {
       const ob = OBSTACLES.find((o) => o.name === name);
-      if (ob) queue.push({ variant: "obstacle", title: name, subtitle: `Habilidad: ${ob.skillLabel}`, image: ob.img });
+      if (ob) queue.push({ variant: "obstacle", title: name, subtitle: `Habilidad: ${ob.skillLabel}`, image: ob.imgs[activeBand] });
     }
 
     // 2) Avatares nuevos
@@ -449,6 +473,7 @@ function StudentDashboard() {
             belt={belt}
             streak={streak}
             openZoom={setZoom}
+            band={activeBand}
           />
         )}
         {tab === "avatar" && (
@@ -521,7 +546,7 @@ function SubScreen({ title, onBack, children }: { title: string; onBack: () => v
 
 /* ─── Medallero (pantalla principal) ─── */
 function Medallero({
-  skills, counts, onAvatar, onEvo, belt, streak, openZoom,
+  skills, counts, onAvatar, onEvo, belt, streak, openZoom, band,
 }: {
   skills: Skills;
   counts: Record<string, number>;
@@ -530,6 +555,7 @@ function Medallero({
   belt: ReturnType<typeof beltFromXp>;
   streak: number;
   openZoom: (z: ZoomItem) => void;
+  band: AgeBand;
 }) {
   void counts;
   const unlocks = OBSTACLES.map((o) => o.unlock(skills));
@@ -580,7 +606,7 @@ function Medallero({
             <button key={o.name}
               type="button"
               onClick={() => openZoom({
-                img: o.img,
+                img: o.imgs[band],
                 title: o.name,
                 subtitle: `Habilidad: ${o.skillLabel}`,
                 locked: !unlocked,
@@ -590,7 +616,7 @@ function Medallero({
               className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden transition active:scale-[0.97] ${
                 unlocked ? "bg-black/40 border-[var(--adn-fluor)]/50 shadow-[0_0_18px_#39ff1433]"
                          : "bg-black/30 border-white/10"}`}>
-              <img src={o.img} alt={o.name}
+              <img src={o.imgs[band]} alt={o.name}
                 className={`w-full flex-1 object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
                 draggable={false} loading="lazy" />
               <div className="text-[9px] uppercase text-center text-white/70 leading-tight w-full px-1 truncate">{o.name}</div>
