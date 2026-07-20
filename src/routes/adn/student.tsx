@@ -589,7 +589,7 @@ function Medallero({
             <button key={o.name}
               type="button"
               onClick={() => openZoom({
-                img: o.img,
+                img: o.imgs[band],
                 title: o.name,
                 subtitle: `Habilidad: ${o.skillLabel}`,
                 locked: !unlocked,
@@ -599,7 +599,7 @@ function Medallero({
               className={`relative aspect-square rounded-2xl border p-2 flex flex-col items-center justify-between overflow-hidden transition active:scale-[0.97] ${
                 unlocked ? "bg-black/40 border-[var(--adn-fluor)]/50 shadow-[0_0_18px_#39ff1433]"
                          : "bg-black/30 border-white/10"}`}>
-              <img src={o.img} alt={o.name}
+              <img src={o.imgs[band]} alt={o.name}
                 className={`w-full flex-1 object-contain ${unlocked ? "" : "grayscale opacity-40"}`}
                 draggable={false} loading="lazy" />
               <div className="text-[9px] uppercase text-center text-white/70 leading-tight w-full px-1 truncate">{o.name}</div>
