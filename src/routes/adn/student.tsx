@@ -529,7 +529,7 @@ function SubScreen({ title, onBack, children }: { title: string; onBack: () => v
 
 /* ─── Medallero (pantalla principal) ─── */
 function Medallero({
-  skills, counts, onAvatar, onEvo, belt, streak, openZoom,
+  skills, counts, onAvatar, onEvo, belt, streak, openZoom, band,
 }: {
   skills: Skills;
   counts: Record<string, number>;
@@ -538,6 +538,7 @@ function Medallero({
   belt: ReturnType<typeof beltFromXp>;
   streak: number;
   openZoom: (z: ZoomItem) => void;
+  band: AgeBand;
 }) {
   void counts;
   const unlocks = OBSTACLES.map((o) => o.unlock(skills));
