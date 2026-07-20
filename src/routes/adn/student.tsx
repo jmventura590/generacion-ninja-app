@@ -456,6 +456,7 @@ function StudentDashboard() {
             belt={belt}
             streak={streak}
             openZoom={setZoom}
+            band={activeBand}
           />
         )}
         {tab === "avatar" && (
