@@ -142,26 +142,43 @@ import obPegboard from "@/assets/obstacles/pegboard.png";
 import obPelotas from "@/assets/obstacles/pelotas.png";
 import obTronco from "@/assets/obstacles/tronco.png";
 import obArana from "@/assets/obstacles/arana.png";
+import obMuroMid from "@/assets/obstacles/mid/muro.png";
+import obPasamanosMid from "@/assets/obstacles/mid/pasamanos.png";
+import obEscaleraMid from "@/assets/obstacles/mid/escalera.png";
+import obEscalonesMid from "@/assets/obstacles/mid/escalones.png";
+import obPalestraMid from "@/assets/obstacles/mid/palestra.png";
+import obPegboardMid from "@/assets/obstacles/mid/pegboard.png";
+import obPelotasMid from "@/assets/obstacles/mid/pelotas.png";
+import obTroncoMid from "@/assets/obstacles/mid/tronco.png";
+import obAranaMid from "@/assets/obstacles/mid/arana.png";
+import obMuroTeens from "@/assets/obstacles/teens/muro.png";
+import obPasamanosTeens from "@/assets/obstacles/teens/pasamanos.png";
+import obEscaleraTeens from "@/assets/obstacles/teens/escalera.png";
+import obEscalonesTeens from "@/assets/obstacles/teens/escalones.png";
+import obPalestraTeens from "@/assets/obstacles/teens/palestra.png";
+import obPegboardTeens from "@/assets/obstacles/teens/pegboard.png";
+import obPelotasTeens from "@/assets/obstacles/teens/pelotas.png";
+import obTroncoTeens from "@/assets/obstacles/teens/tronco.png";
+import obAranaTeens from "@/assets/obstacles/teens/arana.png";
 import { BirthdayCelebration } from "@/components/BirthdayCelebration";
 
 /** Lista en orden (1..9) — unlock mapping abajo se basa en este orden.
- *  Cada obstáculo tiene una imagen por banda etaria (kids/mid/teens).
- *  Hasta que existan los assets propios de mid/teens usamos los de kids como fallback. */
+ *  Cada obstáculo tiene una imagen por banda etaria (kids/mid/teens). */
 const OBSTACLES: {
   name: string;
   imgs: Record<AgeBand, string>;
   skillLabel: string;
   unlock: (s: Skills) => boolean;
 }[] = [
-  { name: "Muro Curvado",       imgs: { kids: obMuro,      mid: obMuro,      teens: obMuro      }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
-  { name: "Pasamanos",          imgs: { kids: obPasamanos, mid: obPasamanos, teens: obPasamanos }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  { name: "Escalera Invertida", imgs: { kids: obEscalera,  mid: obEscalera,  teens: obEscalera  }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
-  { name: "5 Escalones",        imgs: { kids: obEscalones, mid: obEscalones, teens: obEscalones }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
-  { name: "Palestra",           imgs: { kids: obPalestra,  mid: obPalestra,  teens: obPalestra  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
-  { name: "Pegboard",           imgs: { kids: obPegboard,  mid: obPegboard,  teens: obPegboard  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
-  { name: "Pelotas Colgantes",  imgs: { kids: obPelotas,   mid: obPelotas,   teens: obPelotas   }, skillLabel: "Velocidad",                 unlock: (s) => skillFull(s.speed_xp) },
-  { name: "Tronco Giratorio",   imgs: { kids: obTronco,    mid: obTronco,    teens: obTronco    }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
-  { name: "Salto de la Araña",  imgs: { kids: obArana,     mid: obArana,     teens: obArana     }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+  { name: "Muro Curvado",       imgs: { kids: obMuro,      mid: obMuroMid,      teens: obMuroTeens      }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Pasamanos",          imgs: { kids: obPasamanos, mid: obPasamanosMid, teens: obPasamanosTeens }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "Escalera Invertida", imgs: { kids: obEscalera,  mid: obEscaleraMid,  teens: obEscaleraTeens  }, skillLabel: "Agarre + Resistencia",      unlock: (s) => skillFull(s.grip_xp) && skillFull(s.resistance_xp) },
+  { name: "5 Escalones",        imgs: { kids: obEscalones, mid: obEscalonesMid, teens: obEscalonesTeens }, skillLabel: "Salto",                     unlock: (s) => skillFull(s.jump_xp) },
+  { name: "Palestra",           imgs: { kids: obPalestra,  mid: obPalestraMid,  teens: obPalestraTeens  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pegboard",           imgs: { kids: obPegboard,  mid: obPegboardMid,  teens: obPegboardTeens  }, skillLabel: "Fuerza",                    unlock: (s) => skillFull(s.strength_xp) },
+  { name: "Pelotas Colgantes",  imgs: { kids: obPelotas,   mid: obPelotasMid,   teens: obPelotasTeens   }, skillLabel: "Velocidad",                 unlock: (s) => skillFull(s.speed_xp) },
+  { name: "Tronco Giratorio",   imgs: { kids: obTronco,    mid: obTroncoMid,    teens: obTroncoTeens    }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
+  { name: "Salto de la Araña",  imgs: { kids: obArana,     mid: obAranaMid,     teens: obAranaTeens     }, skillLabel: "Equilibrio + Coordinación", unlock: (s) => skillFull(s.balance_xp) && skillFull(s.coordination_xp) },
 ];
 
 const SKILL_MAX = 500; // 100% de la barra
