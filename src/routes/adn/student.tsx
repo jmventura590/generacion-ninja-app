@@ -756,7 +756,7 @@ function AvatarStudio({
             <img
               src={accessories.background.img}
               alt={accessories.background.name}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover adn-scenario-enter"
               draggable={false}
               loading="lazy"
             />
@@ -770,7 +770,7 @@ function AvatarStudio({
                 hint: `\"${selected.quote}\"`,
                 bg: "dark",
               })}
-              className="absolute left-1/2 -translate-x-1/2 block"
+              className="absolute left-1/2 -translate-x-1/2 block adn-avatar-enter"
               style={{ bottom: "2%", height: "32%", width: "34%" }}
               aria-label={`Abrir personaje ${selected.label}`}
             >
@@ -794,6 +794,21 @@ function AvatarStudio({
                 <LogoOverlay variant="shirt" />
               </span>
             </button>
+            <style>{`
+              @keyframes adnAvatarEnter {
+                0%   { opacity: 0; transform: translateX(calc(-50% + 80px)); }
+                100% { opacity: 1; transform: translateX(-50%); }
+              }
+              @keyframes adnScenarioEnter {
+                0%   { opacity: 0; }
+                100% { opacity: 1; }
+              }
+              .adn-avatar-enter { animation: adnAvatarEnter 0.4s ease-out both; }
+              .adn-scenario-enter { animation: adnScenarioEnter 0.4s ease-out both; }
+              @media (prefers-reduced-motion: reduce) {
+                .adn-avatar-enter, .adn-scenario-enter { animation: none !important; }
+              }
+            `}</style>
           </div>
 
           {/* PANEL DER — Escenarios */}
