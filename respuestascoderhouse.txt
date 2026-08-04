@@ -1,0 +1,31 @@
+1. Perfil del early adopter ideal
+Quién es: Padres de nenes  activos (o ex-practicantes) de ninja warrior / obstáculos, que tienen hijos entre 6 y 14 años, que entrenan 2-3 veces por semana en un gimnasio especializado (tipo "ADN Generación Ninja") , o club de la zona de disciplinas deportivas y siguen su progreso de forma manual o no lo siguen en absoluto.
+Problema que enfrenta: No tiene forma fácil de ver su asistencia, constancia y evolución en el tiempo. Pierde motivación porque no visualiza su progreso, y el gimnasio no tiene una manera simple de gamificar el compromiso de sus alumnos (rachas, logros, ranking).
+Por qué es valioso para la startup: Es el usuario que vive el dolor todos los días. Su feedback sobre qué métricas le importan, qué lo motiva a volver, y si la gamificación realmente aumenta su asistencia es la validación central de la hipótesis del producto (que gamificar la asistencia mejora la retención en el gimnasio).
+________________________________________
+2. Canal de outreach elegido
+WhatsApp. Es el canal donde ya está esta comunidad: en ADN tenemos grupos de  WhatsApp de alumnos organizado por clases y ex padres de alumnos , y el contacto ahí es directo, informal y con alta tasa de respuesta — ideal para una primera aproximación personalizada antes de escalar.
+________________________________________
+3. Script personalizado
+"¡Hola [Nombre]! Soy Mati, estoy detrás de ADN Generación Ninja, una app para llevar el registro de tu asistencia y progreso en el gimnasio de forma más motivadora (rachas, logros, tu evolución en un solo lugar). Sé que entrenás seguido y me encantaría que la pruebes gratis estos días y me cuentes qué te parece. ¿Te copa probarla y darme tu feedback? Te tomaría 5 minutos armar tu cuenta."
+Por qué funciona: se presenta, explica el problema/valor en una línea, pide algo concreto y de bajo compromiso (probar + feedback), y cierra con un CTA claro.
+________________________________________
+4. Segmentación y plan de envío
+•	A quién: Primero, contactos personales que entrenan en nuetro gimnasio (círculo cercano, 10-15 personas). Luego, mensajes en grupos de WhatsApp de alumnos existentes.
+•	Cuándo: Envíos individuales, no masivos ni copy-paste evidente — cada mensaje con el nombre de la persona.
+•	Seguimiento: Si no responde en 3-4 días, un recordatorio corto y amable ("¿Llegaste a ver mi mensaje? Sin drama si no te interesa 🙂"). A quien prueba la app, agradecimiento personalizado + pregunta puntual de feedback (ej. "¿qué fue lo primero que se te hizo confuso?").
+________________________________________
+5. Simulación de envío
+Enviá el script tal cual a un colega o amigo y pedile que te responda como si fuera un usuario real (dudas, objeciones, si el CTA le queda claro). Anotá:
+•	¿Entendió qué es la app sin explicación adicional?
+•	¿El CTA le resultó claro y de bajo compromiso?
+•	¿Qué palabra o frase le generó fricción o duda?
+________________________________________
+6. Refinamiento
+Ejemplo de ajuste típico tras el feedback: si la persona no entendió "gamificado", cambiarlo por algo más concreto como "con rachas y logros, como un juego". Si sintió el mensaje muy largo, recortarlo a 2 líneas. Iterar el script hasta que en la simulación genere una respuesta afirmativa clara.
+________________________________________
+Métricas para medir el impacto de la campaña (para conectar con la parte de "medir impacto" del enunciado):
+•	Tasa de respuesta (respondieron / mensajes enviados)
+•	Tasa de conversión a registro (se crearon cuenta / respondieron positivo)
+•	Tasa de activación (completaron el onboarding o primera acción clave / se registraron)
+•	Feedback cualitativo recolectado (cantidad de comentarios accionables)
